@@ -28,8 +28,8 @@ router.get('/', (req, res) => {
             } else {
                 // data is successfully parsed as a JSON object:
 
-                    //USE .send(data) when done
-                console.log(data)
+
+                // console.log(data)
                 res.send(data);
             }
         }

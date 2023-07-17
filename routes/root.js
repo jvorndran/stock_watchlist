@@ -459,8 +459,8 @@ router.get('^/$|/index(.html)?/', (req, res) => {
     //
     //     }
     // });
-
-    res.json(data);
+    res.send(data);
+    //res.json(data);
 
 });
 
