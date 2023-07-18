@@ -8,7 +8,6 @@ const bcrypt = require('bcrypt');
 // @desc Get all users
 // @route GET /users
 // @access Private
-
 const getAllUsers = asyncHandler(async (req, res) => {
     // .lean() gives us minimal data like a JSON
     const users = await User.find().select('-password').lean();

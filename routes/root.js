@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const path = require('path');
 const request = require("request");
-const alpha_api_key = 'ZUVY81MBX0E12LVI';
+const alpha_api_key = process.env.ALPHA_API_KEY;
 
 const url = `https://www.alphavantage.co/query?function=TOP_GAINERS_LOSERS&apikey=${alpha_api_key}`;
 

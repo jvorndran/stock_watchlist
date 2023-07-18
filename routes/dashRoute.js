@@ -2,10 +2,10 @@ const express = require('express');
 const router = express.Router();
 const path = require('path');
 const request = require("request");
-const yahooFinance = require('yahoo-finance');
 const axios = require('axios');
 
-const alpha_api_key = 'ZUVY81MBX0E12LVI';
+
+const alpha_api_key = process.env.ALPHA_API_KEY;
 
 // route regex for '/' or '/index' or '/index.html'
 router.get('/', (req, res) => {
@@ -29,7 +29,7 @@ router.get('/', (req, res) => {
                 // data is successfully parsed as a JSON object:
 
 
-                // console.log(data)
+                console.log(data)
                 res.send(data);
             }
         }

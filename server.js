@@ -47,7 +47,7 @@ app.post('/api/signup', (req, res) => {
     // Create a new user instance
     const newUser = new User({ name, username, password });
 
-    // Save the user to the database using a Promise
+    // Save the user to the database
     newUser
         .save()
         .then(() => {
