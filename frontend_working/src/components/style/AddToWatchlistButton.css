@@ -1,0 +1,32 @@
+.watchlist-btn {
+    padding: 10px;
+    margin-left: 20px;
+    border-radius: 5px;
+    background-color: rgba(103, 103, 103, 0.76);
+    color: white;
+    transition: all 1s ease;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.watchlist-btn.circle {
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    transition: all 1s ease; /* Add this line */
+}
+
+.checkmark {
+    font-size: 20px;
+    color: white;
+    display: inline-block;
+    line-height: 0;
+    transition: all 1s ease;
+}
+
+
+
+
+
