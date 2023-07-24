@@ -9,6 +9,7 @@ const alpha_api_key = process.env.ALPHA_API_KEY;
 
 // route regex for '/' or '/index' or '/index.html'
 router.get('/', (req, res) => {
+
     const url = `https://www.alphavantage.co/query?function=NEWS_SENTIMENT&apikey=${alpha_api_key}`;
 
 
