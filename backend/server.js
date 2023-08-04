@@ -6,12 +6,11 @@ const connectDB = require('./config/dbConn');
 const mongoose = require('mongoose');
 const request = require('request');
 const cors = require('cors');
-const axios = require('axios');
 const User = require('./models/User');
 const asyncHandler = require('express-async-handler');
 const jwt = require('jsonwebtoken');
 const StockPriceData = require('./models/StockPriceData');
-const {da} = require("date-fns/locale");
+
 
 
 const PORT = process.env.PORT || 3500;

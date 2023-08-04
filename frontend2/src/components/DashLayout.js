@@ -26,6 +26,8 @@ const DashLayout = () => {
 
     useEffect(() => {
 
+        console.log("HELLO")
+
         axios.get('http://localhost:3500/dash')
             .then(response => {
                 const slicedData = response.data.feed.slice(20,26)
