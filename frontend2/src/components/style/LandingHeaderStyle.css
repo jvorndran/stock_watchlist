@@ -1,0 +1,23 @@
+.grid{
+    grid-template-columns: 20% 60% 10%;
+    justify-items: center;
+    align-items: center;
+}
+
+.nav div button{
+    background: transparent;
+    border: transparent;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.nav div button:hover{
+    color: #eaeaea;
+    background: cornflowerblue;
+}
+
+
+.nav div{
+    padding-left: 1vw;
+    padding-right: 1vw;
+}
+

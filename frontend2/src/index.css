@@ -1,0 +1,16 @@
+@import url('https://fonts.googleapis.com/css2?family=Nunito&display=swap');
+
+@import 'tailwindcss/base';
+@import 'tailwindcss/components';
+@import 'tailwindcss/utilities';
+
+body {
+  font-family: 'Nunito', sans-serif;
+  min-height: 100vh;
+  color: black;
+  background: url("./img/mountains.jpg") no-repeat center center fixed;
+  background-size: cover;
+  background-blend-mode: multiply;
+}
+
+
