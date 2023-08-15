@@ -4,25 +4,22 @@ import React from 'react';
 
 const DashNews = ({newsData}) => {
 
-
     return (
 
         <section className="text-center md:text-left mt-10">
 
-
             {newsData && newsData.length > 0 ? (
                 newsData.map((item, index) => (
-                    <div className="mb-6 flex flex-wrap p-0" key={index}>
-                        <div className="mb-6 w-full shrink-0 grow-0 basis-auto px-3 md:mb-0 md:w-3/12 content-center">
+                    <a href={item.url} target="_blank" rel="noopener noreferrer">
+                    <div className="mb-6 flex flex-wrap p-0" key={index} >
+                        <div className="mb-6 w-full shrink-0 grow-0 basis-auto px-3 md:mb-0 md:w-3/12 content-center items-center">
                             <div
-                                className="relative mb-6 overflow-hidden rounded-lg bg-cover bg-no-repeat shadow-lg dark:shadow-black/20 content-center"
+                                className="relative overflow-hidden rounded-lg bg-cover bg-no-repeat shadow-lg dark:shadow-black/20 content-center"
                                 data-te-ripple-color="light"
                             >
-                                <img src={item.banner_image} className="w-full" alt="Article Banner"/>
-                                <a href={item.url} target="_blank" rel="noopener noreferrer">
+                                <img src={item.banner_image} className="w-full" alt="Article Banner"  />
                                     <div
                                         className="absolute top-0 right-0 bottom-0 left-0 h-full w-full overflow-hidden bg-fixed opacity-0 transition duration-300 ease-in-out hover:opacity-100 bg-[hsla(0,0%,98.4%,.15)]"></div>
-                                </a>
                             </div>
                         </div>
 
@@ -38,19 +35,19 @@ const DashNews = ({newsData}) => {
                                 </svg>
                                 {item.category}
                             </div>
-                            <p className="mb-6 dark:text-neutral-300 text-gray-300">
+                            <p className="mb-1 dark:text-neutral-300 text-gray-300">
                                 <small>
                                     Published by {item.authors}
                                 </small>
                             </p>
-                            <p className="text-gray-300 dark:text-neutral-300">{item.summary}</p>
+                            <p className="text-gray-300 dark:text-neutral-300 text-sm">{item.summary}</p>
 
                         </div>
 
                         <hr className="border-white my-6 w-full"/>
 
                     </div>
-
+                    </a>
                 ))
             ) : (
                 <p>Loading...</p>

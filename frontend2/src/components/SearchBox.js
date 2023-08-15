@@ -112,7 +112,7 @@ const SearchBox = ({ suggestions }) => {
 
     return (
 
-        <div style={autocomplete}>
+        <div style={autocomplete} className='z-50'>
             <input
                 type="text"
                 value={inputValue}

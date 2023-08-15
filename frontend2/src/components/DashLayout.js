@@ -3,19 +3,20 @@ import Watchlist from "./Watchlist";
 import DashNews from "./DashNews";
 import DashIndices from "./DashIndices";
 import '../index.css'
+import './style/dash-layout-style.css'
 import React, {useEffect, useMemo, useState} from "react";
 import axios from "axios";
 
 
-const background = {
-    backgroundImage: "url(../img/stars.jpg)",
-    backgroundSize: "cover"
-}
+// const background = {
+//     background: "#25252c",
+//     backgroundSize: "cover"
+// }
 
 const newsContainer = {
     background: "#22232d",
-    marginLeft: "10vw",
-    marginRight: "10vw"
+    marginLeft: "2vw",
+    marginRight: "2vw"
 }
 
 
@@ -30,7 +31,7 @@ const DashLayout = () => {
 
         axios.get('http://localhost:3500/dash')
             .then(response => {
-                const slicedData = response.data.feed.slice(20,26)
+                const slicedData = response.data.feed.slice(0,4)
                 setNewsData(slicedData);
             })
             .catch(error => {
@@ -43,16 +44,22 @@ const DashLayout = () => {
 
     return (
         <>
-            <div style={background}>
+            <div className='bg-gray-200'>
 
-                <Header />
+                <div className='z-50'>
+                    <Header />
+                </div>
+
 
                 <Watchlist />
 
-                <DashIndices />
-
-                <div className="rounded-3xl p-2" style={newsContainer}>
-                    <DashNews newsData={newsData}  />
+                <div className='dash-news-container mt-4 z-10'>
+                    <div className="rounded-3xl p-2" style={newsContainer}>
+                        <DashNews newsData={newsData}  />
+                    </div>
+                    <div className='chart-container'>
+                        <DashIndices />
+                    </div>
                 </div>
 
 

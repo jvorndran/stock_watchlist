@@ -3,12 +3,10 @@
     list-style: none;
     position: absolute;
     width: 25vw;
-
+    z-index: 1;
 }
 
 .suggestionListItem{
-    border: black 1px solid;
-    border-radius: 4px;
     background: white;
     padding: 5px;
     display: flex;

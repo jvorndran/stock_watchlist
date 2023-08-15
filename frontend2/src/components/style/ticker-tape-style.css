@@ -1,0 +1,34 @@
+.tradingview-widget-copyright {
+    font-size: 13px !important;
+    line-height: 32px !important;
+    text-align: center !important;
+    vertical-align: middle !important;
+    /* @mixin sf-pro-display-font; */
+    font-family: -apple-system, BlinkMacSystemFont, 'Trebuchet MS', Roboto, Ubuntu, sans-serif !important;
+    color: #9db2bd !important;
+}
+
+.tradingview-widget-copyright .blue-text {
+    color: #2962FF !important;
+}
+
+.tradingview-widget-copyright a {
+    text-decoration: none !important;
+    color: #9db2bd !important;
+}
+
+.tradingview-widget-copyright a:visited {
+    color: #9db2bd !important;
+}
+
+.tradingview-widget-copyright a:hover .blue-text {
+    color: #1E53E5 !important;
+}
+
+.tradingview-widget-copyright a:active .blue-text {
+    color: #1848CC !important;
+}
+
+.tradingview-widget-copyright a:visited .blue-text {
+    color: #2962FF !important;
+}

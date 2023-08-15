@@ -59,11 +59,11 @@ const DashIndices = () => {
                 <div className='index-grid'>
                     <div><ResponsiveFinancialChart data={formattedStockData[index]} /></div>
 
-                    <div>
-                        <div>Name</div>
+                    <div style={{marginLeft: '10%', marginRight: '10%'}}>
+                        <div></div>
                         <div>Price</div>
-                        <div>Daily Change</div>
-                        <div>Weekly Change</div>
+                        <div>1D</div>
+                        <div>1Wk</div>
                     </div>
 
                     {formattedStockData.map((dataItem, dataIndex) =>(
@@ -77,12 +77,12 @@ const DashIndices = () => {
                                 {formattedStockData[dataIndex][formattedStockData[dataIndex].length - 1].close.toFixed(2)}
                             </div>
                             <div style={{
-                                color: (formattedStockData[dataIndex][formattedStockData[dataIndex].length - 1].close - formattedStockData[dataIndex][formattedStockData[dataIndex].length - 2].close) > 0 ? 'green' : 'red'
+                                color: (formattedStockData[dataIndex][formattedStockData[dataIndex].length - 1].close - formattedStockData[dataIndex][formattedStockData[dataIndex].length - 2].close) > 0 ? 'green' : '#b21d2b'
                             }}>
                                 {(formattedStockData[dataIndex][formattedStockData[dataIndex].length - 1].close - formattedStockData[dataIndex][formattedStockData[dataIndex].length - 2].close).toFixed(2)}
                             </div>
                             <div style={{
-                                color: (formattedStockData[dataIndex][formattedStockData[dataIndex].length - 1].close - formattedStockData[dataIndex][formattedStockData[dataIndex].length - 2].close) > 0 ? 'green' : 'red'
+                                color: (formattedStockData[dataIndex][formattedStockData[dataIndex].length - 1].close - formattedStockData[dataIndex][formattedStockData[dataIndex].length - 2].close) > 0 ? 'green' : '#b21d2b'
                             }}>
                                 {(formattedStockData[dataIndex][formattedStockData[dataIndex].length - 1].close - formattedStockData[dataIndex][formattedStockData[dataIndex].length - 6].close).toFixed(2)}
                             </div>

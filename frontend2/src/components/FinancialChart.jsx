@@ -8,9 +8,9 @@ import {scaleUtc} from "d3-scale";
 const axisStyles = {
 	strokeStyle: "#000000",
 	strokeWidth: 2,
-	tickLabelFill: "#1e1d1d",
-	tickStrokeStyle: "#0c0c0c",
-	gridLinesStrokeStyle: "rgba(24,24,24,0.5)"
+	tickLabelFill: "#000000",
+	tickStrokeStyle: "rgba(64,132,192,0.3)",
+	gridLinesStrokeStyle: "rgb(24,24,24)"
 };
 
 
@@ -34,7 +34,7 @@ export function FinancialChart({data, width, height}) {
 				<XAxis axisAt="bottom" orient="bottom" {...axisStyles} />
 				<YAxis axisAt="left" orient="left" ticks={5} {...axisStyles} />
 
-				<AreaSeries yAccessor={(d) => d.high} />
+				<AreaSeries yAccessor={(d) => d.high} strokeStyle='rgba(64,132,192,0.7)' fillStyle='rgba(64,132,192,0.3)'/>
 			</Chart>
 		</ChartCanvas>
 	)

@@ -38,6 +38,7 @@ const Watchlist = () => {
         const script = document.createElement('script');
         script.src = 'https://s3.tradingview.com/external-embedding/embed-widget-ticker-tape.js';
         script.async = true;
+        script.defer = true;
         script.innerHTML = JSON.stringify({
             symbols: watchlist.map((symbol) => ({
                 proName: `NYSE:${symbol}`,
@@ -58,7 +59,6 @@ const Watchlist = () => {
         }
 
         return () => {
-            // Clean up the widget
             tradingViewContainer.innerHTML = '';
         };
     }, [watchlist]);
