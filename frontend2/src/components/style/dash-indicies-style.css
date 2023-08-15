@@ -1,0 +1,63 @@
+.index-grid{
+    display: grid;
+    grid-template-rows: 70% 5% 5% 5% 5% 5% 5%;
+    grid-template-columns: 40% 20% 30%;
+    justify-content: center;
+    align-items: center;
+    width: 90%;
+    margin-right: 5%;
+    margin-left: 5%;
+    margin-top: 5vh;
+    height: 600px;
+}
+
+.bold-text{
+    font-weight: bold;
+}
+
+.index-table-element:hover{
+    transition: all 0.3s ease;
+    background: rgba(145, 145, 145, 0.3);
+}
+
+
+
+.index-grid > div:nth-child(1){
+    grid-column: 1 / span 3;
+    grid-row: 1 / 2;
+    height: 100%;
+}
+
+.index-grid > div:nth-child(n + 2){
+    border-bottom: black 1px solid;
+    display: grid;
+    grid-template-columns: 40% 20% 20% 20%;
+    align-items: center;
+    justify-content: end;
+    height: 100%;
+}
+
+
+.index-grid > div:nth-child(2){
+    grid-column: 1 / span 3;
+    grid-row: 2 / 3;
+}
+
+.index-grid > div:nth-child(3){
+    grid-column: 1 / span 3;
+    grid-row: 3 / 4;
+
+}
+.index-grid > div:nth-child(4){
+    grid-column: 1 / span 3;
+    grid-row: 4 / 5;
+
+}
+.index-grid > div:nth-child(5){
+     grid-column: 1 / span 3;
+     grid-row: 5 / 6;
+ }
+.index-grid > div:nth-child(6){
+    grid-column: 1 / span 3;
+    grid-row: 6 / 7;
+}

@@ -1,11 +1,14 @@
 import React, {memo, useEffect, useState} from 'react';
 import axios from "axios";
 import ResponsiveFinancialChart from "./FinancialChart";
+import './style/dash-indicies-style.css'
 
 const DashIndices = () => {
 
     const [priceData, setPriceData] = useState({});
     const [formattedStockData, setFormattedStockData] = useState({})
+    const [index, setIndex] = useState(0)
+
 
     useEffect(() => {
 
@@ -24,9 +27,8 @@ const DashIndices = () => {
 
     }, [])
 
-
     function formatData (data){
-        const formattedData = data.map((stock) => {
+        let formattedData = data.map((stock) => {
             return stock.dates.map((date, index) => ({
                 date: new Date(date),
                 open: stock.opens[index],
@@ -36,21 +38,60 @@ const DashIndices = () => {
                 volume: stock.volumes[index],
             }));
         });
+
+
         return formattedData;
     }
 
+    function setIndexFunction(num){
+        setIndex(num)
+    }
+
+    const indexes = ['NDX 100', 'S&P 500', 'Dow Jones', 'Russell 2000']
 
     return (
 
-        <div style={chartGrid}>
+        <div>
 
-            {formattedStockData.length > 0 &&
-                formattedStockData.map((priceDataArray, index) => (
-                    <div style={gridItemStyle}>
-                        <ResponsiveFinancialChart data={priceDataArray} />
+            {formattedStockData.length > 0 && (
+
+
+                <div className='index-grid'>
+                    <div><ResponsiveFinancialChart data={formattedStockData[index]} /></div>
+
+                    <div>
+                        <div>Name</div>
+                        <div>Price</div>
+                        <div>Daily Change</div>
+                        <div>Weekly Change</div>
                     </div>
-                ))}
 
+                    {formattedStockData.map((dataItem, dataIndex) =>(
+                        <div onClick={() => setIndexFunction(dataIndex)}
+                              className={index === dataIndex ? 'bold-text index-table-element' : 'index-table-element'}
+                             style={{cursor: 'pointer'}}>
+                            <div>
+                                {indexes[dataIndex]}
+                            </div>
+                            <div>
+                                {formattedStockData[dataIndex][formattedStockData[dataIndex].length - 1].close.toFixed(2)}
+                            </div>
+                            <div style={{
+                                color: (formattedStockData[dataIndex][formattedStockData[dataIndex].length - 1].close - formattedStockData[dataIndex][formattedStockData[dataIndex].length - 2].close) > 0 ? 'green' : 'red'
+                            }}>
+                                {(formattedStockData[dataIndex][formattedStockData[dataIndex].length - 1].close - formattedStockData[dataIndex][formattedStockData[dataIndex].length - 2].close).toFixed(2)}
+                            </div>
+                            <div style={{
+                                color: (formattedStockData[dataIndex][formattedStockData[dataIndex].length - 1].close - formattedStockData[dataIndex][formattedStockData[dataIndex].length - 2].close) > 0 ? 'green' : 'red'
+                            }}>
+                                {(formattedStockData[dataIndex][formattedStockData[dataIndex].length - 1].close - formattedStockData[dataIndex][formattedStockData[dataIndex].length - 6].close).toFixed(2)}
+                            </div>
+                        </div>
+                    ))}
+
+                </div>
+
+            )}
 
         </div>
 
