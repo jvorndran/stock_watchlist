@@ -12,21 +12,21 @@ const AddToWatchlist = ({stockTicker}) => {
         setIsClicked(true)
 
         try {
-            // Send a POST request to backend
+
             await axios.post(
                 'http://localhost:3500/watchlist',
                 { stockTicker },
                 {
                     headers: {
-                        Authorization: `Bearer ${localStorage.getItem('jwt')}`, // Include the JWT from localStorage in the Authorization header
+                        Authorization: `Bearer ${localStorage.getItem('jwt')}`,
                     },
                 }
             );
-            // Handle the successful addition to the watchlist
+
             console.log('Stock added to watchlist!');
 
         } catch (error) {
-            // Handle any errors that occur during the API call
+
             console.error(error);
             setIsClicked(false)
         }

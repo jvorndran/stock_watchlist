@@ -56,8 +56,10 @@ const DashIndices = () => {
             {formattedStockData.length > 0 && (
 
 
-                <div className='index-grid'>
+                <div className='index-grid rounded-3xl'>
                     <div><ResponsiveFinancialChart data={formattedStockData[index]} /></div>
+
+                    <div></div>
 
                     <div style={{marginLeft: '10%', marginRight: '10%'}}>
                         <div></div>
@@ -65,6 +67,8 @@ const DashIndices = () => {
                         <div>1D</div>
                         <div>1Wk</div>
                     </div>
+
+
 
                     {formattedStockData.map((dataItem, dataIndex) =>(
                         <div onClick={() => setIndexFunction(dataIndex)}
@@ -77,12 +81,12 @@ const DashIndices = () => {
                                 {formattedStockData[dataIndex][formattedStockData[dataIndex].length - 1].close.toFixed(2)}
                             </div>
                             <div style={{
-                                color: (formattedStockData[dataIndex][formattedStockData[dataIndex].length - 1].close - formattedStockData[dataIndex][formattedStockData[dataIndex].length - 2].close) > 0 ? 'green' : '#b21d2b'
+                                color: (formattedStockData[dataIndex][formattedStockData[dataIndex].length - 1].close - formattedStockData[dataIndex][formattedStockData[dataIndex].length - 2].close) > 0 ? 'green' : '#d73d4a'
                             }}>
                                 {(formattedStockData[dataIndex][formattedStockData[dataIndex].length - 1].close - formattedStockData[dataIndex][formattedStockData[dataIndex].length - 2].close).toFixed(2)}
                             </div>
                             <div style={{
-                                color: (formattedStockData[dataIndex][formattedStockData[dataIndex].length - 1].close - formattedStockData[dataIndex][formattedStockData[dataIndex].length - 2].close) > 0 ? 'green' : '#b21d2b'
+                                color: (formattedStockData[dataIndex][formattedStockData[dataIndex].length - 1].close - formattedStockData[dataIndex][formattedStockData[dataIndex].length - 2].close) > 0 ? 'green' : '#d73d4a'
                             }}>
                                 {(formattedStockData[dataIndex][formattedStockData[dataIndex].length - 1].close - formattedStockData[dataIndex][formattedStockData[dataIndex].length - 6].close).toFixed(2)}
                             </div>
@@ -99,29 +103,5 @@ const DashIndices = () => {
 
 };
 
-const gridItemStyle = {
-    boxSizing: "border-box",
-    display: "block",
-    height: "350px",
-    width: "95%",
-    borderRadius: "10px",
-    border: "1px solid white",
-    background: "#191c27",
-    marginLeft: "20px",
-    marginRight: "20px"
-}
 
-const chartGrid = {
-    marginBottom: '20px',
-    marginTop: '20px',
-    display: 'grid',
-    gridTemplateColumns: 'repeat(2, 1fr)',
-    gap: '1vw',
-    paddingLeft: "3vw",
-    paddingRight: "3vw",
-    justifyContent: 'space-evenly',
-    justifyItems: 'center',
-    alignContent: 'space-evenly',
-    alignItems: 'center'
-};
 export default memo(DashIndices);

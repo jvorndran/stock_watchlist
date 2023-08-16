@@ -50,7 +50,7 @@ const DashNews = ({newsData}) => {
                     </a>
                 ))
             ) : (
-                <p>Loading...</p>
+                <p className='text-4xl text-white'>Loading...</p>
             )}
 
         </section>
@@ -58,8 +58,6 @@ const DashNews = ({newsData}) => {
 
     );
 };
-
-
 
 
 export default React.memo(DashNews)

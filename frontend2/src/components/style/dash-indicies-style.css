@@ -1,12 +1,14 @@
 .index-grid{
+    color: white;
+    background: rgb(34, 35, 45);
     font-size: 0.9rem;
     display: grid;
-    grid-template-rows: 70% 5% 5% 5% 5% 5% 5%;
+    grid-template-rows: 70% 2% 5% 5% 5% 5% 5%;
     grid-template-columns: 50% 20% 30%;
     justify-content: center;
     align-items: start;
     width: 100%;
-    margin-top: 5vh;
+    padding-top: 5vh;
     height: 600px;
 }
 
@@ -15,13 +17,14 @@
 }
 
 .index-table-element{
-    margin-left: 10%;
-    margin-right: 10%;
+    padding-left: 10%;
+    padding-right: 10%;
 }
 
 .index-table-element:hover{
     transition: all 0.3s ease;
     background: rgba(145, 145, 145, 0.3);
+    border-radius: 5px;
 }
 
 .index-grid > div:nth-child(1){
@@ -38,12 +41,6 @@
     height: 100%;
 }
 
-.index-grid > div:nth-child(2){
-    border-top: gray 1px solid;
-    grid-column: 1 / span 3;
-    grid-row: 2 / 3;
-}
-
 .index-grid > div:nth-child(n + 2) > div:nth-child(n + 2){
     display: flex;
     justify-content: center;
@@ -51,21 +48,25 @@
 
 .index-grid > div:nth-child(3){
     grid-column: 1 / span 3;
-    grid-row: 3 / 4;
-
+    grid-row: 3 / 3;
 }
+
 .index-grid > div:nth-child(4){
     grid-column: 1 / span 3;
-    grid-row: 4 / 5;
+    grid-row: 4 / 4;
 
 }
 .index-grid > div:nth-child(5){
-     grid-column: 1 / span 3;
-     grid-row: 5 / 6;
- }
-.index-grid > div:nth-child(6){
     grid-column: 1 / span 3;
-    grid-row: 6 / 7;
-    border-bottom: gray 1px solid;
+    grid-row: 5 / 5;
+
+}
+.index-grid > div:nth-child(6){
+     grid-column: 1 / span 3;
+     grid-row: 6 / 6;
+ }
+.index-grid > div:nth-child(7){
+    grid-column: 1 / span 3;
+    grid-row: 7 / 7;
 }
 

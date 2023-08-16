@@ -5,20 +5,7 @@ import './style/searchBoxStyle.css';
 import '../index.css'
 
 
-const autocomplete = {
-    position: "relative",
-    display: "inline-block",
-};
 
-const input = {
-    border: "1px solid black",
-    borderRadius: "10px",
-    backgroundColor: "#f1f1f1",
-    padding: "10px",
-    fontSize: "16px",
-    width: "25vw",
-    height: "5vh"
-};
 
 const SearchBox = ({ suggestions }) => {
 
@@ -112,20 +99,20 @@ const SearchBox = ({ suggestions }) => {
 
     return (
 
-        <div style={autocomplete} className='z-50'>
+        <div className='z-50 search-box-container'>
             <input
                 type="text"
                 value={inputValue}
                 onChange={handleChange}
                 onKeyDown={handleKeyDown}
-                style={input}
+                className='search-input-style'
             />
             <button
                 onClick={() => redirectToTicker(String(inputValue).trim().split(',')[0])}
-                className="searchBox align-middle rounded-3xl px-5 py-2 m-1 overflow-hidden relative group cursor-pointer font-medium"
+                className="search-box-button align-middle px-5 mx-1 mb-1 overflow-hidden relative group cursor-pointer font-medium"
             >
-                <span className="absolute w-64 h-0 transition-all duration-300 origin-center rotate-45 -translate-x-20 bg-black-steel top-1/2 group-hover:h-64 group-hover:-translate-y-32 ease"></span>
-                <span className="relative bg-black-steel font-semibold transition duration-300 group-hover:text-white ease">
+                <span className="absolute w-64 h-0 transition-all duration-300 origin-center rotate-45 -translate-x-20 bg-blue-400 top-1/2 group-hover:h-64 group-hover:-translate-y-32 ease"></span>
+                <span className="relative bg-blue-400 font-semibold transition duration-300 group-hover:text-white ease">
           <FaSearch />
         </span>
             </button>

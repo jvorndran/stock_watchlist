@@ -1,15 +1,18 @@
 
 .suggestionList{
+    font-size: 0.8rem;
     list-style: none;
     position: absolute;
-    width: 25vw;
+    width: clamp(250px, 300px, 25vw);
     z-index: 1;
 }
 
 .suggestionListItem{
+    border: 1px black solid;
     background: white;
     padding: 5px;
     display: flex;
+    border-radius: 40px;
 }
 
 .suggestionListItem > .name {
@@ -19,20 +22,34 @@
 }
 
 .suggestionListItem:hover{
-    background: rgba(190, 190, 190, 0.9);
+    background-color: rgba(190, 190, 190, 0.9);
+    transition: background-color 0.2s ease;
 }
 
-.searchBox{
+.search-box-button{
+    border-radius: 100%;
     background: white;
-    border: 1px solid black;
-    border-radius: 10px;
     padding: 10px;
     font-size: 16px;
 }
 
-.searchBox:hover{
-    background: lightblue;
-    transition: background 0.5s ease;
-
+.search-box-button:hover{
+    background-color: rgb(38,38,38,1);
+    transition: background-color 0.3s ease;
 }
 
+.search-input-style{
+    border: 1px solid black;
+    border-radius: 40px;
+    background-color: #f1f1f1;
+    padding: 10px;
+    font-size: 1.1rem;
+    width: clamp(250px, 300px, 25vw);
+    height: 35px;
+}
+
+.search-box-container{
+    position: relative;
+    display: inline-block;
+    align-items: center;
+}

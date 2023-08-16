@@ -1,16 +1,15 @@
 import React from 'react';
-import {ChartCanvas, Chart, EdgeIndicator, AreaSeries} from 'react-financial-charts';
-import { CandlestickSeries, BarSeries, LineSeries } from 'react-financial-charts';
+import {ChartCanvas, Chart, AreaSeries} from 'react-financial-charts';
 import { XAxis, YAxis } from 'react-financial-charts';
 import { withDeviceRatio, withSize } from 'react-financial-charts';
 import {scaleUtc} from "d3-scale";
 
 const axisStyles = {
-	strokeStyle: "#000000",
+	strokeStyle: "#ffffff",
 	strokeWidth: 2,
-	tickLabelFill: "#000000",
-	tickStrokeStyle: "rgba(64,132,192,0.3)",
-	gridLinesStrokeStyle: "rgb(24,24,24)"
+	tickLabelFill: "#ffffff",
+	tickStrokeStyle: "rgba(253,253,253,0.3)",
+	gridLinesStrokeStyle: "rgb(255,255,255)"
 };
 
 

@@ -1,10 +1,7 @@
 .dash-news-container{
     display: grid;
-    grid-template-columns: 65% 35%;
+    grid-template-columns: 60% 35%;
     justify-content: center;
     align-items: start;
-}
-
-.chart-container{
-
+    column-gap: 2.5%;
 }

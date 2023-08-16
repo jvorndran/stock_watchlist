@@ -8,15 +8,8 @@ import React, {useEffect, useMemo, useState} from "react";
 import axios from "axios";
 
 
-// const background = {
-//     background: "#25252c",
-//     backgroundSize: "cover"
-// }
-
 const newsContainer = {
     background: "#22232d",
-    marginLeft: "2vw",
-    marginRight: "2vw"
 }
 
 
@@ -60,13 +53,6 @@ const DashLayout = () => {
                     <div className='chart-container'>
                         <DashIndices />
                     </div>
-                </div>
-
-
-                <div className="tradingview-widget-copyright">
-                    <a href="https://www.tradingview.com/" rel="noopener nofollow" target="_blank">
-                        <span className="blue-text">Track all markets on TradingView</span>
-                    </a>
                 </div>
 
 
