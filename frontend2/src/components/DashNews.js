@@ -4,20 +4,34 @@ import React from 'react';
 
 const DashNews = ({newsData}) => {
 
+    const truncate = (str, maxChars) => {
+
+        if (str.length > maxChars){
+
+            return str.slice(0, maxChars) + '...'
+
+        } else{
+            return str
+        }
+
+
+    }
+
+
     return (
 
-        <section className="text-center md:text-left mt-10">
+        <section className="text-center md:text-left mt-5">
 
             {newsData && newsData.length > 0 ? (
                 newsData.map((item, index) => (
                     <a href={item.url} target="_blank" rel="noopener noreferrer">
-                    <div className="mb-6 flex flex-wrap p-0" key={index} >
-                        <div className="mb-6 w-full shrink-0 grow-0 basis-auto px-3 md:mb-0 md:w-3/12 content-center items-center">
+                    <div className="flex flex-wrap p-0" key={index} >
+                        <div className="mb-6 w-full shrink-0 grow-0 basis-auto px-3 md:mb-0 md:w-3/12 content-center items-center" style={{width:'150px', height:'150px'}}>
                             <div
-                                className="relative overflow-hidden rounded-lg bg-cover bg-no-repeat shadow-lg dark:shadow-black/20 content-center"
+                                className="relative overflow-hidden rounded-lg bg-no-repeat shadow-lg dark:shadow-black/20 content-center"
                                 data-te-ripple-color="light"
                             >
-                                <img src={item.banner_image} className="w-full" alt="Article Banner"  />
+                                <img src={item.banner_image} className="w-full h-full" alt="Article Banner"  />
                                     <div
                                         className="absolute top-0 right-0 bottom-0 left-0 h-full w-full overflow-hidden bg-fixed opacity-0 transition duration-300 ease-in-out hover:opacity-100 bg-[hsla(0,0%,98.4%,.15)]"></div>
                             </div>
@@ -25,7 +39,7 @@ const DashNews = ({newsData}) => {
 
                         <div
                             className="mb-6 w-full shrink-0 grow-0 basis-auto px-3 md:mb-0 md:w-9/12">
-                            <h5 className="mb-3 text-lg font-bold text-white">{item.title}</h5>
+                            <h5 className="mb-3 text-lg font-bold text-white">{truncate(item.title, 50)}</h5>
                             <div
                                 className="mb-3 flex items-center justify-center text-sm font-medium text-danger dark:text-danger-500 md:justify-start ">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="white" viewBox="0 0 24 24" strokeWidth="2"
@@ -40,7 +54,7 @@ const DashNews = ({newsData}) => {
                                     Published by {item.authors}
                                 </small>
                             </p>
-                            <p className="text-gray-300 dark:text-neutral-300 text-sm">{item.summary}</p>
+                            <p className="text-gray-300 dark:text-neutral-300 text-sm">{truncate(item.summary, 100)}</p>
 
                         </div>
 

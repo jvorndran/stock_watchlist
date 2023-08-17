@@ -9,6 +9,7 @@
 
 .suggestionListItem{
     border: 1px black solid;
+    cursor: pointer;
     background: white;
     padding: 5px;
     display: flex;

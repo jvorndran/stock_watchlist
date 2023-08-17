@@ -3,18 +3,20 @@
     background: rgb(34, 35, 45);
     font-size: 0.9rem;
     display: grid;
-    grid-template-rows: 70% 2% 5% 5% 5% 5% 5%;
+    grid-template-rows: 65% 2% 6% 6% 6% 6% 6%;
     grid-template-columns: 50% 20% 30%;
     justify-content: center;
     align-items: start;
     width: 100%;
-    padding-top: 5vh;
+    padding-top: 2vh;
     height: 600px;
 }
 
-.bold-text{
+.selected-index{
+    background-color: rgba(61, 62, 72);
     font-weight: bold;
 }
+
 
 .index-table-element{
     padding-left: 10%;
@@ -23,7 +25,7 @@
 
 .index-table-element:hover{
     transition: all 0.3s ease;
-    background: rgba(145, 145, 145, 0.3);
+    background: rgba(145, 145, 145, 0.5);
     border-radius: 5px;
 }
 

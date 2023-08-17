@@ -63,7 +63,7 @@ const DashIndices = () => {
 
                     <div style={{marginLeft: '10%', marginRight: '10%'}}>
                         <div></div>
-                        <div>Price</div>
+                        <div>Close</div>
                         <div>1D</div>
                         <div>1Wk</div>
                     </div>
@@ -72,9 +72,9 @@ const DashIndices = () => {
 
                     {formattedStockData.map((dataItem, dataIndex) =>(
                         <div onClick={() => setIndexFunction(dataIndex)}
-                              className={index === dataIndex ? 'bold-text index-table-element' : 'index-table-element'}
+                              className={index === dataIndex ? 'selected-index index-table-element' : 'index-table-element'}
                              style={{cursor: 'pointer'}}>
-                            <div>
+                            <div className='text-base'>
                                 {indexes[dataIndex]}
                             </div>
                             <div>

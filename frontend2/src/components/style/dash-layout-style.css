@@ -1,6 +1,6 @@
 .dash-news-container{
     display: grid;
-    grid-template-columns: 60% 35%;
+    grid-template-columns: 55% 40%;
     justify-content: center;
     align-items: start;
     column-gap: 2.5%;
