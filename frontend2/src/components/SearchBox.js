@@ -5,8 +5,6 @@ import './style/searchBoxStyle.css';
 import '../index.css'
 
 
-
-
 const SearchBox = ({ suggestions }) => {
 
     const [inputValue, setInputValue] = useState("");

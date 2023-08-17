@@ -1,9 +1,18 @@
 .dash-news-container{
-    background-image: url("../../img/seatle.jpg");
+    background-image: url("../../img/forrest.jpg");
     background-size: cover;
     display: grid;
     grid-template-columns: 55% 40%;
     justify-content: center;
     align-items: start;
     column-gap: 2.5%;
+}
+
+@media (max-width: 950px) {
+
+    .dash-news-container{
+        grid-template-columns: 95%;
+        row-gap: 20px;
+    }
+
 }

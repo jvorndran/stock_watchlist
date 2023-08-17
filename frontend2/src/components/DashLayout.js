@@ -20,11 +20,10 @@ const DashLayout = () => {
 
     useEffect(() => {
 
-        console.log("HELLO")
 
         axios.get('http://localhost:3500/dash')
             .then(response => {
-                const slicedData = response.data.feed.slice(0,4)
+                const slicedData = response.data.feed.slice(0,10)
                 setNewsData(slicedData);
             })
             .catch(error => {
@@ -46,7 +45,7 @@ const DashLayout = () => {
 
                 <Watchlist />
 
-                <div className='dash-news-container pt-4 z-10'>
+                <div className='dash-news-container py-4 z-10'>
                     <div className="rounded-3xl p-2" style={newsContainer}>
                         <DashNews newsData={newsData}  />
                     </div>

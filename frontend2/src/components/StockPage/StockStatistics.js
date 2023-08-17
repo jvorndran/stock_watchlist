@@ -23,11 +23,9 @@ const StockStatistics = ({ stockData }) => {
 
 
     return (
-        <div className="grid-cols-3 gap-4 rounded-3xl m-10 p-2 text-white" style={newsContainer}>
+        <div className="grid-cols-3 gap-4 rounded-3xl my-4 mx-10 p-2 text-white" style={newsContainer}>
 
             <div className="ml-3">
-                <h1 className="flex justify-center">Valuation Metrics</h1>
-                <hr />
                 <p className="mt-2 flex"><strong>Price to Earnings:</strong><span className="ml-auto">{summary.PERatio}</span> </p>
                 <p className="mt-2 flex"><strong>Forward Price to Earnings:</strong><span className="ml-auto">{summary.ForwardPE}</span></p>
                 <p className="mt-2 flex"><strong>Price to Sales:</strong><span className="ml-auto">{summary.PriceToSalesRatioTTM}</span></p>
@@ -38,8 +36,6 @@ const StockStatistics = ({ stockData }) => {
             </div>
 
             <div className="ml-3">
-                <h1 className="flex justify-center">General</h1>
-                <hr />
                 <p className="mt-2 flex"><strong>Analyst Price Target:</strong><span className="ml-auto">{summary.AnalystTargetPrice}</span> </p>
                 <p className="mt-2 flex"><strong>Beta:</strong><span className="ml-auto">{summary.Beta}</span></p>
                 <p className="mt-2 flex"><strong>Book Value:</strong><span className="ml-auto">{summary.BookValue}</span></p>
@@ -50,8 +46,6 @@ const StockStatistics = ({ stockData }) => {
             </div>
 
             <div className="ml-3 mr-3">
-                <h1 className="flex justify-center">General</h1>
-                <hr />
                 <p className="mt-2 flex"><strong>Earnings Growth YOY:</strong><span className="ml-auto">{summary.QuarterlyEarningsGrowthYOY}</span> </p>
                 <p className="mt-2 flex"><strong>Revenue Growth YOY:</strong><span className="ml-auto">{summary.QuarterlyRevenueGrowthYOY}</span></p>
                 <p className="mt-2 flex"><strong>Return on Assets:</strong><span className="ml-auto">{summary.ReturnOnAssetsTTM}</span></p>
