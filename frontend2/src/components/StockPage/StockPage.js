@@ -25,8 +25,6 @@ const StockPage = () => {
             }
         };
 
-
-
         fetchData();
 
     }, [stock_ticker]);

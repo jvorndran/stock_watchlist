@@ -5,8 +5,15 @@ import {FaArrowDown, FaArrowUp} from 'react-icons/fa'
 const DashNews = ({newsData}) => {
 
     const [showNews, setShowNews] = useState(false)
-    let firstNewsData = newsData.slice(0,4)
-    let additionalNewsData = newsData.slice(4,10)
+    const [firstNewsData, setFirstNewsData] = useState([]);
+    const [additionalNewsData, setAdditionalNewsData] = useState([]);
+
+    useEffect(() => {
+        if (newsData.length > 0) {
+            setFirstNewsData(newsData.slice(0, 4));
+            setAdditionalNewsData(newsData.slice(4, 10));
+        }
+    }, [newsData]);
 
     const showMoreNews = () => {
         setShowNews(true)
@@ -37,7 +44,7 @@ const DashNews = ({newsData}) => {
                 firstNewsData.map((item, index) => (
                     <a href={item.url} target="_blank" rel="noopener noreferrer">
                     <div className="flex flex-wrap p-0 justify-center" key={index} >
-                        <div className="w-full mb-5 shrink-0 grow-0 basis-auto px-3 md:mb-0 md:w-3/12 content-center items-center" style={{maxWidth:'200px', maxHeight:'150px'}}>
+                        <div className="w-full mb-5 shrink-0 grow-0 basis-auto px-3 md:mb-0 md:w-3/12 content-center items-center" style={{maxWidth:'200px', maxHeight:'175px'}}>
                             <div
                                 className="relative overflow-hidden rounded-lg bg-no-repeat shadow-lg dark:shadow-black/20 content-center"
                                 data-te-ripple-color="light"

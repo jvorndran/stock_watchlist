@@ -14,12 +14,11 @@ const newsContainer = {
 
 
 const DashLayout = () => {
+    console.log('Hello')
 
     const [initialNewsData, setNewsData] = useState({});
 
-
     useEffect(() => {
-
 
         axios.get('http://localhost:3500/dash')
             .then(response => {
