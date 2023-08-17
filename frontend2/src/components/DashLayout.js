@@ -46,7 +46,7 @@ const DashLayout = () => {
 
                 <Watchlist />
 
-                <div className='dash-news-container mt-4 z-10'>
+                <div className='dash-news-container pt-4 z-10'>
                     <div className="rounded-3xl p-2" style={newsContainer}>
                         <DashNews newsData={newsData}  />
                     </div>

@@ -1,4 +1,6 @@
 .dash-news-container{
+    background-image: url("../../img/seatle.jpg");
+    background-size: cover;
     display: grid;
     grid-template-columns: 55% 40%;
     justify-content: center;
