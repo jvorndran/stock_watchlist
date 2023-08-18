@@ -33,7 +33,7 @@ export function FinancialChart({data, width, height}) {
 				<XAxis axisAt="bottom" orient="bottom" {...axisStyles} />
 				<YAxis axisAt="left" orient="left" ticks={5} {...axisStyles} />
 
-				<AreaSeries yAccessor={(d) => d.high} strokeStyle='rgba(96, 165, 250,0.9)' fillStyle='rgba(96, 165, 250,0.3)'/>
+				<AreaSeries yAccessor={(d) => d.high} strokeStyle='rgba(230, 230, 255,0.9)' fillStyle='rgba(230, 230, 255,0.3)'/>
 			</Chart>
 		</ChartCanvas>
 	)

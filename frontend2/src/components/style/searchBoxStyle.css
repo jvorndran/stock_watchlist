@@ -1,19 +1,28 @@
-
+.suggestions-container{
+ border-radius: 40px;
+}
 .suggestionList{
     font-size: 0.8rem;
+    border-radius: 40px;
     list-style: none;
     position: absolute;
     width: clamp(250px, 300px, 25vw);
-    z-index: 1;
+}
+
+.suggestionList > li:nth-child(1) {
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+}
+.suggestionList > li:nth-child(5){
+    border-bottom-left-radius: 10px;
+    border-bottom-right-radius: 10px;
 }
 
 .suggestionListItem{
-    border: 1px black solid;
     cursor: pointer;
     background: white;
     padding: 5px;
     display: flex;
-    border-radius: 40px;
 }
 
 .suggestionListItem > .name {

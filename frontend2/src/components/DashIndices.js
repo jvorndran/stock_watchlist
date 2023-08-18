@@ -68,8 +68,6 @@ const DashIndices = () => {
                         <div>1Wk</div>
                     </div>
 
-
-
                     {formattedStockData.map((dataItem, dataIndex) =>(
                         <div onClick={() => setIndexFunction(dataIndex)}
                               className={index === dataIndex ? 'selected-index index-table-element' : 'index-table-element'}

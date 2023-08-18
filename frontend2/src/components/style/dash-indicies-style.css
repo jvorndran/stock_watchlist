@@ -12,9 +12,10 @@
     height: 600px;
 }
 
+
 .selected-index{
-    background-color: rgba(61, 62, 72);
-    font-weight: bold;
+    background-color: rgb(50, 51, 58);
+    font-weight: 600;
 }
 
 
@@ -54,20 +55,25 @@
 }
 
 .index-grid > div:nth-child(4){
+    border-top: 1px solid rgba(255, 255, 255, 0.3);
     grid-column: 1 / span 3;
     grid-row: 4 / 4;
 
 }
 .index-grid > div:nth-child(5){
+    border-top: 1px solid rgba(255, 255, 255, 0.3);
     grid-column: 1 / span 3;
     grid-row: 5 / 5;
 
 }
 .index-grid > div:nth-child(6){
+    border-top: 1px solid rgba(255, 255, 255, 0.3);
      grid-column: 1 / span 3;
      grid-row: 6 / 6;
  }
 .index-grid > div:nth-child(7){
+    border-top: 1px solid rgba(255, 255, 255, 0.3);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.3);
     grid-column: 1 / span 3;
     grid-row: 7 / 7;
 }
