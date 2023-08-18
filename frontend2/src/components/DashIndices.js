@@ -55,7 +55,6 @@ const DashIndices = () => {
 
             {formattedStockData.length > 0 && (
 
-
                 <div className='index-grid rounded-3xl'>
                     <div><ResponsiveFinancialChart data={formattedStockData[index]} /></div>
 
@@ -70,8 +69,10 @@ const DashIndices = () => {
 
                     {formattedStockData.map((dataItem, dataIndex) =>(
                         <div onClick={() => setIndexFunction(dataIndex)}
-                              className={index === dataIndex ? 'selected-index index-table-element' : 'index-table-element'}
-                             style={{cursor: 'pointer'}}>
+                             className={index === dataIndex ? 'selected-index index-table-element' : 'index-table-element'}
+                             style={{cursor: 'pointer'}}
+                             key={indexes[dataIndex]}>
+
                             <div className='text-base'>
                                 {indexes[dataIndex]}
                             </div>

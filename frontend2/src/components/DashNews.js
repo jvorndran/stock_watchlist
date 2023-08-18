@@ -42,7 +42,7 @@ const DashNews = ({newsData}) => {
 
             {firstNewsData && firstNewsData.length > 0 ? (
                 firstNewsData.map((item, index) => (
-                    <a href={item.url} target="_blank" rel="noopener noreferrer">
+                    <a href={item.url} target="_blank" rel="noopener noreferrer" key={item.title}>
                     <div className="flex flex-wrap p-0 justify-center" key={index} >
                         <div className="w-full mb-5 shrink-0 grow-0 basis-auto px-3 md:mb-0 md:w-3/12 content-center items-center" style={{maxWidth:'200px', maxHeight:'175px'}}>
                             <div

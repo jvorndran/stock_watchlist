@@ -1,15 +1,16 @@
 import React, { useEffect, useState } from 'react';
 
 const Watchlist = () => {
+
     const [watchlist, setWatchlist] = useState([]);
 
     useEffect(() => {
         const fetchWatchlist = async () => {
             try {
-                // Get the JWT token from local storage
+
                 const token = localStorage.getItem('jwt');
 
-                // Make the GET request to fetch the watchlist
+
                 const response = await fetch('http://localhost:3500/api/watchlist', {
                     method: 'GET',
                     headers: {
@@ -18,7 +19,6 @@ const Watchlist = () => {
                     },
                 });
 
-                // Check if the request was successful
                 if (response.ok) {
                     const watchlistData = await response.json();
                     setWatchlist(watchlistData.watchlist);
@@ -35,7 +35,10 @@ const Watchlist = () => {
     }, []);
 
     useEffect(() => {
+        const tradingViewContainer = document.getElementById('tradingview-widget');
+
         const script = document.createElement('script');
+        script.type = "text/javascript"
         script.src = 'https://s3.tradingview.com/external-embedding/embed-widget-ticker-tape.js';
         script.async = true;
         script.defer = true;
@@ -51,12 +54,10 @@ const Watchlist = () => {
             locale: 'en',
         });
 
-        const tradingViewContainer = document.getElementById('tradingview-widget');
-        const tradingViewWidget = document.querySelector('.tradingview-widget-container__widget');
-
-        if (tradingViewContainer && !tradingViewWidget) {
+        if (tradingViewContainer) {
             tradingViewContainer.appendChild(script);
         }
+
 
         return () => {
             tradingViewContainer.innerHTML = '';

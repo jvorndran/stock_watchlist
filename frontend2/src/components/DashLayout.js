@@ -2,6 +2,7 @@ import Header from "./Header";
 import Watchlist from "./Watchlist";
 import DashNews from "./DashNews";
 import DashIndices from "./DashIndices";
+import Heatmap from "./Heatmap";
 import '../index.css'
 import './style/dash-layout-style.css'
 import React, {useEffect, useMemo, useState} from "react";
@@ -14,7 +15,6 @@ const newsContainer = {
 
 
 const DashLayout = () => {
-    console.log('Hello')
 
     const [initialNewsData, setNewsData] = useState({});
 
@@ -45,14 +45,14 @@ const DashLayout = () => {
                 <Watchlist />
 
                 <div className='dash-news-container py-4 z-10'>
-                    <div className="rounded-3xl p-2" style={newsContainer}>
+                    <div className="rounded-3xl p-2 row-span-2" style={newsContainer}>
                         <DashNews newsData={newsData}  />
                     </div>
                     <div className='chart-container'>
                         <DashIndices />
                     </div>
-                </div>
 
+                </div>
 
             </div>
         </>
