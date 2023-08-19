@@ -3,12 +3,12 @@ import axios from "axios";
 import ResponsiveFinancialChart from "./FinancialChart";
 import './style/dash-indicies-style.css'
 
+const indexes = ['NDX 100', 'S&P 500', 'Dow Jones', 'Russell 2000']
+
 const DashIndices = () => {
 
-    const [priceData, setPriceData] = useState({});
     const [formattedStockData, setFormattedStockData] = useState({})
-    const [index, setIndex] = useState(0)
-
+    const [selectedIndex, setSelectedIndex] = useState(0)
 
     useEffect(() => {
 
@@ -16,19 +16,15 @@ const DashIndices = () => {
             .then(response => {
                 const priceDataObj = response.data
                 const formattedData = formatData(priceDataObj);
-                setPriceData(priceDataObj)
                 setFormattedStockData(formattedData)
-                console.log(formattedData)
             })
             .catch(error => {
                 console.error(error)
             })
-
-
     }, [])
 
-    function formatData (data){
-        let formattedData = data.map((stock) => {
+    function formatData(data) {
+        return data.map((stock) => {
             return stock.dates.map((date, index) => ({
                 date: new Date(date),
                 open: stock.opens[index],
@@ -38,25 +34,19 @@ const DashIndices = () => {
                 volume: stock.volumes[index],
             }));
         });
-
-
-        return formattedData;
     }
 
-    function setIndexFunction(num){
-        setIndex(num)
+    function setIndexFunction(num) {
+        setSelectedIndex(num)
     }
-
-    const indexes = ['NDX 100', 'S&P 500', 'Dow Jones', 'Russell 2000']
 
     return (
 
         <div>
-
             {formattedStockData.length > 0 && (
 
                 <div className='index-grid rounded-3xl'>
-                    <div><ResponsiveFinancialChart data={formattedStockData[index]} /></div>
+                    <div><ResponsiveFinancialChart data={formattedStockData[selectedIndex]}/></div>
 
                     <div></div>
 
@@ -67,9 +57,9 @@ const DashIndices = () => {
                         <div>1Wk</div>
                     </div>
 
-                    {formattedStockData.map((dataItem, dataIndex) =>(
+                    {formattedStockData.map((dataItem, dataIndex) => (
                         <div onClick={() => setIndexFunction(dataIndex)}
-                             className={index === dataIndex ? 'selected-index index-table-element' : 'index-table-element'}
+                             className={selectedIndex === dataIndex ? 'selected-index index-table-element' : 'index-table-element'}
                              style={{cursor: 'pointer'}}
                              key={indexes[dataIndex]}>
 

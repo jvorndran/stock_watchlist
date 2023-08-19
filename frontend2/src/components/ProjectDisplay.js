@@ -1,6 +1,6 @@
 import React from "react";
 import '../index.css'
-import './style/ProjectDisplayStyle.css'
+import './style/project-display-style.css'
 
 
 const imgStyle = {

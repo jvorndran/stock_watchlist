@@ -2,28 +2,22 @@ import Header from "./Header";
 import Watchlist from "./Watchlist";
 import DashNews from "./DashNews";
 import DashIndices from "./DashIndices";
-import Heatmap from "./Heatmap";
 import '../index.css'
 import './style/dash-layout-style.css'
 import React, {useEffect, useMemo, useState} from "react";
 import axios from "axios";
 
 
-const newsContainer = {
-    background: "#22232d",
-}
-
-
 const DashLayout = () => {
 
-    const [initialNewsData, setNewsData] = useState({});
+    const [initialNewsData, setInitialNewsData] = useState({});
 
     useEffect(() => {
 
         axios.get('http://localhost:3500/dash')
             .then(response => {
                 const slicedData = response.data.feed.slice(0,10)
-                setNewsData(slicedData);
+                setInitialNewsData(slicedData);
             })
             .catch(error => {
                 console.error(error);
@@ -41,11 +35,10 @@ const DashLayout = () => {
                     <Header />
                 </div>
 
-
                 <Watchlist />
 
                 <div className='dash-news-container py-4 z-10'>
-                    <div className="rounded-3xl p-2 row-span-2" style={newsContainer}>
+                    <div className="rounded-3xl p-2 row-span-2" style={{background: "#22232d"}}>
                         <DashNews newsData={newsData}  />
                     </div>
                     <div className='chart-container'>

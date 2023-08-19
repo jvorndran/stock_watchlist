@@ -1,7 +1,7 @@
 import React, { useEffect }from "react";
 import '../index.css';
 import ProjectDisplay from "./ProjectDisplay";
-import './style/LandingPageStyle.css';
+import './style/landing-page-style.css';
 import TechButton from "./TechButton";
 import LandingHeader from "./LandingHeader";
 
@@ -158,45 +158,6 @@ const LandingPage = () => {
                         </div>
 
                     </div>
-                    {/*<div className="drop-shadow-xl skills">*/}
-                    {/*    <header className="flex justify-center text-xl pb-3">Frontend</header>*/}
-                    {/*    <hr />*/}
-                    {/*    <div className="frontendSkills text-sm font-light">*/}
-                    {/*        <div><img src="/img/icons/javascript.svg" />Javascript</div>*/}
-                    {/*        <div><img src="/img/icons/react.svg" />React</div>*/}
-                    {/*        <div><img src="/img/icons/css.svg" />CSS</div>*/}
-                    {/*        <div><img src="/img/icons/html5.svg" />HTML</div>*/}
-                    {/*        <div><img src="/img/icons/tailwind-css.svg" />Tailwind</div>*/}
-                    {/*    </div>*/}
-
-                    {/*</div>*/}
-
-                    {/*<div className="drop-shadow-xl skills">*/}
-                    {/*    <header className="flex justify-center text-xl pb-3">Backend</header>*/}
-                    {/*    <hr />*/}
-                    {/*    <div className="frontendSkills text-sm font-light">*/}
-                    {/*        <div><img src="/img/icons/python.svg" />Python</div>*/}
-                    {/*        <div><img src="/img/icons/java.svg" />Java</div>*/}
-                    {/*        <div><img src="/img/icons/php.svg" />PHP</div>*/}
-                    {/*        <div><img src="/img/icons/nodejs.svg" />Node js</div>*/}
-                    {/*        <div><img src="/img/icons/express.svg" />Express</div>*/}
-                    {/*        <div><img src="/img/icons/flask.svg" />Flask</div>*/}
-                    {/*        <div><img src="/img/icons/mongodb.svg" />MongoDB</div>*/}
-                    {/*        <div><img src="/img/icons/mysql.svg" />MySQL</div>*/}
-                    {/*    </div>*/}
-
-                    {/*</div>*/}
-
-
-                    {/*<div className="drop-shadow-xl skills">*/}
-                    {/*    <header className="flex justify-center text-xl pb-3">Misc</header>*/}
-                    {/*    <hr />*/}
-                    {/*    <div className="frontendSkills text-sm font-light">*/}
-                    {/*        <div><img src="/img/icons/github.svg" />Github</div>*/}
-                    {/*        <div><img src="/img/icons/git.svg" />Git</div>*/}
-                    {/*    </div>*/}
-
-                    {/*</div>*/}
 
                 </div>
 

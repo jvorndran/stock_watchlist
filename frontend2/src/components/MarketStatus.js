@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import "./style/MarketStatusStyle.css"
+import "./style/market-status-style.css"
 
 const isMarketOpen = (currentTime) => {
     const currentHour = currentTime.getHours();

@@ -4,7 +4,7 @@ import {FaArrowDown, FaArrowUp} from 'react-icons/fa'
 
 const DashNews = ({newsData}) => {
 
-    const [showNews, setShowNews] = useState(false)
+    const [showAdditionalNews, setShowAdditionalNews] = useState(false)
     const [firstNewsData, setFirstNewsData] = useState([]);
     const [additionalNewsData, setAdditionalNewsData] = useState([]);
 
@@ -16,11 +16,11 @@ const DashNews = ({newsData}) => {
     }, [newsData]);
 
     const showMoreNews = () => {
-        setShowNews(true)
+        setShowAdditionalNews(true)
     }
 
     const showLessNews = () => {
-        setShowNews(false)
+        setShowAdditionalNews(false)
     }
 
 
@@ -85,7 +85,7 @@ const DashNews = ({newsData}) => {
                 <p className='text-4xl text-white'>Loading...</p>
             )}
 
-            {additionalNewsData && additionalNewsData.length > 0 && showNews && (
+            {additionalNewsData && additionalNewsData.length > 0 && showAdditionalNews && (
                 additionalNewsData.map((item, index) =>(
 
                     <a href={item.url} target="_blank" rel="noopener noreferrer">
@@ -131,7 +131,7 @@ const DashNews = ({newsData}) => {
             )}
 
             <div className='flex justify-center items-center mb-2'>
-                {showNews ? (
+                {showAdditionalNews ? (
                     <button onClick={showLessNews} className='text-white'><FaArrowUp /></button>
                 ): (
                     <button onClick={showMoreNews} className='text-white'><FaArrowDown /></button>

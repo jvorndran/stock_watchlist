@@ -4,7 +4,6 @@ import '../index.css';
 
 const Public = () => {
 
-
     return (
         <section className="public" style={sectionStyle}>
             <header style={headerStyle}>

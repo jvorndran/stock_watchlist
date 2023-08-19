@@ -1,0 +1,15 @@
+.container-grid{
+    display: grid;
+    grid-template-columns: 25% 50% 25%;
+
+}
+
+@media (max-width: 900px) {
+
+    .container-grid{
+        grid-template-columns: 25% 70%;
+        justify-content: center;
+        padding-right: 1rem;
+    }
+
+}

@@ -9,7 +9,7 @@ const StockPageHeader = ({ stockData }) => {
 
     return (
         <nav className="bg-black-steel bg-gradient-to-b">
-            <div className="py-4 flex justify-between items-center">
+            <div className="py-4 flex justify-between items-center flex-wrap gap-4">
 
                 <AddToWatchlist stockTicker={stockData.summary.Symbol}/>
 

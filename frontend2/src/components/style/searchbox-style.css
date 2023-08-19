@@ -62,4 +62,6 @@
     position: relative;
     display: inline-block;
     align-items: center;
+    margin-right: 10px;
+    margin-left: 20px;
 }

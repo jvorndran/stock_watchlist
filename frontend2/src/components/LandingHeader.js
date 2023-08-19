@@ -1,4 +1,4 @@
-import './style/LandingHeaderStyle.css'
+import './style/landing-header-style.css'
 
 const LandingHeader = () => {
 

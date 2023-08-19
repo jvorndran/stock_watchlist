@@ -1,0 +1,9 @@
+.header-container{
+    justify-content: space-between;
+}
+
+@media (max-width: 580px){
+    .header-container{
+        justify-content: center;
+    }
+}

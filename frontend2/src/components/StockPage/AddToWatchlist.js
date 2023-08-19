@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-import '../style/AddToWatchlistButton.css'
+import '../style/add-to-watchlist-button-style.css'
 import '../../index.css'
 
 const AddToWatchlist = ({stockTicker}) => {

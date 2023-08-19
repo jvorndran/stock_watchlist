@@ -1,11 +1,10 @@
-import React, { useState, useEffect, useRef } from "react";
-import { useNavigate } from "react-router-dom";
-import { FaSearch } from "react-icons/fa";
-import './style/searchBoxStyle.css';
+import React, {useState, useEffect, useRef} from "react";
+import {useNavigate} from "react-router-dom";
+import {FaSearch} from "react-icons/fa";
+import './style/searchbox-style.css';
 import '../index.css'
 
-
-const SearchBox = ({ suggestions }) => {
+const SearchBox = ({suggestions}) => {
 
     const [inputValue, setInputValue] = useState("");
     const [filteredSuggestions, setFilteredSuggestions] = useState([]);
@@ -109,9 +108,11 @@ const SearchBox = ({ suggestions }) => {
                 onClick={() => redirectToTicker(String(inputValue).trim().split(',')[0])}
                 className="search-box-button align-middle px-5 mx-1 mb-1 overflow-hidden relative group cursor-pointer font-medium"
             >
-                <span className="absolute w-64 h-0 transition-all duration-300 origin-center rotate-45 -translate-x-20 bg-blue-400 top-1/2 group-hover:h-64 group-hover:-translate-y-32 ease"></span>
-                <span className="relative bg-blue-400 font-semibold transition duration-300 group-hover:text-white ease">
-          <FaSearch />
+                <span
+                    className="absolute w-64 h-0 transition-all duration-300 origin-center rotate-45 -translate-x-20 bg-blue-400 top-1/2 group-hover:h-64 group-hover:-translate-y-32 ease"></span>
+                <span
+                    className="relative bg-blue-400 font-semibold transition duration-300 group-hover:text-white ease">
+          <FaSearch/>
         </span>
             </button>
             {renderSuggestions()}
