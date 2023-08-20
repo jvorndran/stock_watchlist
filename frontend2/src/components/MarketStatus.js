@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import "./style/market-status-style.css"
+import logo from "../img/svg/NYSE-The-New-York-Stock-Exchang-New.svg"
 
 const isMarketOpen = (currentTime) => {
     const currentHour = currentTime.getHours();
@@ -13,6 +14,29 @@ const isMarketOpen = (currentTime) => {
     return isWeekday && isMarketHours && isMarketMinutes;
 };
 
+const getTimeUntilMarket = (currentTime, isMarketOpen) => {
+    if (!isMarketOpen) {
+        // If it's not a weekday (Saturday or Sunday), set the next market open time for Monday
+        if (currentTime.getDay() === 6) {
+            currentTime.setDate(currentTime.getDate() + 2);
+        } else if (currentTime.getDay() === 0) {
+            currentTime.setDate(currentTime.getDate() + 1);
+        }
+        currentTime.setHours(9, 30, 0, 0); // Set next market open time to 9:30 AM
+    } else {
+        currentTime.setHours(16, 0, 0, 0); // Set next market close time to 4:00 PM
+    }
+
+    const timeDifference = currentTime - new Date();
+
+    // Convert time difference to hours, minutes, and seconds
+    const hours = Math.floor(timeDifference / (1000 * 60 * 60));
+    const minutes = Math.floor((timeDifference % (1000 * 60 * 60)) / (1000 * 60));
+    const seconds = Math.floor((timeDifference % (1000 * 60)) / 1000);
+
+    return `${hours > 9 ? hours : '0' + hours.toString()}:${minutes > 9 ? minutes : '0' + minutes.toString()}:${seconds > 9 ? seconds : '0' + seconds.toString()}`;
+};
+
 const MarketStatus = () => {
     const [currentTime, setCurrentTime] = useState(new Date());
 
@@ -21,12 +45,13 @@ const MarketStatus = () => {
         return () => clearInterval(timer);
     }, []);
 
-    const marketOpen = isMarketOpen(currentTime);
-
     return (
-        <div className={`market-status ${marketOpen ? 'open' : 'closed'}`}>
-            <span className="time">{currentTime.toLocaleTimeString()}</span>
-            <span className="status">{marketOpen ? ' Market Open' : ' Market Closed'}</span>
+        <div className={`market-status-container ${isMarketOpen(currentTime) ? 'open' : 'closed'} mx-4 px-4`}>
+            <div className='mt-2 image-container'><img src={logo} alt='' className="market-logo" /></div>
+            <hr className="mt-1" />
+            <div>
+                {isMarketOpen(currentTime) ? 'Closes' : 'Opens'} in {getTimeUntilMarket(new Date(), isMarketOpen(currentTime))}
+            </div>
         </div>
     );
 };

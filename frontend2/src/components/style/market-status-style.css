@@ -9,11 +9,40 @@
 }
 
 .open {
-    background-color: #076051;
-    color: white;
+    border-top: darkblue 5px solid;
 }
 
 .closed {
-    background-color: #b21d2b;
-    color: white;
+    border-top: #b21d2b 5px solid;
 }
+
+.market-logo{
+    object-fit: fill;
+    width: 100px;
+    height: 40px;
+}
+.image-container{
+    display: grid;
+    justify-content: center;
+    align-items: center;
+}
+
+.market-status-container{
+    height: 60px;
+    background-color: white;
+    color: rgb(38,38,38);
+    display: grid;
+    grid-template-rows: 40% 1% 40%;
+    gap: 0.3rem;
+    justify-content: center;
+    align-items: center;
+    border-radius: 5px;
+}
+
+.market-status-container > div{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+

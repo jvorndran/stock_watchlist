@@ -9,7 +9,7 @@ const Header = () => {
 
     return (
         <nav className="bg-black-steel">
-            <div className="py-4 flex header-container items-center flex-wrap gap-4">
+            <div className=" py-3 flex header-container items-center flex-wrap gap-4">
                 <MarketStatus/>
 
                 <SearchBox suggestions={nyse_stocks}/>
