@@ -2,7 +2,9 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import '../../index.css'
+import StyledFormButton from "../../components/StyledFormButton";
 
+const inputTailwindStyle = "w-full px-4 py-2.5 text-sm border rounded-lg focus:ring-primary-600 focus:border-primary-600 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
 
 const Login = () => {
 
@@ -18,6 +20,31 @@ const Login = () => {
     const handlePasswordChange = (e) => {
         setPassword(e.target.value);
     };
+
+    const exampleAccountSignIn = async (e) => {
+        e.preventDefault();
+
+        const exampleUsername = 'example'
+        const examplePassword = 'password'
+
+        try {
+
+            axios.defaults.withCredentials = true;
+
+            const response = await axios.post('http://localhost:3500/auth', { username: exampleUsername, password: examplePassword });
+
+            // Extract the JWT token from the response
+            const token = response.data.accessToken;
+
+            // Store the JWT token in localStorage
+            localStorage.setItem('jwt', token);
+
+            navigate('/dash');
+
+        } catch (error) {
+            console.error(error);
+        }
+    }
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -57,7 +84,7 @@ const Login = () => {
                         <h1 className="text-xl font-bold leading-tight tracking-tight text-gray-900 md:text-2xl dark:text-white">
                             Sign in to your account
                         </h1>
-                        <form className="space-y-4 md:space-y-6" onSubmit={handleSubmit}>
+                        <form className="space-y-4" onSubmit={handleSubmit}>
                             <div>
                                 <label
                                     htmlFor="username"
@@ -71,8 +98,7 @@ const Login = () => {
                                     value={username}
                                     onChange={handleUsernameChange}
                                     required
-                                    className="w-full px-4 py-2.5 text-sm border rounded-lg focus:ring-primary-600 focus:border-primary-600 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                                />
+                                    className={inputTailwindStyle} />
                             </div>
                             <div>
                                 <label
@@ -87,19 +113,18 @@ const Login = () => {
                                     value={password}
                                     onChange={handlePasswordChange}
                                     required
-                                    className="w-full px-4 py-2.5 text-sm border rounded-lg focus:ring-primary-600 focus:border-primary-600 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                                />
+                                    className={inputTailwindStyle} />
                             </div>
+
                             <div className="flex justify-center">
-                            <button
-                                type="submit"
-                                className="align-middle rounded-3xl px-5 py-2 m-1 overflow-hidden relative group cursor-pointer border-2 font-medium border-black-steel text-indigo-600 text-white"
-                            >
-                                <span
-                                    className="absolute w-64 h-0 transition-all duration-300 origin-center rotate-45 -translate-x-20 bg-black-steel top-1/2 group-hover:h-64 group-hover:-translate-y-32 ease"></span>
-                                <span className="relative text-black-steel font-semibold transition duration-300 group-hover:text-white ease">Login</span>
-                            </button>
-                                </div>
+
+                                <StyledFormButton type="submit" text="Login" onClickFunction={handleSubmit} />
+                                <StyledFormButton type="submit" text="Example Account" onClickFunction={exampleAccountSignIn} />
+
+                            </div>
+
+
+
                             <p className="text-sm font-light text-gray-500 dark:text-gray-400">
                                 Don’t have an account yet?{' '}
                                 <a
@@ -117,5 +142,7 @@ const Login = () => {
 
     );
 };
+
+
 
 export default Login;
