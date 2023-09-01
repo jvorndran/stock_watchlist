@@ -1,38 +1,8 @@
 import React, { useEffect, useState } from 'react';
 
-const Watchlist = () => {
-
-    const [watchlist, setWatchlist] = useState([]);
-
-    useEffect(() => {
-        const fetchWatchlist = async () => {
-            try {
-
-                const token = localStorage.getItem('jwt');
+const Watchlist = ({watchlist}) => {
 
 
-                const response = await fetch('http://localhost:3500/api/watchlist', {
-                    method: 'GET',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        Authorization: `Bearer ${token}`, // Include the token in the Authorization header
-                    },
-                });
-
-                if (response.ok) {
-                    const watchlistData = await response.json();
-                    setWatchlist(watchlistData.watchlist);
-                } else {
-                    console.error('Failed to fetch watchlist');
-                }
-            } catch (error) {
-                console.error('Error:', error);
-            }
-        };
-
-        fetchWatchlist();
-
-    }, []);
 
     useEffect(() => {
         const tradingViewContainer = document.getElementById('tradingview-widget');

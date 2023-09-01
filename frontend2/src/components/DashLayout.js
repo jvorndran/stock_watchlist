@@ -2,6 +2,7 @@ import Header from "./Header";
 import Watchlist from "./Watchlist";
 import DashNews from "./DashNews";
 import DashIndices from "./DashIndices";
+import DashboardWatchlistWidget from "./DashboardWatchlistWidget"
 import '../index.css'
 import './style/dash-layout-style.css'
 import React, {useEffect, useMemo, useState} from "react";
@@ -11,6 +12,37 @@ import axios from "axios";
 const DashLayout = () => {
 
     const [initialNewsData, setInitialNewsData] = useState({});
+    const [watchlist, setWatchlist] = useState([]);
+
+    useEffect(() => {
+        const fetchWatchlist = async () => {
+            try {
+
+                const token = localStorage.getItem('jwt');
+
+                const response = await fetch('http://localhost:3500/api/watchlist', {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        Authorization: `Bearer ${token}`, // Include the token in the Authorization header
+                    },
+                });
+
+                if (response.ok) {
+                    const watchlistData = await response.json();
+                    setWatchlist(watchlistData.watchlist);
+                } else {
+                    console.error('Failed to fetch watchlist');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        };
+
+        fetchWatchlist();
+
+    }, []);
+
 
     useEffect(() => {
 
@@ -35,7 +67,7 @@ const DashLayout = () => {
                     <Header />
                 </div>
 
-                <Watchlist />
+                <Watchlist watchlist={watchlist} />
 
                 <div className='dash-news-container py-4 z-10'>
                     <div className="rounded-3xl p-2 row-span-2" style={{background: "#22232d"}}>

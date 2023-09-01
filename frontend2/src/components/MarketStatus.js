@@ -30,11 +30,16 @@ const getTimeUntilMarket = (currentTime, isMarketOpen) => {
     const timeDifference = currentTime - new Date();
 
     // Convert time difference to hours, minutes, and seconds
-    const hours = Math.floor(timeDifference / (1000 * 60 * 60));
-    const minutes = Math.floor((timeDifference % (1000 * 60 * 60)) / (1000 * 60));
-    const seconds = Math.floor((timeDifference % (1000 * 60)) / 1000);
+    const hours = Math.abs(Math.floor(timeDifference / (1000 * 60 * 60)));
+    const minutes = Math.abs(Math.floor((timeDifference % (1000 * 60 * 60)) / (1000 * 60)));
+    const seconds = Math.abs(Math.floor((timeDifference % (1000 * 60)) / 1000));
 
-    return `${hours > 9 ? hours : '0' + hours.toString()}:${minutes > 9 ? minutes : '0' + minutes.toString()}:${seconds > 9 ? seconds : '0' + seconds.toString()}`;
+
+    const formattedHours = hours > 9 ? hours.toString() : '0' + hours.toString();
+    const formattedMinutes = minutes > 9 ? minutes.toString() : '0' + minutes.toString();
+    const formattedSeconds = seconds > 9 ? seconds.toString() : '0' + seconds.toString();
+
+    return `${formattedHours}:${formattedMinutes}:${formattedSeconds}`;
 };
 
 const MarketStatus = () => {
