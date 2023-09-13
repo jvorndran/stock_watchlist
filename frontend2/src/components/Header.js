@@ -2,7 +2,7 @@ import React from "react";
 import SearchBox from "./SearchBox";
 import './style/header-style.css'
 import nyse_stocks from "../text/nyse_stocks";
-import MarketStatus from "./MarketStatus";
+import MarketStatus from "./Dashboard/MarketStatus";
 import "../index.css"
 
 const Header = () => {

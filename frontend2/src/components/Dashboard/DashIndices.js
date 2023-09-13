@@ -1,7 +1,7 @@
 import React, {memo, useEffect, useState} from 'react';
 import axios from "axios";
 import ResponsiveFinancialChart from "./FinancialChart";
-import './style/dash-indicies-style.css'
+import '../style/dash-indicies-style.css'
 
 const indexes = ['NDX 100', 'S&P 500', 'Dow Jones', 'Russell 2000']
 

@@ -1,7 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 
 const Watchlist = ({watchlist}) => {
-
 
 
     useEffect(() => {

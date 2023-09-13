@@ -1,10 +1,9 @@
-import Header from "./Header";
+import Header from "../Header";
 import Watchlist from "./Watchlist";
 import DashNews from "./DashNews";
 import DashIndices from "./DashIndices";
-import DashboardWatchlistWidget from "./DashboardWatchlistWidget"
-import '../index.css'
-import './style/dash-layout-style.css'
+import '../../index.css'
+import '../style/dash-layout-style.css'
 import React, {useEffect, useMemo, useState} from "react";
 import axios from "axios";
 

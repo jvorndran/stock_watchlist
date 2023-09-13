@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import "./style/market-status-style.css"
-import logo from "../img/svg/NYSE-The-New-York-Stock-Exchang-New.svg"
+import "../style/market-status-style.css"
+import logo from "../../img/svg/NYSE-The-New-York-Stock-Exchang-New.svg"
 
 const isMarketOpen = (currentTime) => {
     const currentHour = currentTime.getHours();
