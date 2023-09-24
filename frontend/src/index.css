@@ -8,7 +8,7 @@ body {
   font-family: 'Nunito', sans-serif;
   min-height: 100vh;
   color: black;
-  background: url("./img/mountains.jpg") no-repeat center center fixed;
+  background: url("./img/forrest.jpg") no-repeat center center fixed;
   background-size: cover;
   background-blend-mode: multiply;
 }
