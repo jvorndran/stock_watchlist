@@ -18,7 +18,7 @@ export const formatNumber = (number) => {
 
 const StockStatistics = ({ stockData }) => {
 
-    const { summary, news } = stockData;
+    const { summary } = stockData;
 
 
 
