@@ -9,19 +9,15 @@ const User = require('./models/User');
 const asyncHandler = require('express-async-handler');
 const jwt = require('jsonwebtoken');
 
-
 const PORT = process.env.PORT || 3500;
 console.log(process.env.NODE_ENV);
-
 
 app.use(cors({
     origin: 'http://localhost:3000',
     credentials: true,
 }));
 
-
 connectDB();
-
 
 app.use(express.json());
 
