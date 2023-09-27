@@ -13,7 +13,7 @@ const PORT = process.env.PORT || 3500;
 console.log(process.env.NODE_ENV);
 
 app.use(cors({
-    origin: 'http://localhost:3000',
+    origin: ['http://localhost:3000', 'https://findashboard2345.onrender.com'],
     credentials: true,
 }));
 
