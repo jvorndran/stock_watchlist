@@ -19,7 +19,7 @@ const DashLayout = () => {
 
                 const token = localStorage.getItem('jwt');
 
-                const response = await fetch('http://localhost:3500/api/watchlist', {
+                const response = await fetch('https://findashboard-api.onrender.com/api/watchlist', {
                     method: 'GET',
                     headers: {
                         'Content-Type': 'application/json',
@@ -45,7 +45,7 @@ const DashLayout = () => {
 
     useEffect(() => {
 
-        axios.get('http://localhost:3500/dash')
+        axios.get('https://findashboard-api.onrender.com/dash')
             .then(response => {
                 const slicedData = response.data.feed.slice(0,10)
                 setInitialNewsData(slicedData);

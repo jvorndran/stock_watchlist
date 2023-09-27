@@ -29,7 +29,7 @@ const Signup = () => {
         try {
 
             // Send the form data to the server
-            await axios.post('http://localhost:3500/api/signup', { name, username, password });
+            await axios.post('https://findashboard-api.onrender.com/api/signup', { name, username, password });
 
             // Reset the form
             setName('');

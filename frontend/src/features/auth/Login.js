@@ -31,7 +31,7 @@ const Login = () => {
 
             axios.defaults.withCredentials = true;
 
-            const response = await axios.post('http://localhost:3500/auth', { username: exampleUsername, password: examplePassword });
+            const response = await axios.post('https://findashboard-api.onrender.com/auth', { username: exampleUsername, password: examplePassword });
 
             // Extract the JWT token from the response
             const token = response.data.accessToken;
@@ -55,7 +55,7 @@ const Login = () => {
             axios.defaults.withCredentials = true;
 
             // Send the login credentials to the server
-            const response = await axios.post('http://localhost:3500/auth', { username, password });
+            const response = await axios.post('https://findashboard-api.onrender.com/auth', { username, password });
 
             // Reset the form
             setUsername('');
