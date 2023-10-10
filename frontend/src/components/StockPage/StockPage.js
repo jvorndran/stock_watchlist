@@ -16,9 +16,8 @@ const StockPage = () => {
         const fetchData = async () => {
             try {
                 // Fetch stock data from the server
-                const response = await fetch(`http://localhost:3500/dash/${stock_ticker}`);
+                const response = await fetch(`https://findashboard-api.onrender.com/dash/${stock_ticker}`);
                 const data = await response.json();
-                console.log(data)
                 setStockData(data);
             } catch (error) {
                 console.error(error);

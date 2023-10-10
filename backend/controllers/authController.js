@@ -9,7 +9,6 @@ const asyncHandler = require('express-async-handler')
 const login = asyncHandler(async (req, res) => {
     const { username, password } = req.body
 
-    //console.log(`Username ${username} Password ${password}`)
 
     if (!username || !password) {
         return res.status(400).json({ message: 'All fields are required' })
@@ -17,11 +16,7 @@ const login = asyncHandler(async (req, res) => {
 
     const foundUser = await User.findOne({ username }).exec()
 
-    //console.log(foundUser)
-
-
     const match = await bcrypt.compare(password, foundUser.password)
-
 
     const accessToken = jwt.sign(
         {

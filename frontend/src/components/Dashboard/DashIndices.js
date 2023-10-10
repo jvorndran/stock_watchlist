@@ -12,7 +12,7 @@ const DashIndices = () => {
 
     useEffect(() => {
 
-        axios.get('http://localhost:3500/api/indices')
+        axios.get('https://findashboard-api.onrender.com/api/indices')
             .then(response => {
                 const priceDataObj = response.data
                 const formattedData = formatData(priceDataObj);

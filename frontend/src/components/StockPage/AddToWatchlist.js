@@ -14,7 +14,7 @@ const AddToWatchlist = ({stockTicker}) => {
         try {
 
             await axios.post(
-                'http://localhost:3500/watchlist',
+                'https://findashboard-api.onrender.com/watchlist',
                 { stockTicker },
                 {
                     headers: {

@@ -79,7 +79,7 @@ const SearchBox = ({suggestions}) => {
         return (
             <div className='suggestions-container' ref={suggestionsContainerRef}>
                 <ul id="suggestions-list" className='suggestionList'>
-                    {filteredSuggestions.slice(0, 5).map((suggestion, index) => (
+                    {filteredSuggestions.slice(0, 5).map((suggestion) => (
                         <li
                             key={suggestion[0]}
                             className='suggestionListItem'

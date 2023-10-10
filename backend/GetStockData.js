@@ -13,10 +13,9 @@ async function fetchPriceData(symbols) {
 
             const today = new Date().toISOString().split('T')[0];
 
-            const queryOptions = { period1: '2023-01-01', period2: today };
+            const queryOptions = { period1: '2022-01-01', period2: today };
 
             const data = await yahooFinance.historical(symbol, queryOptions)
-
 
             stockPriceData = [];
 
