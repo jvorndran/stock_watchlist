@@ -1,22 +1,31 @@
 # Stock Watchlist
-This app allows users to make accounts and make a watchlist of stocks. 
 
-# Features
-- JWT Authentication and Authorization
-- Live News Feed
-- Charts of the big 4 indices
-- Coverage of all NYSE stocks
-- Over 15 statistics for each stock
-- Live news feed for each stock
+This project combines an Express/MongoDB backend with a React frontend for user watchlists, per-stock pages,
+and market/news views.
 
-When you first load onto the website, press "Example Account" to log in to the example account. Then from there
-you will see general news, the major stock indices, and a tape across the top of all the stocks the example
-account is watching. You can search up stocks with the search bar in the top left hand corner. Then you can
-add them to the example account if you would like. 
+## Highlights
 
-# Usage
-Since this uses MongoDB and I cannot publicly display my env variables, there is no way to run this project
-locally on your machine.
+- JWT-based authentication and watchlist management
+- Per-stock pages with charts, news, and summary data
+- Dashboard views for major indices and general market headlines
 
-# Tech Used
-For the backend NodeJs, Express, and MongoDB is used. For the frontend, react and tailwind is used. 
+## Local setup
+
+1. Start a local MongoDB instance or provide a hosted MongoDB connection string.
+2. Set the backend environment variables:
+   - `DATABASE_URI`
+   - `ACCESS_TOKEN_SECRET`
+   - `REFRESH_TOKEN_SECRET`
+   - `ALPHA_API_KEY`
+   - `PORT` (optional, defaults to `3500`)
+3. Install backend dependencies with `cd backend && npm install`.
+4. Install frontend dependencies with `cd frontend && npm install`.
+5. Start the API with `cd backend && node server.js`.
+6. Start the React app with `cd frontend && npm start`.
+
+## Notes
+
+- The frontend currently calls the deployed Render API at `https://findashboard-api.onrender.com`.
+- For a fully local workflow, update those frontend URLs to your local API host or add a client-side API config.
+- Company logos are fetched directly from Clearbit image URLs, so there is no extra backend key to configure for
+  that part of the UI.
