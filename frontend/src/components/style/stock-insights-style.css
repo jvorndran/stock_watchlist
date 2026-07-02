@@ -1,0 +1,75 @@
+.stock-insights {
+    background: #22232d;
+    border-radius: 8px;
+    color: #ffffff;
+    display: grid;
+    gap: 1rem;
+    margin: 1rem 2.5rem;
+    padding: 1rem;
+}
+
+.stock-insights__header {
+    align-items: center;
+    display: flex;
+    justify-content: space-between;
+}
+
+.stock-insights__header h2 {
+    font-size: 1.25rem;
+    font-weight: 700;
+    margin: 0;
+}
+
+.stock-insights__header span {
+    color: #aeb6c5;
+    font-weight: 700;
+}
+
+.stock-insights__grid {
+    display: grid;
+    gap: 0.85rem;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.stock-insight-card {
+    background: #171923;
+    border: 1px solid #343947;
+    border-radius: 6px;
+    display: grid;
+    gap: 0.45rem;
+    min-height: 8.5rem;
+    padding: 0.9rem;
+}
+
+.stock-insight-card span {
+    color: #aeb6c5;
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.stock-insight-card strong {
+    color: #ffffff;
+    font-size: 1.55rem;
+}
+
+.stock-insight-card p,
+.stock-insight-card small {
+    color: #d7deea;
+}
+
+@media (max-width: 1050px) {
+    .stock-insights__grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 650px) {
+    .stock-insights {
+        margin: 1rem;
+    }
+
+    .stock-insights__grid {
+        grid-template-columns: 1fr;
+    }
+}

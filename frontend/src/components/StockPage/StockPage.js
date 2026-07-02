@@ -5,6 +5,7 @@ import StockNews from './StockNews';
 import StockStatistics from './StockStatistics';
 import StockSubHeader from './StockSubHeader';
 import StockPageHeader from "./StockPageHeader";
+import StockInsights from './StockInsights';
 import "../../index.css"
 
 const StockPage = () => {
@@ -40,6 +41,7 @@ const StockPage = () => {
 
                     {/*</div>*/}
 
+                    <StockInsights stockData={stockData} />
 
 
                     <StockChart stockData={stockData} />
