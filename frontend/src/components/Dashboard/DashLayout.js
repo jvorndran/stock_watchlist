@@ -12,6 +12,7 @@ const DashLayout = () => {
 
     const [initialNewsData, setInitialNewsData] = useState({});
     const [watchlist, setWatchlist] = useState([]);
+    const [watchlistError, setWatchlistError] = useState('');
 
     useEffect(() => {
         const fetchWatchlist = async () => {
@@ -30,10 +31,13 @@ const DashLayout = () => {
                 if (response.ok) {
                     const watchlistData = await response.json();
                     setWatchlist(watchlistData.watchlist);
+                    setWatchlistError('');
                 } else {
+                    setWatchlistError('Unable to load watchlist');
                     console.error('Failed to fetch watchlist');
                 }
             } catch (error) {
+                setWatchlistError('Unable to load watchlist');
                 console.error('Error:', error);
             }
         };
@@ -58,6 +62,31 @@ const DashLayout = () => {
 
     const newsData = useMemo(() => initialNewsData, [initialNewsData])
 
+    const removeFromWatchlist = async (stockTicker) => {
+        try {
+            const token = localStorage.getItem('jwt');
+
+            const response = await fetch(`https://findashboard-api.onrender.com/api/watchlist/${encodeURIComponent(stockTicker)}`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+
+            if (response.ok) {
+                const watchlistData = await response.json();
+                setWatchlist(watchlistData.watchlist);
+                setWatchlistError('');
+            } else {
+                setWatchlistError(`Unable to remove ${stockTicker}`);
+            }
+        } catch (error) {
+            setWatchlistError(`Unable to remove ${stockTicker}`);
+            console.error('Error:', error);
+        }
+    };
+
     return (
         <>
             <div className='bg-gray-200'>
@@ -66,7 +95,11 @@ const DashLayout = () => {
                     <Header />
                 </div>
 
-                <Watchlist watchlist={watchlist} />
+                <Watchlist
+                    onRemoveTicker={removeFromWatchlist}
+                    watchlist={watchlist}
+                    watchlistError={watchlistError}
+                />
 
                 <div className='dash-news-container py-4 z-10'>
                     <div className="rounded-3xl p-2 row-span-2" style={{background: "#22232d"}}>

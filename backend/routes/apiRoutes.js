@@ -73,5 +73,39 @@ router.get('/watchlist', (req, res) => {
 
 });
 
+router.delete('/watchlist/:stockTicker', (req, res) => {
+    try {
+        const token = req.headers.authorization?.split(' ')[1];
+
+        if (!token) {
+            return res.status(401).json({ message: 'Missing token' });
+        }
+
+        jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, async (err, decodedToken) => {
+            if (err) {
+                return res.status(401).json({ message: 'Invalid token' });
+            }
+
+            const { username } = decodedToken.UserInfo;
+            const { stockTicker } = req.params;
+
+            const user = await User.findOneAndUpdate(
+                { username },
+                { $pull: { watchlist: stockTicker } },
+                { new: true }
+            );
+
+            if (!user) {
+                return res.status(404).json({ message: 'User not found' });
+            }
+
+            res.status(200).json({ watchlist: user.watchlist });
+        });
+    } catch (error) {
+        console.error('Error:', error);
+        res.status(500).json({ message: 'Server error' });
+    }
+});
+
 
 module.exports = router;
