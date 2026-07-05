@@ -1,10 +1,11 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { FaTimes } from 'react-icons/fa';
+import { FaPlus, FaTimes } from 'react-icons/fa';
 import '../style/DashboardWatchlistWidgetStyle.css';
 
-const Watchlist = ({onRemoveTicker, watchlist, watchlistError}) => {
+const Watchlist = ({onAddTicker, onRemoveTicker, watchlist, watchlistError, watchlistNotice}) => {
 
+    const [newTicker, setNewTicker] = useState('');
     const [searchText, setSearchText] = useState('');
     const [sortMode, setSortMode] = useState('added');
 
@@ -58,6 +59,16 @@ const Watchlist = ({onRemoveTicker, watchlist, watchlistError}) => {
         };
     }, [visibleWatchlist]);
 
+    const handleAddTicker = async (event) => {
+        event.preventDefault();
+
+        const wasAdded = await onAddTicker(newTicker);
+
+        if (wasAdded) {
+            setNewTicker('');
+        }
+    };
+
     return (
         <section className="watchlist-manager">
             <div className="watchlist-manager__header">
@@ -68,6 +79,23 @@ const Watchlist = ({onRemoveTicker, watchlist, watchlistError}) => {
             </div>
 
             {watchlistError && <p className="watchlist-manager__error">{watchlistError}</p>}
+            {watchlistNotice && <p className="watchlist-manager__notice">{watchlistNotice}</p>}
+
+            <form className="watchlist-manager__add-form" onSubmit={handleAddTicker}>
+                <label>
+                    <span>Add Symbol</span>
+                    <input
+                        maxLength="12"
+                        onChange={(event) => setNewTicker(event.target.value.toUpperCase())}
+                        placeholder="Ticker"
+                        type="text"
+                        value={newTicker}
+                    />
+                </label>
+                <button aria-label="Add symbol to watchlist" type="submit">
+                    <FaPlus />
+                </button>
+            </form>
 
             <div className="watchlist-manager__controls">
                 <label>

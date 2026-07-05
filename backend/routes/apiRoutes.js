@@ -73,6 +73,44 @@ router.get('/watchlist', (req, res) => {
 
 });
 
+router.post('/watchlist', (req, res) => {
+    try {
+        const token = req.headers.authorization?.split(' ')[1];
+        const stockTicker = req.body?.stockTicker?.trim().toUpperCase();
+
+        if (!token) {
+            return res.status(401).json({ message: 'Missing token' });
+        }
+
+        if (!stockTicker) {
+            return res.status(400).json({ message: 'Stock ticker is required' });
+        }
+
+        jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, async (err, decodedToken) => {
+            if (err) {
+                return res.status(401).json({ message: 'Invalid token' });
+            }
+
+            const { username } = decodedToken.UserInfo;
+
+            const user = await User.findOneAndUpdate(
+                { username },
+                { $addToSet: { watchlist: stockTicker } },
+                { new: true }
+            );
+
+            if (!user) {
+                return res.status(404).json({ message: 'User not found' });
+            }
+
+            res.status(200).json({ watchlist: user.watchlist });
+        });
+    } catch (error) {
+        console.error('Error:', error);
+        res.status(500).json({ message: 'Server error' });
+    }
+});
+
 router.delete('/watchlist/:stockTicker', (req, res) => {
     try {
         const token = req.headers.authorization?.split(' ')[1];

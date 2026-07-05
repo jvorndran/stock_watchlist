@@ -13,6 +13,7 @@ const DashLayout = () => {
     const [initialNewsData, setInitialNewsData] = useState({});
     const [watchlist, setWatchlist] = useState([]);
     const [watchlistError, setWatchlistError] = useState('');
+    const [watchlistNotice, setWatchlistNotice] = useState('');
 
     useEffect(() => {
         const fetchWatchlist = async () => {
@@ -32,6 +33,7 @@ const DashLayout = () => {
                     const watchlistData = await response.json();
                     setWatchlist(watchlistData.watchlist);
                     setWatchlistError('');
+                    setWatchlistNotice('');
                 } else {
                     setWatchlistError('Unable to load watchlist');
                     console.error('Failed to fetch watchlist');
@@ -62,6 +64,52 @@ const DashLayout = () => {
 
     const newsData = useMemo(() => initialNewsData, [initialNewsData])
 
+    const addToWatchlist = async (stockTicker) => {
+        const normalizedTicker = stockTicker.trim().toUpperCase();
+
+        if (!normalizedTicker) {
+            setWatchlistError('Enter a ticker before adding it');
+            setWatchlistNotice('');
+            return false;
+        }
+
+        if (watchlist.includes(normalizedTicker)) {
+            setWatchlistNotice(`${normalizedTicker} is already on your watchlist`);
+            setWatchlistError('');
+            return true;
+        }
+
+        try {
+            const token = localStorage.getItem('jwt');
+
+            const response = await fetch('https://findashboard-api.onrender.com/api/watchlist', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${token}`,
+                },
+                body: JSON.stringify({ stockTicker: normalizedTicker }),
+            });
+
+            if (response.ok) {
+                const watchlistData = await response.json();
+                setWatchlist(watchlistData.watchlist);
+                setWatchlistNotice(`${normalizedTicker} added to your watchlist`);
+                setWatchlistError('');
+                return true;
+            }
+
+            setWatchlistError(`Unable to add ${normalizedTicker}`);
+            setWatchlistNotice('');
+            return false;
+        } catch (error) {
+            setWatchlistError(`Unable to add ${normalizedTicker}`);
+            setWatchlistNotice('');
+            console.error('Error:', error);
+            return false;
+        }
+    };
+
     const removeFromWatchlist = async (stockTicker) => {
         try {
             const token = localStorage.getItem('jwt');
@@ -78,11 +126,14 @@ const DashLayout = () => {
                 const watchlistData = await response.json();
                 setWatchlist(watchlistData.watchlist);
                 setWatchlistError('');
+                setWatchlistNotice(`${stockTicker} removed from your watchlist`);
             } else {
                 setWatchlistError(`Unable to remove ${stockTicker}`);
+                setWatchlistNotice('');
             }
         } catch (error) {
             setWatchlistError(`Unable to remove ${stockTicker}`);
+            setWatchlistNotice('');
             console.error('Error:', error);
         }
     };
@@ -96,9 +147,11 @@ const DashLayout = () => {
                 </div>
 
                 <Watchlist
+                    onAddTicker={addToWatchlist}
                     onRemoveTicker={removeFromWatchlist}
                     watchlist={watchlist}
                     watchlistError={watchlistError}
+                    watchlistNotice={watchlistNotice}
                 />
 
                 <div className='dash-news-container py-4 z-10'>
