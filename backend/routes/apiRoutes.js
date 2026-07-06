@@ -111,6 +111,47 @@ router.post('/watchlist', (req, res) => {
     }
 });
 
+router.post('/watchlist/bulk', (req, res) => {
+    try {
+        const token = req.headers.authorization?.split(' ')[1];
+        const requestedTickers = Array.isArray(req.body?.stockTickers) ? req.body.stockTickers : [];
+        const stockTickers = [...new Set(requestedTickers
+            .map((ticker) => String(ticker).trim().toUpperCase())
+            .filter(Boolean))];
+
+        if (!token) {
+            return res.status(401).json({ message: 'Missing token' });
+        }
+
+        if (stockTickers.length === 0) {
+            return res.status(400).json({ message: 'At least one stock ticker is required' });
+        }
+
+        jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, async (err, decodedToken) => {
+            if (err) {
+                return res.status(401).json({ message: 'Invalid token' });
+            }
+
+            const { username } = decodedToken.UserInfo;
+
+            const user = await User.findOneAndUpdate(
+                { username },
+                { $addToSet: { watchlist: { $each: stockTickers } } },
+                { new: true }
+            );
+
+            if (!user) {
+                return res.status(404).json({ message: 'User not found' });
+            }
+
+            res.status(200).json({ watchlist: user.watchlist, requestedTickers: stockTickers });
+        });
+    } catch (error) {
+        console.error('Error:', error);
+        res.status(500).json({ message: 'Server error' });
+    }
+});
+
 router.delete('/watchlist/:stockTicker', (req, res) => {
     try {
         const token = req.headers.authorization?.split(' ')[1];

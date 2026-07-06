@@ -64,6 +64,10 @@ const DashLayout = () => {
 
     const newsData = useMemo(() => initialNewsData, [initialNewsData])
 
+    const normalizeTickers = (stockTickers) => [...new Set(stockTickers
+        .map((ticker) => ticker.trim().toUpperCase())
+        .filter(Boolean))];
+
     const addToWatchlist = async (stockTicker) => {
         const normalizedTicker = stockTicker.trim().toUpperCase();
 
@@ -110,6 +114,58 @@ const DashLayout = () => {
         }
     };
 
+    const addTickersToWatchlist = async (stockTickers) => {
+        const normalizedTickers = normalizeTickers(stockTickers);
+
+        if (normalizedTickers.length === 0) {
+            setWatchlistError('Enter at least one ticker before adding it');
+            setWatchlistNotice('');
+            return false;
+        }
+
+        if (normalizedTickers.length === 1) {
+            return addToWatchlist(normalizedTickers[0]);
+        }
+
+        const tickersToAdd = normalizedTickers.filter((ticker) => !watchlist.includes(ticker));
+
+        if (tickersToAdd.length === 0) {
+            setWatchlistNotice('Those symbols are already on your watchlist');
+            setWatchlistError('');
+            return true;
+        }
+
+        try {
+            const token = localStorage.getItem('jwt');
+
+            const response = await fetch('https://findashboard-api.onrender.com/api/watchlist/bulk', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${token}`,
+                },
+                body: JSON.stringify({ stockTickers: tickersToAdd }),
+            });
+
+            if (response.ok) {
+                const watchlistData = await response.json();
+                setWatchlist(watchlistData.watchlist);
+                setWatchlistNotice(`${tickersToAdd.length} symbols added to your watchlist`);
+                setWatchlistError('');
+                return true;
+            }
+
+            setWatchlistError('Unable to add those symbols');
+            setWatchlistNotice('');
+            return false;
+        } catch (error) {
+            setWatchlistError('Unable to add those symbols');
+            setWatchlistNotice('');
+            console.error('Error:', error);
+            return false;
+        }
+    };
+
     const removeFromWatchlist = async (stockTicker) => {
         try {
             const token = localStorage.getItem('jwt');
@@ -147,6 +203,7 @@ const DashLayout = () => {
                 </div>
 
                 <Watchlist
+                    onAddTickers={addTickersToWatchlist}
                     onAddTicker={addToWatchlist}
                     onRemoveTicker={removeFromWatchlist}
                     watchlist={watchlist}

@@ -3,7 +3,12 @@ import { Link } from 'react-router-dom';
 import { FaPlus, FaTimes } from 'react-icons/fa';
 import '../style/DashboardWatchlistWidgetStyle.css';
 
-const Watchlist = ({onAddTicker, onRemoveTicker, watchlist, watchlistError, watchlistNotice}) => {
+const parseTickerEntry = (entry) => [...new Set(entry
+    .split(/[\s,;]+/)
+    .map((symbol) => symbol.trim().toUpperCase())
+    .filter(Boolean))];
+
+const Watchlist = ({onAddTicker, onAddTickers, onRemoveTicker, watchlist, watchlistError, watchlistNotice}) => {
 
     const [newTicker, setNewTicker] = useState('');
     const [searchText, setSearchText] = useState('');
@@ -62,7 +67,10 @@ const Watchlist = ({onAddTicker, onRemoveTicker, watchlist, watchlistError, watc
     const handleAddTicker = async (event) => {
         event.preventDefault();
 
-        const wasAdded = await onAddTicker(newTicker);
+        const requestedTickers = parseTickerEntry(newTicker);
+        const wasAdded = requestedTickers.length > 1
+            ? await onAddTickers(requestedTickers)
+            : await onAddTicker(requestedTickers[0] || '');
 
         if (wasAdded) {
             setNewTicker('');
@@ -83,11 +91,11 @@ const Watchlist = ({onAddTicker, onRemoveTicker, watchlist, watchlistError, watc
 
             <form className="watchlist-manager__add-form" onSubmit={handleAddTicker}>
                 <label>
-                    <span>Add Symbol</span>
+                    <span>Add Symbols</span>
                     <input
-                        maxLength="12"
+                        maxLength="160"
                         onChange={(event) => setNewTicker(event.target.value.toUpperCase())}
-                        placeholder="Ticker"
+                        placeholder="AAPL, MSFT, NVDA"
                         type="text"
                         value={newTicker}
                     />

@@ -34,7 +34,7 @@
     align-items: end;
     display: grid;
     gap: 0.75rem;
-    grid-template-columns: minmax(180px, 280px) 2.5rem;
+    grid-template-columns: minmax(220px, 420px) 2.5rem;
 }
 
 .watchlist-manager__add-form label {
