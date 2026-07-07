@@ -1,0 +1,114 @@
+.stock-target-panel {
+    background: #22232d;
+    border-radius: 8px;
+    color: #ffffff;
+    display: grid;
+    gap: 1rem;
+    margin: 1rem 2.5rem;
+    padding: 1rem;
+}
+
+.stock-target-panel__header {
+    align-items: center;
+    display: flex;
+    justify-content: space-between;
+}
+
+.stock-target-panel__header h2 {
+    font-size: 1.25rem;
+    font-weight: 700;
+    margin: 0;
+}
+
+.stock-target-panel__header span {
+    color: #aeb6c5;
+    font-weight: 700;
+}
+
+.stock-target-panel__grid {
+    display: grid;
+    gap: 0.85rem;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.stock-target-card {
+    background: #171923;
+    border: 1px solid #343947;
+    border-radius: 6px;
+    display: grid;
+    gap: 0.45rem;
+    min-height: 7.5rem;
+    padding: 0.9rem;
+}
+
+.stock-target-card span {
+    color: #aeb6c5;
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.stock-target-card strong {
+    color: #ffffff;
+    font-size: 1.45rem;
+}
+
+.stock-target-card small {
+    color: #d7deea;
+}
+
+.stock-target-range {
+    background: #171923;
+    border: 1px solid #343947;
+    border-radius: 6px;
+    display: grid;
+    gap: 0.65rem;
+    padding: 0.9rem;
+}
+
+.stock-target-range__labels {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    justify-content: space-between;
+}
+
+.stock-target-range__labels span {
+    color: #d7deea;
+    font-size: 0.82rem;
+}
+
+.stock-target-range__track {
+    background: linear-gradient(90deg, #ef4444 0%, #eab308 50%, #22c55e 100%);
+    border-radius: 999px;
+    height: 0.75rem;
+    position: relative;
+}
+
+.stock-target-range__marker {
+    background: #ffffff;
+    border: 2px solid #0f172a;
+    border-radius: 50%;
+    box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.2);
+    height: 1.1rem;
+    position: absolute;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: 1.1rem;
+}
+
+@media (max-width: 1050px) {
+    .stock-target-panel__grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 650px) {
+    .stock-target-panel {
+        margin: 1rem;
+    }
+
+    .stock-target-panel__grid {
+        grid-template-columns: 1fr;
+    }
+}
