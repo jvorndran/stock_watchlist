@@ -134,10 +134,109 @@
     margin: 0;
 }
 
+.watchlist-allocation {
+    background: #1b1f2a;
+    border: 1px solid #303646;
+    border-radius: 6px;
+    display: grid;
+    gap: 0.85rem;
+    padding: 1rem;
+}
+
+.watchlist-allocation__header {
+    align-items: end;
+    display: flex;
+    gap: 1rem;
+    justify-content: space-between;
+}
+
+.watchlist-allocation__header h3 {
+    font-size: 1.05rem;
+    font-weight: 700;
+    margin: 0;
+}
+
+.watchlist-allocation__header > div > span,
+.watchlist-allocation__header label span,
+.watchlist-allocation__summary span {
+    color: #aeb6c5;
+    font-size: 0.8rem;
+}
+
+.watchlist-allocation__header label {
+    display: grid;
+    gap: 0.35rem;
+    min-width: 180px;
+}
+
+.watchlist-allocation__header label span {
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.watchlist-allocation__header input {
+    background: #232733;
+    border: 1px solid #3a4050;
+    border-radius: 4px;
+    color: #f8fafc;
+    min-height: 2.4rem;
+    padding: 0 0.75rem;
+}
+
+.watchlist-allocation__summary {
+    align-items: center;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.55rem;
+}
+
+.watchlist-allocation__summary strong {
+    color: #93c5fd;
+    font-size: 1.25rem;
+}
+
+.watchlist-allocation__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 0.55rem;
+}
+
+.watchlist-allocation__row {
+    align-items: center;
+    background: #232733;
+    border: 1px solid #3a4050;
+    border-radius: 5px;
+    display: grid;
+    gap: 0.35rem;
+    grid-template-columns: 1fr auto;
+    padding: 0.65rem;
+}
+
+.watchlist-allocation__row a {
+    color: #ffffff;
+    font-weight: 700;
+}
+
+.watchlist-allocation__row span {
+    color: #aeb6c5;
+    font-size: 0.78rem;
+}
+
+.watchlist-allocation__row strong {
+    color: #bfdbfe;
+    grid-column: 1 / -1;
+}
+
 @media (max-width: 640px) {
     .watchlist-manager__add-form,
     .watchlist-manager__controls {
         grid-template-columns: 1fr;
+    }
+
+    .watchlist-allocation__header {
+        align-items: stretch;
+        flex-direction: column;
     }
 
     .watchlist-manager__add-form button {

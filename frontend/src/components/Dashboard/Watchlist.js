@@ -8,11 +8,18 @@ const parseTickerEntry = (entry) => [...new Set(entry
     .map((symbol) => symbol.trim().toUpperCase())
     .filter(Boolean))];
 
+const formatMoney = (value) => new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD',
+    maximumFractionDigits: 0,
+}).format(value);
+
 const Watchlist = ({onAddTicker, onAddTickers, onRemoveTicker, watchlist, watchlistError, watchlistNotice}) => {
 
     const [newTicker, setNewTicker] = useState('');
     const [searchText, setSearchText] = useState('');
     const [sortMode, setSortMode] = useState('added');
+    const [portfolioValue, setPortfolioValue] = useState('10000');
 
     const visibleWatchlist = useMemo(() => {
         const normalizedSearch = searchText.trim().toUpperCase();
@@ -30,6 +37,24 @@ const Watchlist = ({onAddTicker, onAddTickers, onRemoveTicker, watchlist, watchl
 
         return filteredSymbols;
     }, [watchlist, searchText, sortMode]);
+
+    const parsedPortfolioValue = useMemo(() => {
+        const value = Number(String(portfolioValue).replace(/[^0-9.]/g, ''));
+        return Number.isFinite(value) && value > 0 ? value : 0;
+    }, [portfolioValue]);
+
+    const allocationRows = useMemo(() => {
+        const allocation = visibleWatchlist.length > 0 && parsedPortfolioValue > 0
+            ? parsedPortfolioValue / visibleWatchlist.length
+            : 0;
+        const weight = visibleWatchlist.length > 0 ? 100 / visibleWatchlist.length : 0;
+
+        return visibleWatchlist.map((symbol) => ({
+            symbol,
+            allocation,
+            weight,
+        }));
+    }, [visibleWatchlist, parsedPortfolioValue]);
 
 
     useEffect(() => {
@@ -144,6 +169,46 @@ const Watchlist = ({onAddTicker, onAddTickers, onRemoveTicker, watchlist, watchl
             ) : (
                 <p className="watchlist-manager__empty">Search for a ticker to start tracking stocks here.</p>
             )}
+
+            <div className="watchlist-allocation">
+                <div className="watchlist-allocation__header">
+                    <div>
+                        <h3>Equal Weight Plan</h3>
+                        <span>{allocationRows.length} visible symbols</span>
+                    </div>
+                    <label>
+                        <span>Portfolio Value</span>
+                        <input
+                            min="0"
+                            onChange={(event) => setPortfolioValue(event.target.value)}
+                            step="500"
+                            type="number"
+                            value={portfolioValue}
+                        />
+                    </label>
+                </div>
+
+                {allocationRows.length > 0 && parsedPortfolioValue > 0 ? (
+                    <>
+                        <div className="watchlist-allocation__summary">
+                            <span>{allocationRows.length} positions</span>
+                            <strong>{formatMoney(parsedPortfolioValue / allocationRows.length)}</strong>
+                            <span>per symbol at {(100 / allocationRows.length).toFixed(1)}% weight</span>
+                        </div>
+                        <div className="watchlist-allocation__grid">
+                            {allocationRows.map((row) => (
+                                <div className="watchlist-allocation__row" key={row.symbol}>
+                                    <Link to={`/dash/${row.symbol}`}>{row.symbol}</Link>
+                                    <span>{row.weight.toFixed(1)}%</span>
+                                    <strong>{formatMoney(row.allocation)}</strong>
+                                </div>
+                            ))}
+                        </div>
+                    </>
+                ) : (
+                    <p className="watchlist-manager__empty">Add or reveal symbols and enter a portfolio value to build an allocation plan.</p>
+                )}
+            </div>
 
             <div id="tradingview-widget" className="tradingview-widget-container">
                 <div id="tradingview-widget-symbols" className="tradingview-widget-container__widget"></div>
