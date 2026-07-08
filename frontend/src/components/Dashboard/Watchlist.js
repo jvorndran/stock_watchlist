@@ -8,6 +8,29 @@ const parseTickerEntry = (entry) => [...new Set(entry
     .map((symbol) => symbol.trim().toUpperCase())
     .filter(Boolean))];
 
+const starterBaskets = [
+    {
+        name: 'AI Leaders',
+        description: 'Semis and platform names',
+        symbols: ['NVDA', 'AMD', 'MSFT', 'GOOGL', 'META'],
+    },
+    {
+        name: 'Index Core',
+        description: 'Broad market ETFs',
+        symbols: ['SPY', 'QQQ', 'IWM', 'DIA', 'VTI'],
+    },
+    {
+        name: 'Defensive Yield',
+        description: 'Staples, healthcare, utilities',
+        symbols: ['PG', 'KO', 'JNJ', 'XLU', 'VZ'],
+    },
+    {
+        name: 'Energy And Materials',
+        description: 'Cyclicals and commodities',
+        symbols: ['XLE', 'XOM', 'CVX', 'FCX', 'NUE'],
+    },
+];
+
 const formatMoney = (value) => new Intl.NumberFormat('en-US', {
     style: 'currency',
     currency: 'USD',
@@ -102,6 +125,10 @@ const Watchlist = ({onAddTicker, onAddTickers, onRemoveTicker, watchlist, watchl
         }
     };
 
+    const handleAddBasket = async (symbols) => {
+        await onAddTickers(symbols);
+    };
+
     return (
         <section className="watchlist-manager">
             <div className="watchlist-manager__header">
@@ -129,6 +156,26 @@ const Watchlist = ({onAddTicker, onAddTickers, onRemoveTicker, watchlist, watchl
                     <FaPlus />
                 </button>
             </form>
+
+            <div className="watchlist-baskets">
+                <div className="watchlist-baskets__header">
+                    <h3>Starter Baskets</h3>
+                    <span>Add a themed group in one click</span>
+                </div>
+                <div className="watchlist-baskets__grid">
+                    {starterBaskets.map((basket) => (
+                        <button
+                            className="watchlist-basket"
+                            key={basket.name}
+                            onClick={() => handleAddBasket(basket.symbols)}
+                            type="button">
+                            <span>{basket.name}</span>
+                            <small>{basket.description}</small>
+                            <strong>{basket.symbols.join(' ')}</strong>
+                        </button>
+                    ))}
+                </div>
+            </div>
 
             <div className="watchlist-manager__controls">
                 <label>

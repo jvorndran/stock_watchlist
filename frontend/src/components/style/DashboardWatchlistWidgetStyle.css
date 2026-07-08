@@ -76,6 +76,72 @@
     text-transform: uppercase;
 }
 
+.watchlist-baskets {
+    background: #1b1f2a;
+    border: 1px solid #303646;
+    border-radius: 6px;
+    display: grid;
+    gap: 0.75rem;
+    padding: 1rem;
+}
+
+.watchlist-baskets__header {
+    align-items: baseline;
+    display: flex;
+    gap: 1rem;
+    justify-content: space-between;
+}
+
+.watchlist-baskets__header h3 {
+    font-size: 1.05rem;
+    font-weight: 700;
+    margin: 0;
+}
+
+.watchlist-baskets__header span {
+    color: #aeb6c5;
+    font-size: 0.8rem;
+}
+
+.watchlist-baskets__grid {
+    display: grid;
+    gap: 0.65rem;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+}
+
+.watchlist-basket {
+    background: #232733;
+    border: 1px solid #3a4050;
+    border-radius: 5px;
+    color: #f8fafc;
+    display: grid;
+    gap: 0.25rem;
+    min-height: 104px;
+    padding: 0.75rem;
+    text-align: left;
+    transition: border-color 160ms ease, transform 160ms ease;
+}
+
+.watchlist-basket:hover {
+    border-color: #60a5fa;
+    transform: translateY(-1px);
+}
+
+.watchlist-basket span {
+    font-weight: 700;
+}
+
+.watchlist-basket small {
+    color: #aeb6c5;
+    font-size: 0.78rem;
+}
+
+.watchlist-basket strong {
+    color: #93c5fd;
+    font-size: 0.75rem;
+    line-height: 1.3;
+}
+
 .watchlist-manager__add-form input,
 .watchlist-manager__controls input,
 .watchlist-manager__controls select {
