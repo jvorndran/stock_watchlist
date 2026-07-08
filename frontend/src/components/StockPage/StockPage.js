@@ -7,6 +7,7 @@ import StockSubHeader from './StockSubHeader';
 import StockPageHeader from "./StockPageHeader";
 import StockInsights from './StockInsights';
 import StockTargetPanel from './StockTargetPanel';
+import StockScorecard from './StockScorecard';
 import "../../index.css"
 
 const StockPage = () => {
@@ -45,6 +46,8 @@ const StockPage = () => {
                     <StockInsights stockData={stockData} />
 
                     <StockTargetPanel stockData={stockData} />
+
+                    <StockScorecard stockData={stockData} />
 
                     <StockChart stockData={stockData} />
 

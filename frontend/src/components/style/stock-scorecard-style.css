@@ -1,0 +1,116 @@
+.stock-scorecard {
+    background: #1f2330;
+    border: 1px solid #343b4d;
+    border-radius: 8px;
+    color: #f8fafc;
+    display: grid;
+    gap: 1rem;
+    margin: 1rem 10vw;
+    padding: 1rem;
+}
+
+.stock-scorecard__header {
+    align-items: center;
+    display: flex;
+    gap: 1rem;
+    justify-content: space-between;
+}
+
+.stock-scorecard__header h2 {
+    font-size: 1.15rem;
+    font-weight: 700;
+    margin: 0;
+}
+
+.stock-scorecard__header span {
+    color: #aeb6c5;
+    font-size: 0.85rem;
+}
+
+.stock-scorecard__overall {
+    align-items: center;
+    display: grid;
+    gap: 0.15rem;
+    justify-items: end;
+}
+
+.stock-scorecard__overall strong {
+    color: #93c5fd;
+    font-size: 2rem;
+    line-height: 1;
+}
+
+.stock-scorecard__overall span {
+    color: #dbeafe;
+    font-weight: 700;
+}
+
+.stock-scorecard__grid {
+    display: grid;
+    gap: 0.75rem;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+
+.stock-scorecard__card {
+    background: #272d3c;
+    border: 1px solid #3a4358;
+    border-radius: 6px;
+    display: grid;
+    gap: 0.65rem;
+    min-height: 130px;
+    padding: 0.85rem;
+}
+
+.stock-scorecard__card > div:first-child {
+    align-items: baseline;
+    display: flex;
+    gap: 0.75rem;
+    justify-content: space-between;
+}
+
+.stock-scorecard__card span {
+    color: #cbd5e1;
+    font-size: 0.82rem;
+    font-weight: 700;
+}
+
+.stock-scorecard__card strong {
+    color: #f8fafc;
+    font-size: 1.45rem;
+    line-height: 1;
+}
+
+.stock-scorecard__track {
+    background: #151720;
+    border-radius: 999px;
+    height: 0.55rem;
+    overflow: hidden;
+}
+
+.stock-scorecard__track span {
+    background: linear-gradient(90deg, #60a5fa, #34d399);
+    display: block;
+    height: 100%;
+}
+
+.stock-scorecard__card small {
+    color: #aeb6c5;
+    font-size: 0.78rem;
+    line-height: 1.4;
+}
+
+@media (max-width: 700px) {
+    .stock-scorecard {
+        margin-left: 1rem;
+        margin-right: 1rem;
+    }
+
+    .stock-scorecard__header {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .stock-scorecard__overall {
+        justify-items: start;
+    }
+}
