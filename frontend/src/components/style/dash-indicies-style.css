@@ -3,7 +3,7 @@
     background: rgb(34, 35, 45);
     font-size: 0.9rem;
     display: grid;
-    grid-template-rows: 65% 2% 6% 6% 6% 6% 6%;
+    grid-template-rows: 58% 12% 6% 6% 6% 6% 6%;
     grid-template-columns: 50% 20% 30%;
     justify-content: center;
     align-items: start;
@@ -54,6 +54,38 @@
     grid-row: 3 / 3;
 }
 
+.index-grid > .index-breadth-panel{
+    align-items: center;
+    border-top: 1px solid rgba(255, 255, 255, 0.18);
+    display: grid;
+    gap: 0.5rem;
+    grid-column: 1 / span 3;
+    grid-row: 2 / 3;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    padding: 0 10%;
+}
+
+.index-grid > .index-breadth-panel > div{
+    display: grid;
+    gap: 0.15rem;
+    justify-content: stretch;
+}
+
+.index-grid > .index-breadth-panel span{
+    color: rgba(255, 255, 255, 0.65);
+    font-size: 0.72rem;
+    text-transform: uppercase;
+}
+
+.index-grid > .index-breadth-panel strong{
+    color: white;
+    font-size: 1rem;
+}
+
+.index-grid > .index-breadth-panel small{
+    color: rgba(255, 255, 255, 0.74);
+}
+
 .index-grid > div:nth-child(4){
     border-top: 1px solid rgba(255, 255, 255, 0.3);
     grid-column: 1 / span 3;
@@ -76,5 +108,16 @@
     border-bottom: 1px solid rgba(255, 255, 255, 0.3);
     grid-column: 1 / span 3;
     grid-row: 7 / 7;
+}
+
+@media (max-width: 700px) {
+    .index-grid{
+        grid-template-rows: 50% 20% 6% 6% 6% 6% 6%;
+    }
+
+    .index-grid > .index-breadth-panel{
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        padding: 0 6%;
+    }
 }
 
