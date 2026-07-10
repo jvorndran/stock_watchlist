@@ -1,0 +1,102 @@
+.stock-risk-checklist {
+    background: #22232d;
+    border: 1px solid #343947;
+    border-radius: 8px;
+    color: #ffffff;
+    display: grid;
+    gap: 1rem;
+    margin: 1rem 2.5rem;
+    padding: 1rem;
+}
+
+.stock-risk-checklist__header {
+    align-items: center;
+    display: flex;
+    gap: 1rem;
+    justify-content: space-between;
+}
+
+.stock-risk-checklist__header h2 {
+    font-size: 1.2rem;
+    font-weight: 700;
+    margin: 0;
+}
+
+.stock-risk-checklist__header span,
+.stock-risk-checklist__header strong {
+    color: #aeb6c5;
+    font-size: 0.85rem;
+}
+
+.stock-risk-checklist__grid {
+    display: grid;
+    gap: 0.75rem;
+    grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+}
+
+.stock-risk-card {
+    background: #171923;
+    border: 1px solid #343947;
+    border-left-width: 4px;
+    border-radius: 6px;
+    display: grid;
+    gap: 0.45rem;
+    min-height: 132px;
+    padding: 0.85rem;
+}
+
+.stock-risk-card--clear {
+    border-left-color: #22c55e;
+}
+
+.stock-risk-card--monitor {
+    border-left-color: #eab308;
+}
+
+.stock-risk-card--watch {
+    border-left-color: #ef4444;
+}
+
+.stock-risk-card--missing {
+    border-left-color: #64748b;
+}
+
+.stock-risk-card__topline {
+    align-items: center;
+    display: flex;
+    gap: 0.75rem;
+    justify-content: space-between;
+}
+
+.stock-risk-card__topline span {
+    color: #aeb6c5;
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.stock-risk-card__topline strong {
+    color: #f8fafc;
+    font-size: 0.82rem;
+}
+
+.stock-risk-card p {
+    color: #ffffff;
+    font-weight: 700;
+    margin: 0;
+}
+
+.stock-risk-card small {
+    color: #d7deea;
+}
+
+@media (max-width: 650px) {
+    .stock-risk-checklist {
+        margin: 1rem;
+    }
+
+    .stock-risk-checklist__header {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+}
