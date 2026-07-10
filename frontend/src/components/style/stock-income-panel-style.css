@@ -1,0 +1,73 @@
+.stock-income-panel {
+    background: #22232d;
+    border: 1px solid #343947;
+    border-radius: 8px;
+    color: #ffffff;
+    display: grid;
+    gap: 1rem;
+    margin: 1rem 10vw;
+    padding: 1rem;
+}
+
+.stock-income-panel__header {
+    align-items: center;
+    display: flex;
+    gap: 1rem;
+    justify-content: space-between;
+}
+
+.stock-income-panel__header h2 {
+    font-size: 1.15rem;
+    font-weight: 700;
+    margin: 0;
+}
+
+.stock-income-panel__header span,
+.stock-income-panel__header strong {
+    color: #aeb6c5;
+    font-size: 0.85rem;
+}
+
+.stock-income-panel__grid {
+    display: grid;
+    gap: 0.75rem;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+}
+
+.stock-income-card {
+    background: #171923;
+    border: 1px solid #343947;
+    border-radius: 6px;
+    display: grid;
+    gap: 0.45rem;
+    min-height: 118px;
+    padding: 0.85rem;
+}
+
+.stock-income-card span {
+    color: #aeb6c5;
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.stock-income-card strong {
+    color: #f8fafc;
+    font-size: 1.35rem;
+}
+
+.stock-income-card small {
+    color: #d7deea;
+}
+
+@media (max-width: 700px) {
+    .stock-income-panel {
+        margin-left: 1rem;
+        margin-right: 1rem;
+    }
+
+    .stock-income-panel__header {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+}
