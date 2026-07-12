@@ -5,6 +5,19 @@ import '../style/dash-indicies-style.css'
 
 const indexes = ['NDX 100', 'S&P 500', 'Dow Jones', 'Russell 2000']
 
+const getAverageClose = (data, period) => {
+    if (!data || data.length < period) {
+        return null;
+    }
+
+    const closes = data.slice(-period).map((point) => Number(point.close));
+    return closes.reduce((total, close) => total + close, 0) / closes.length;
+};
+
+const formatPercent = (value) => value === null
+    ? '-'
+    : `${value > 0 ? '+' : ''}${value.toFixed(1)}%`;
+
 const DashIndices = () => {
 
     const [formattedStockData, setFormattedStockData] = useState([])
@@ -50,6 +63,62 @@ const DashIndices = () => {
         };
     }, [formattedStockData]);
 
+    const selectedIndexRegime = useMemo(() => {
+        const data = formattedStockData[selectedIndex];
+
+        if (!data || data.length === 0) {
+            return null;
+        }
+
+        const latestClose = Number(data[data.length - 1].close);
+        const average20Day = getAverageClose(data, 20);
+        const average50Day = getAverageClose(data, 50);
+        const versus20Day = average20Day ? ((latestClose - average20Day) / average20Day) * 100 : null;
+        const versus50Day = average50Day ? ((latestClose - average50Day) / average50Day) * 100 : null;
+        const recentData = data.slice(-20);
+        const rangeHigh = Math.max(...recentData.map((point) => Number(point.high)));
+        const rangeLow = Math.min(...recentData.map((point) => Number(point.low)));
+        const volatilityData = data.slice(-21);
+        const dailyReturns = volatilityData.slice(1).map((point, index) => (
+            (Number(point.close) / Number(volatilityData[index].close)) - 1
+        ));
+        const averageReturn = dailyReturns.length
+            ? dailyReturns.reduce((total, value) => total + value, 0) / dailyReturns.length
+            : 0;
+        const variance = dailyReturns.length
+            ? dailyReturns.reduce((total, value) => total + ((value - averageReturn) ** 2), 0) / dailyReturns.length
+            : 0;
+        const annualizedVolatility = dailyReturns.length ? Math.sqrt(variance) * Math.sqrt(252) * 100 : null;
+        let label = 'Needs more history';
+        let detail = 'Moving-average regime is unavailable';
+
+        if (versus20Day !== null && versus50Day !== null) {
+            if (versus20Day >= 0 && versus50Day >= 0) {
+                label = 'Broad uptrend';
+                detail = 'Close is above both trend averages';
+            } else if (versus20Day >= 0) {
+                label = 'Recovery attempt';
+                detail = 'Close reclaimed the 20-day average';
+            } else if (versus50Day >= 0) {
+                label = 'Short-term pullback';
+                detail = 'Longer trend remains supported';
+            } else {
+                label = 'Broad downtrend';
+                detail = 'Close is below both trend averages';
+            }
+        }
+
+        return {
+            label,
+            detail,
+            versus20Day,
+            versus50Day,
+            annualizedVolatility,
+            rangeHigh,
+            rangeLow,
+        };
+    }, [formattedStockData, selectedIndex]);
+
     useEffect(() => {
 
         axios.get('https://findashboard-api.onrender.com/api/indices')
@@ -83,7 +152,9 @@ const DashIndices = () => {
     return (
 
         <div>
-            {formattedStockData.length > 0 && indexSummary && (
+            {formattedStockData.length > 0 && indexSummary && selectedIndexRegime && (
+
+                <>
 
                 <div className='index-grid rounded-3xl'>
                     <div><ResponsiveFinancialChart data={formattedStockData[selectedIndex]}/></div>
@@ -138,6 +209,36 @@ const DashIndices = () => {
                     ))}
 
                 </div>
+
+                <section className="index-regime-panel">
+                    <div className="index-regime-panel__header">
+                        <div>
+                            <h2>{indexes[selectedIndex]} Market Regime</h2>
+                            <span>{selectedIndexRegime.detail}</span>
+                        </div>
+                        <strong>{selectedIndexRegime.label}</strong>
+                    </div>
+                    <div className="index-regime-panel__grid">
+                        <span>
+                            <small>Vs 20-Day Average</small>
+                            <strong>{formatPercent(selectedIndexRegime.versus20Day)}</strong>
+                        </span>
+                        <span>
+                            <small>Vs 50-Day Average</small>
+                            <strong>{formatPercent(selectedIndexRegime.versus50Day)}</strong>
+                        </span>
+                        <span>
+                            <small>20-Day Volatility</small>
+                            <strong>{selectedIndexRegime.annualizedVolatility === null ? '-' : `${selectedIndexRegime.annualizedVolatility.toFixed(1)}%`}</strong>
+                        </span>
+                        <span>
+                            <small>20-Day Range</small>
+                            <strong>{selectedIndexRegime.rangeLow.toFixed(0)} - {selectedIndexRegime.rangeHigh.toFixed(0)}</strong>
+                        </span>
+                    </div>
+                </section>
+
+                </>
 
             )}
 
