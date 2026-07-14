@@ -152,6 +152,61 @@ router.post('/watchlist/bulk', (req, res) => {
     }
 });
 
+router.put('/watchlist/order', (req, res) => {
+    try {
+        const token = req.headers.authorization?.split(' ')[1];
+        const requestedTickers = Array.isArray(req.body?.stockTickers) ? req.body.stockTickers : [];
+        const stockTickers = requestedTickers.map((ticker) => String(ticker).trim().toUpperCase());
+
+        if (!token) {
+            return res.status(401).json({ message: 'Missing token' });
+        }
+
+        if (stockTickers.length === 0 || stockTickers.some((ticker) => !ticker)) {
+            return res.status(400).json({ message: 'A complete watchlist order is required' });
+        }
+
+        if (new Set(stockTickers).size !== stockTickers.length) {
+            return res.status(400).json({ message: 'Watchlist order cannot contain duplicate symbols' });
+        }
+
+        jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, async (err, decodedToken) => {
+            if (err) {
+                return res.status(401).json({ message: 'Invalid token' });
+            }
+
+            try {
+                const { username } = decodedToken.UserInfo;
+                const user = await User.findOne({ username });
+
+                if (!user) {
+                    return res.status(404).json({ message: 'User not found' });
+                }
+
+                const currentTickers = user.watchlist.map((ticker) => String(ticker).trim().toUpperCase());
+                const currentTickerSet = new Set(currentTickers);
+                const hasSameSymbols = stockTickers.length === currentTickers.length &&
+                    stockTickers.every((ticker) => currentTickerSet.has(ticker));
+
+                if (!hasSameSymbols) {
+                    return res.status(400).json({ message: 'Reordered watchlist must contain the same symbols' });
+                }
+
+                user.watchlist = stockTickers;
+                await user.save();
+
+                res.status(200).json({ watchlist: user.watchlist });
+            } catch (error) {
+                console.error('Error:', error);
+                res.status(500).json({ message: 'Server error' });
+            }
+        });
+    } catch (error) {
+        console.error('Error:', error);
+        res.status(500).json({ message: 'Server error' });
+    }
+});
+
 router.delete('/watchlist/:stockTicker', (req, res) => {
     try {
         const token = req.headers.authorization?.split(' ')[1];

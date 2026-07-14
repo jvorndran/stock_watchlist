@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { FaPlus, FaTimes } from 'react-icons/fa';
+import { FaArrowDown, FaArrowUp, FaPlus, FaTimes } from 'react-icons/fa';
 import '../style/DashboardWatchlistWidgetStyle.css';
 
 const parseTickerEntry = (entry) => [...new Set(entry
@@ -37,12 +37,13 @@ const formatMoney = (value) => new Intl.NumberFormat('en-US', {
     maximumFractionDigits: 0,
 }).format(value);
 
-const Watchlist = ({onAddTicker, onAddTickers, onRemoveTicker, watchlist, watchlistError, watchlistNotice}) => {
+const Watchlist = ({onAddTicker, onAddTickers, onRemoveTicker, onReorderTicker, watchlist, watchlistError, watchlistNotice}) => {
 
     const [newTicker, setNewTicker] = useState('');
     const [searchText, setSearchText] = useState('');
     const [sortMode, setSortMode] = useState('added');
     const [portfolioValue, setPortfolioValue] = useState('10000');
+    const canReorder = sortMode === 'added' && searchText.trim().length === 0;
 
     const visibleWatchlist = useMemo(() => {
         const normalizedSearch = searchText.trim().toUpperCase();
@@ -197,17 +198,46 @@ const Watchlist = ({onAddTicker, onAddTickers, onRemoveTicker, watchlist, watchl
                 </label>
             </div>
 
+            {watchlist.length > 1 && (
+                <p className="watchlist-manager__order-hint">
+                    {canReorder
+                        ? 'Use the arrows to save a preferred watchlist order.'
+                        : 'Choose Watchlist Order and clear search to rearrange symbols.'}
+                </p>
+            )}
+
             {watchlist.length > 0 ? (
                 <div className="watchlist-chip-grid">
                     {visibleWatchlist.length > 0 ? visibleWatchlist.map((symbol) => (
                         <div className="watchlist-chip" key={symbol}>
                             <Link to={`/dash/${symbol}`}>{symbol}</Link>
-                            <button
-                                aria-label={`Remove ${symbol} from watchlist`}
-                                onClick={() => onRemoveTicker(symbol)}
-                                type="button">
-                                <FaTimes />
-                            </button>
+                            <div className="watchlist-chip__actions">
+                                {canReorder && (
+                                    <>
+                                        <button
+                                            aria-label={`Move ${symbol} up`}
+                                            disabled={watchlist.indexOf(symbol) === 0}
+                                            onClick={() => onReorderTicker(symbol, 'up')}
+                                            type="button">
+                                            <FaArrowUp />
+                                        </button>
+                                        <button
+                                            aria-label={`Move ${symbol} down`}
+                                            disabled={watchlist.indexOf(symbol) === watchlist.length - 1}
+                                            onClick={() => onReorderTicker(symbol, 'down')}
+                                            type="button">
+                                            <FaArrowDown />
+                                        </button>
+                                    </>
+                                )}
+                                <button
+                                    aria-label={`Remove ${symbol} from watchlist`}
+                                    className="watchlist-chip__remove"
+                                    onClick={() => onRemoveTicker(symbol)}
+                                    type="button">
+                                    <FaTimes />
+                                </button>
+                            </div>
                         </div>
                     )) : (
                         <p className="watchlist-manager__empty">No symbols match this watchlist search.</p>

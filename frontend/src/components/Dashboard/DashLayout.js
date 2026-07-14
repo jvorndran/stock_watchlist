@@ -194,6 +194,48 @@ const DashLayout = () => {
         }
     };
 
+    const reorderWatchlist = async (stockTicker, direction) => {
+        const currentIndex = watchlist.indexOf(stockTicker);
+        const targetIndex = direction === 'up' ? currentIndex - 1 : currentIndex + 1;
+
+        if (currentIndex < 0 || targetIndex < 0 || targetIndex >= watchlist.length) {
+            return false;
+        }
+
+        const reorderedWatchlist = [...watchlist];
+        [reorderedWatchlist[currentIndex], reorderedWatchlist[targetIndex]] =
+            [reorderedWatchlist[targetIndex], reorderedWatchlist[currentIndex]];
+
+        try {
+            const token = localStorage.getItem('jwt');
+            const response = await fetch('https://findashboard-api.onrender.com/api/watchlist/order', {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${token}`,
+                },
+                body: JSON.stringify({stockTickers: reorderedWatchlist}),
+            });
+
+            if (response.ok) {
+                const watchlistData = await response.json();
+                setWatchlist(watchlistData.watchlist);
+                setWatchlistError('');
+                setWatchlistNotice(`${stockTicker} moved ${direction}`);
+                return true;
+            }
+
+            setWatchlistError(`Unable to move ${stockTicker}`);
+            setWatchlistNotice('');
+            return false;
+        } catch (error) {
+            setWatchlistError(`Unable to move ${stockTicker}`);
+            setWatchlistNotice('');
+            console.error('Error:', error);
+            return false;
+        }
+    };
+
     return (
         <>
             <div className='bg-gray-200'>
@@ -206,6 +248,7 @@ const DashLayout = () => {
                     onAddTickers={addTickersToWatchlist}
                     onAddTicker={addToWatchlist}
                     onRemoveTicker={removeFromWatchlist}
+                    onReorderTicker={reorderWatchlist}
                     watchlist={watchlist}
                     watchlistError={watchlistError}
                     watchlistNotice={watchlistNotice}

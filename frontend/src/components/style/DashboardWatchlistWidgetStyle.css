@@ -175,19 +175,41 @@
     padding: 0.55rem 0.75rem;
 }
 
-.watchlist-chip button {
+.watchlist-chip__actions {
+    align-self: stretch;
+    display: flex;
+}
+
+.watchlist-chip__actions button {
     align-items: center;
     align-self: stretch;
     background: #303646;
+    border-left: 1px solid #434a5b;
     color: #d9e1ee;
     display: inline-flex;
     justify-content: center;
     min-width: 2.3rem;
 }
 
-.watchlist-chip button:hover {
+.watchlist-chip__actions button:hover:not(:disabled) {
+    background: #3d465b;
+    color: #ffffff;
+}
+
+.watchlist-chip__actions button:disabled {
+    color: #687083;
+    cursor: not-allowed;
+}
+
+.watchlist-chip__actions .watchlist-chip__remove:hover {
     background: #4b2430;
     color: #ffffff;
+}
+
+.watchlist-manager__order-hint {
+    color: #aeb6c5;
+    font-size: 0.8rem;
+    margin: -0.25rem 0 0;
 }
 
 .watchlist-manager__error {
