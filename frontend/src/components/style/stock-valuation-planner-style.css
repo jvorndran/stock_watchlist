@@ -1,0 +1,146 @@
+.stock-valuation-planner {
+    background: #1f2330;
+    border: 1px solid #343b4d;
+    border-radius: 8px;
+    color: #f8fafc;
+    display: grid;
+    gap: 1rem;
+    margin: 1rem 10vw;
+    padding: 1rem;
+}
+
+.stock-valuation-planner__header {
+    align-items: center;
+    display: flex;
+    gap: 1rem;
+    justify-content: space-between;
+}
+
+.stock-valuation-planner__header h2 {
+    font-size: 1.15rem;
+    font-weight: 700;
+    margin: 0;
+}
+
+.stock-valuation-planner__header span,
+.stock-valuation-planner__note,
+.stock-valuation-planner__disclaimer {
+    color: #aeb6c5;
+    font-size: 0.82rem;
+}
+
+.stock-valuation-planner__header button {
+    background: #334155;
+    border: 1px solid #526075;
+    border-radius: 5px;
+    color: #f8fafc;
+    cursor: pointer;
+    font-size: 0.78rem;
+    font-weight: 700;
+    padding: 0.55rem 0.75rem;
+}
+
+.stock-valuation-planner__header button:hover,
+.stock-valuation-planner__header button:focus {
+    background: #42526a;
+}
+
+.stock-valuation-planner__note {
+    margin: 0;
+}
+
+.stock-valuation-planner__inputs,
+.stock-valuation-planner__results {
+    display: grid;
+    gap: 0.75rem;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+}
+
+.stock-valuation-planner__inputs label {
+    display: grid;
+    gap: 0.4rem;
+}
+
+.stock-valuation-planner__inputs label > span {
+    color: #cbd5e1;
+    font-size: 0.75rem;
+    font-weight: 700;
+}
+
+.stock-valuation-planner__inputs input,
+.stock-valuation-planner__inputs select {
+    background: #151720;
+    border: 1px solid #465066;
+    border-radius: 5px;
+    color: #f8fafc;
+    min-height: 40px;
+    padding: 0.55rem 0.65rem;
+    width: 100%;
+}
+
+.stock-valuation-planner__suffix-input {
+    align-items: center;
+    display: flex;
+    position: relative;
+}
+
+.stock-valuation-planner__suffix-input > span {
+    color: #94a3b8;
+    position: absolute;
+    right: 0.65rem;
+}
+
+.stock-valuation-planner__results article {
+    background: #272d3c;
+    border: 1px solid #3a4358;
+    border-radius: 6px;
+    display: grid;
+    gap: 0.35rem;
+    min-height: 105px;
+    padding: 0.85rem;
+}
+
+.stock-valuation-planner__results article > span,
+.stock-valuation-planner__results article > small {
+    color: #aeb6c5;
+    font-size: 0.78rem;
+}
+
+.stock-valuation-planner__results article > strong {
+    color: #f8fafc;
+    font-size: 1.45rem;
+}
+
+.stock-valuation-planner__results article.is-positive > strong {
+    color: #6ee7b7;
+}
+
+.stock-valuation-planner__results article.is-negative > strong {
+    color: #fda4af;
+}
+
+.stock-valuation-planner__empty {
+    background: #272d3c;
+    border: 1px dashed #526075;
+    border-radius: 6px;
+    color: #cbd5e1;
+    margin: 0;
+    padding: 1rem;
+}
+
+.stock-valuation-planner__disclaimer {
+    border-top: 1px solid #343b4d;
+    padding-top: 0.75rem;
+}
+
+@media (max-width: 700px) {
+    .stock-valuation-planner {
+        margin-left: 1rem;
+        margin-right: 1rem;
+    }
+
+    .stock-valuation-planner__header {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+}
