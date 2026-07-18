@@ -4,6 +4,14 @@ const User = require("../models/User");
 const StockPriceData = require("../models/StockPriceData");
 const jwt = require("jsonwebtoken");
 
+const serializeWatchlistNotes = (notes = []) => notes.reduce((serializedNotes, item) => {
+    if (item?.ticker && item?.note) {
+        serializedNotes[item.ticker] = item.note;
+    }
+
+    return serializedNotes;
+}, {});
+
 router.post('/signup', (req, res) => {
     const { name, username, password } = req.body;
 
@@ -103,7 +111,10 @@ router.post('/watchlist', (req, res) => {
                 return res.status(404).json({ message: 'User not found' });
             }
 
-            res.status(200).json({ watchlist: user.watchlist });
+            res.status(200).json({
+                watchlist: user.watchlist,
+                notes: serializeWatchlistNotes(user.watchlistNotes)
+            });
         });
     } catch (error) {
         console.error('Error:', error);
@@ -207,6 +218,69 @@ router.put('/watchlist/order', (req, res) => {
     }
 });
 
+router.put('/watchlist/:stockTicker/note', (req, res) => {
+    try {
+        const token = req.headers.authorization?.split(' ')[1];
+        const stockTicker = String(req.params.stockTicker || '').trim().toUpperCase();
+        const note = String(req.body?.note || '').trim();
+
+        if (!token) {
+            return res.status(401).json({ message: 'Missing token' });
+        }
+
+        if (!stockTicker) {
+            return res.status(400).json({ message: 'Stock ticker is required' });
+        }
+
+        if (note.length > 500) {
+            return res.status(400).json({ message: 'Watchlist notes are limited to 500 characters' });
+        }
+
+        jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, async (err, decodedToken) => {
+            if (err) {
+                return res.status(401).json({ message: 'Invalid token' });
+            }
+
+            try {
+                const { username } = decodedToken.UserInfo;
+                const user = await User.findOne({ username });
+
+                if (!user) {
+                    return res.status(404).json({ message: 'User not found' });
+                }
+
+                if (!user.watchlist.includes(stockTicker)) {
+                    return res.status(400).json({ message: 'Add the symbol to your watchlist before saving a note' });
+                }
+
+                const existingNote = user.watchlistNotes.find((item) => item.ticker === stockTicker);
+
+                if (!note && existingNote) {
+                    user.watchlistNotes.pull(existingNote._id);
+                } else if (existingNote) {
+                    existingNote.note = note;
+                    existingNote.updatedAt = new Date();
+                } else if (note) {
+                    user.watchlistNotes.push({ ticker: stockTicker, note, updatedAt: new Date() });
+                }
+
+                await user.save();
+
+                res.status(200).json({
+                    watchlist: user.watchlist,
+                    notes: serializeWatchlistNotes(user.watchlistNotes)
+                });
+            } catch (error) {
+                console.error('Error:', error);
+                res.status(500).json({ message: 'Server error' });
+            }
+        });
+    } catch (error) {
+        console.error('Error:', error);
+        res.status(500).json({ message: 'Server error' });
+    }
+});
+
 router.delete('/watchlist/:stockTicker', (req, res) => {
     try {
         const token = req.headers.authorization?.split(' ')[1];
@@ -221,11 +295,11 @@ router.delete('/watchlist/:stockTicker', (req, res) => {
             }
 
             const { username } = decodedToken.UserInfo;
-            const { stockTicker } = req.params;
+            const stockTicker = String(req.params.stockTicker || '').trim().toUpperCase();
 
             const user = await User.findOneAndUpdate(
                 { username },
-                { $pull: { watchlist: stockTicker } },
+                { $pull: { watchlist: stockTicker, watchlistNotes: { ticker: stockTicker } } },
                 { new: true }
             );
 
@@ -233,7 +307,10 @@ router.delete('/watchlist/:stockTicker', (req, res) => {
                 return res.status(404).json({ message: 'User not found' });
             }
 
-            res.status(200).json({ watchlist: user.watchlist });
+            res.status(200).json({
+                watchlist: user.watchlist,
+                notes: serializeWatchlistNotes(user.watchlistNotes)
+            });
         });
     } catch (error) {
         console.error('Error:', error);

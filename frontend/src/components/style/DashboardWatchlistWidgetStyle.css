@@ -154,19 +154,26 @@
 }
 
 .watchlist-chip-grid {
-    display: flex;
-    flex-wrap: wrap;
+    display: grid;
     gap: 0.65rem;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+}
+
+.watchlist-chip-card {
+    align-content: start;
+    background: #1b1f2a;
+    border: 1px solid #303646;
+    border-radius: 6px;
+    display: grid;
+    overflow: hidden;
 }
 
 .watchlist-chip {
     align-items: center;
     background: #232733;
-    border: 1px solid #3a4050;
-    border-radius: 6px;
-    display: inline-flex;
+    display: flex;
+    justify-content: space-between;
     min-height: 2.4rem;
-    overflow: hidden;
 }
 
 .watchlist-chip a {
@@ -204,6 +211,75 @@
 .watchlist-chip__actions .watchlist-chip__remove:hover {
     background: #4b2430;
     color: #ffffff;
+}
+
+.watchlist-chip__actions .watchlist-chip__note {
+    color: #bfdbfe;
+    font-size: 0.72rem;
+    padding: 0 0.6rem;
+}
+
+.watchlist-chip__actions .watchlist-chip__note--saved {
+    background: #17365e;
+    color: #ffffff;
+}
+
+.watchlist-note-preview {
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    color: #b8c2d1;
+    display: -webkit-box;
+    font-size: 0.78rem;
+    margin: 0;
+    overflow: hidden;
+    padding: 0 0.75rem 0.7rem;
+}
+
+.watchlist-note-editor {
+    border-top: 1px solid #303646;
+    display: grid;
+    gap: 0.45rem;
+    padding: 0.75rem;
+}
+
+.watchlist-note-editor label {
+    color: #aeb6c5;
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.watchlist-note-editor textarea {
+    background: #232733;
+    border: 1px solid #3a4050;
+    border-radius: 4px;
+    color: #f8fafc;
+    padding: 0.6rem;
+    resize: vertical;
+}
+
+.watchlist-note-editor > div {
+    align-items: center;
+    display: flex;
+    gap: 0.5rem;
+    justify-content: flex-end;
+}
+
+.watchlist-note-editor span {
+    color: #8993a5;
+    font-size: 0.72rem;
+    margin-right: auto;
+}
+
+.watchlist-note-editor button {
+    background: #303646;
+    border-radius: 4px;
+    color: #f8fafc;
+    padding: 0.4rem 0.65rem;
+}
+
+.watchlist-note-editor button[type="submit"] {
+    background: #2563eb;
 }
 
 .watchlist-manager__order-hint {

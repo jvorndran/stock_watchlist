@@ -12,6 +12,7 @@ const DashLayout = () => {
 
     const [initialNewsData, setInitialNewsData] = useState({});
     const [watchlist, setWatchlist] = useState([]);
+    const [watchlistNotes, setWatchlistNotes] = useState({});
     const [watchlistError, setWatchlistError] = useState('');
     const [watchlistNotice, setWatchlistNotice] = useState('');
 
@@ -32,6 +33,7 @@ const DashLayout = () => {
                 if (response.ok) {
                     const watchlistData = await response.json();
                     setWatchlist(watchlistData.watchlist);
+                    setWatchlistNotes(watchlistData.notes || {});
                     setWatchlistError('');
                     setWatchlistNotice('');
                 } else {
@@ -114,6 +116,41 @@ const DashLayout = () => {
         }
     };
 
+    const saveWatchlistNote = async (stockTicker, note) => {
+        try {
+            const token = localStorage.getItem('jwt');
+            const response = await fetch(
+                `https://findashboard-api.onrender.com/api/watchlist/${encodeURIComponent(stockTicker)}/note`,
+                {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        Authorization: `Bearer ${token}`,
+                    },
+                    body: JSON.stringify({note}),
+                }
+            );
+
+            if (response.ok) {
+                const watchlistData = await response.json();
+                setWatchlistNotes(watchlistData.notes || {});
+                setWatchlistNotice(note.trim() ? `${stockTicker} thesis note saved` : `${stockTicker} thesis note cleared`);
+                setWatchlistError('');
+                return true;
+            }
+
+            const errorData = await response.json().catch(() => ({}));
+            setWatchlistError(errorData.message || `Unable to save ${stockTicker} note`);
+            setWatchlistNotice('');
+            return false;
+        } catch (error) {
+            setWatchlistError(`Unable to save ${stockTicker} note`);
+            setWatchlistNotice('');
+            console.error('Error:', error);
+            return false;
+        }
+    };
+
     const addTickersToWatchlist = async (stockTickers) => {
         const normalizedTickers = normalizeTickers(stockTickers);
 
@@ -181,6 +218,7 @@ const DashLayout = () => {
             if (response.ok) {
                 const watchlistData = await response.json();
                 setWatchlist(watchlistData.watchlist);
+                setWatchlistNotes(watchlistData.notes || {});
                 setWatchlistError('');
                 setWatchlistNotice(`${stockTicker} removed from your watchlist`);
             } else {
@@ -249,8 +287,10 @@ const DashLayout = () => {
                     onAddTicker={addToWatchlist}
                     onRemoveTicker={removeFromWatchlist}
                     onReorderTicker={reorderWatchlist}
+                    onSaveNote={saveWatchlistNote}
                     watchlist={watchlist}
                     watchlistError={watchlistError}
+                    watchlistNotes={watchlistNotes}
                     watchlistNotice={watchlistNotice}
                 />
 

@@ -16,6 +16,14 @@ const userSchema = new mongoose.Schema({
     watchlist:{
         type: [String],
         default: []
+    },
+    watchlistNotes: {
+        type: [{
+            ticker: { type: String, required: true },
+            note: { type: String, required: true, maxlength: 500 },
+            updatedAt: { type: Date, default: Date.now }
+        }],
+        default: []
     }
 });
 

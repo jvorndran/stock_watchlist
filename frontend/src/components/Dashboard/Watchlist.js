@@ -37,12 +37,14 @@ const formatMoney = (value) => new Intl.NumberFormat('en-US', {
     maximumFractionDigits: 0,
 }).format(value);
 
-const Watchlist = ({onAddTicker, onAddTickers, onRemoveTicker, onReorderTicker, watchlist, watchlistError, watchlistNotice}) => {
+const Watchlist = ({onAddTicker, onAddTickers, onRemoveTicker, onReorderTicker, onSaveNote, watchlist, watchlistError, watchlistNotes, watchlistNotice}) => {
 
     const [newTicker, setNewTicker] = useState('');
     const [searchText, setSearchText] = useState('');
     const [sortMode, setSortMode] = useState('added');
     const [portfolioValue, setPortfolioValue] = useState('10000');
+    const [activeNoteTicker, setActiveNoteTicker] = useState(null);
+    const [noteDraft, setNoteDraft] = useState('');
     const canReorder = sortMode === 'added' && searchText.trim().length === 0;
 
     const visibleWatchlist = useMemo(() => {
@@ -130,6 +132,21 @@ const Watchlist = ({onAddTicker, onAddTickers, onRemoveTicker, onReorderTicker, 
         await onAddTickers(symbols);
     };
 
+    const openNoteEditor = (symbol) => {
+        setActiveNoteTicker(symbol);
+        setNoteDraft(watchlistNotes[symbol] || '');
+    };
+
+    const handleSaveNote = async (event, symbol) => {
+        event.preventDefault();
+        const wasSaved = await onSaveNote(symbol, noteDraft);
+
+        if (wasSaved) {
+            setActiveNoteTicker(null);
+            setNoteDraft('');
+        }
+    };
+
     return (
         <section className="watchlist-manager">
             <div className="watchlist-manager__header">
@@ -209,35 +226,68 @@ const Watchlist = ({onAddTicker, onAddTickers, onRemoveTicker, onReorderTicker, 
             {watchlist.length > 0 ? (
                 <div className="watchlist-chip-grid">
                     {visibleWatchlist.length > 0 ? visibleWatchlist.map((symbol) => (
-                        <div className="watchlist-chip" key={symbol}>
-                            <Link to={`/dash/${symbol}`}>{symbol}</Link>
-                            <div className="watchlist-chip__actions">
-                                {canReorder && (
-                                    <>
-                                        <button
-                                            aria-label={`Move ${symbol} up`}
-                                            disabled={watchlist.indexOf(symbol) === 0}
-                                            onClick={() => onReorderTicker(symbol, 'up')}
-                                            type="button">
-                                            <FaArrowUp />
-                                        </button>
-                                        <button
-                                            aria-label={`Move ${symbol} down`}
-                                            disabled={watchlist.indexOf(symbol) === watchlist.length - 1}
-                                            onClick={() => onReorderTicker(symbol, 'down')}
-                                            type="button">
-                                            <FaArrowDown />
-                                        </button>
-                                    </>
-                                )}
-                                <button
-                                    aria-label={`Remove ${symbol} from watchlist`}
-                                    className="watchlist-chip__remove"
-                                    onClick={() => onRemoveTicker(symbol)}
-                                    type="button">
-                                    <FaTimes />
-                                </button>
+                        <div className="watchlist-chip-card" key={symbol}>
+                            <div className="watchlist-chip">
+                                <Link to={`/dash/${symbol}`}>{symbol}</Link>
+                                <div className="watchlist-chip__actions">
+                                    <button
+                                        aria-label={`Edit thesis note for ${symbol}`}
+                                        className={watchlistNotes[symbol] ? 'watchlist-chip__note watchlist-chip__note--saved' : 'watchlist-chip__note'}
+                                        onClick={() => openNoteEditor(symbol)}
+                                        type="button">
+                                        Note
+                                    </button>
+                                    {canReorder && (
+                                        <>
+                                            <button
+                                                aria-label={`Move ${symbol} up`}
+                                                disabled={watchlist.indexOf(symbol) === 0}
+                                                onClick={() => onReorderTicker(symbol, 'up')}
+                                                type="button">
+                                                <FaArrowUp />
+                                            </button>
+                                            <button
+                                                aria-label={`Move ${symbol} down`}
+                                                disabled={watchlist.indexOf(symbol) === watchlist.length - 1}
+                                                onClick={() => onReorderTicker(symbol, 'down')}
+                                                type="button">
+                                                <FaArrowDown />
+                                            </button>
+                                        </>
+                                    )}
+                                    <button
+                                        aria-label={`Remove ${symbol} from watchlist`}
+                                        className="watchlist-chip__remove"
+                                        onClick={() => onRemoveTicker(symbol)}
+                                        type="button">
+                                        <FaTimes />
+                                    </button>
+                                </div>
                             </div>
+
+                            {watchlistNotes[symbol] && activeNoteTicker !== symbol && (
+                                <p className="watchlist-note-preview">{watchlistNotes[symbol]}</p>
+                            )}
+
+                            {activeNoteTicker === symbol && (
+                                <form className="watchlist-note-editor" onSubmit={(event) => handleSaveNote(event, symbol)}>
+                                    <label htmlFor={`watchlist-note-${symbol}`}>Investment thesis or follow-up</label>
+                                    <textarea
+                                        autoFocus
+                                        id={`watchlist-note-${symbol}`}
+                                        maxLength="500"
+                                        onChange={(event) => setNoteDraft(event.target.value)}
+                                        placeholder="What would confirm or invalidate this idea?"
+                                        rows="3"
+                                        value={noteDraft}
+                                    />
+                                    <div>
+                                        <span>{noteDraft.length}/500</span>
+                                        <button onClick={() => setActiveNoteTicker(null)} type="button">Cancel</button>
+                                        <button type="submit">{noteDraft.trim() ? 'Save Note' : 'Clear Note'}</button>
+                                    </div>
+                                </form>
+                            )}
                         </div>
                     )) : (
                         <p className="watchlist-manager__empty">No symbols match this watchlist search.</p>
