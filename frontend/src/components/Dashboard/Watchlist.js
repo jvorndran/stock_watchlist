@@ -37,6 +37,52 @@ const formatMoney = (value) => new Intl.NumberFormat('en-US', {
     maximumFractionDigits: 0,
 }).format(value);
 
+const tradePlanStorageKey = 'stock-watchlist-trade-plans-v1';
+const emptyTradePlan = {entry: '', stop: '', target: ''};
+
+const loadTradePlans = () => {
+    try {
+        const storedPlans = JSON.parse(window.localStorage.getItem(tradePlanStorageKey) || '{}');
+        return storedPlans && typeof storedPlans === 'object' && !Array.isArray(storedPlans)
+            ? storedPlans
+            : {};
+    } catch (error) {
+        return {};
+    }
+};
+
+const parsePositiveNumber = (value) => {
+    const parsedValue = Number(value);
+    return Number.isFinite(parsedValue) && parsedValue > 0 ? parsedValue : 0;
+};
+
+const analyzeTradePlan = (plan, riskBudget) => {
+    const entry = parsePositiveNumber(plan?.entry);
+    const stop = parsePositiveNumber(plan?.stop);
+    const target = parsePositiveNumber(plan?.target);
+    const isLong = stop < entry && entry < target;
+    const isShort = target < entry && entry < stop;
+
+    if (!entry || !stop || !target || (!isLong && !isShort)) {
+        return null;
+    }
+
+    const riskPerShare = Math.abs(entry - stop);
+    const rewardPerShare = Math.abs(target - entry);
+    const shares = Math.floor(parsePositiveNumber(riskBudget) / riskPerShare);
+
+    return {
+        capital: shares * entry,
+        direction: isLong ? 'Long' : 'Short',
+        entry,
+        reward: shares * rewardPerShare,
+        rewardMultiple: rewardPerShare / riskPerShare,
+        shares,
+        stop,
+        target,
+    };
+};
+
 const Watchlist = ({onAddTicker, onAddTickers, onRemoveTicker, onReorderTicker, onSaveNote, watchlist, watchlistError, watchlistNotes, watchlistNotice}) => {
 
     const [newTicker, setNewTicker] = useState('');
@@ -45,6 +91,11 @@ const Watchlist = ({onAddTicker, onAddTickers, onRemoveTicker, onReorderTicker, 
     const [portfolioValue, setPortfolioValue] = useState('10000');
     const [activeNoteTicker, setActiveNoteTicker] = useState(null);
     const [noteDraft, setNoteDraft] = useState('');
+    const [activePlanTicker, setActivePlanTicker] = useState(null);
+    const [planDraft, setPlanDraft] = useState(emptyTradePlan);
+    const [planMessage, setPlanMessage] = useState('');
+    const [riskBudget, setRiskBudget] = useState('250');
+    const [tradePlans, setTradePlans] = useState(loadTradePlans);
     const canReorder = sortMode === 'added' && searchText.trim().length === 0;
 
     const visibleWatchlist = useMemo(() => {
@@ -81,6 +132,14 @@ const Watchlist = ({onAddTicker, onAddTickers, onRemoveTicker, onReorderTicker, 
             weight,
         }));
     }, [visibleWatchlist, parsedPortfolioValue]);
+
+    useEffect(() => {
+        try {
+            window.localStorage.setItem(tradePlanStorageKey, JSON.stringify(tradePlans));
+        } catch (error) {
+            setPlanMessage('Trade plans could not be saved in this browser.');
+        }
+    }, [tradePlans]);
 
 
     useEffect(() => {
@@ -133,8 +192,51 @@ const Watchlist = ({onAddTicker, onAddTickers, onRemoveTicker, onReorderTicker, 
     };
 
     const openNoteEditor = (symbol) => {
+        setActivePlanTicker(null);
         setActiveNoteTicker(symbol);
         setNoteDraft(watchlistNotes[symbol] || '');
+    };
+
+    const openPlanEditor = (symbol) => {
+        setActiveNoteTicker(null);
+        setActivePlanTicker(symbol);
+        setPlanDraft(tradePlans[symbol] || emptyTradePlan);
+        setPlanMessage('');
+    };
+
+    const handlePlanDraftChange = (field, value) => {
+        setPlanDraft((currentDraft) => ({...currentDraft, [field]: value}));
+    };
+
+    const handleSaveTradePlan = (event, symbol) => {
+        event.preventDefault();
+        const analysis = analyzeTradePlan(planDraft, riskBudget);
+
+        if (!analysis) {
+            setPlanMessage('Use positive levels ordered stop < entry < target for long plans, or target < entry < stop for short plans.');
+            return;
+        }
+
+        const normalizedPlan = {
+            entry: analysis.entry,
+            stop: analysis.stop,
+            target: analysis.target,
+        };
+        setTradePlans((currentPlans) => ({...currentPlans, [symbol]: normalizedPlan}));
+        setActivePlanTicker(null);
+        setPlanDraft(emptyTradePlan);
+        setPlanMessage(`${symbol} trade plan saved.`);
+    };
+
+    const handleRemoveTradePlan = (symbol) => {
+        setTradePlans((currentPlans) => {
+            const nextPlans = {...currentPlans};
+            delete nextPlans[symbol];
+            return nextPlans;
+        });
+        setActivePlanTicker(null);
+        setPlanDraft(emptyTradePlan);
+        setPlanMessage(`${symbol} trade plan cleared.`);
     };
 
     const handleSaveNote = async (event, symbol) => {
@@ -215,6 +317,26 @@ const Watchlist = ({onAddTicker, onAddTickers, onRemoveTicker, onReorderTicker, 
                 </label>
             </div>
 
+            <div className="watchlist-risk-budget">
+                <div>
+                    <h3>Trade Plan Risk Budget</h3>
+                    <span>Size every saved setup from the maximum dollars you are willing to lose.</span>
+                </div>
+                <label>
+                    <span>Risk per trade</span>
+                    <input
+                        inputMode="decimal"
+                        min="1"
+                        onChange={(event) => setRiskBudget(event.target.value)}
+                        step="25"
+                        type="number"
+                        value={riskBudget}
+                    />
+                </label>
+            </div>
+
+            {planMessage && <p className="watchlist-plan-message" aria-live="polite">{planMessage}</p>}
+
             {watchlist.length > 1 && (
                 <p className="watchlist-manager__order-hint">
                     {canReorder
@@ -236,6 +358,13 @@ const Watchlist = ({onAddTicker, onAddTickers, onRemoveTicker, onReorderTicker, 
                                         onClick={() => openNoteEditor(symbol)}
                                         type="button">
                                         Note
+                                    </button>
+                                    <button
+                                        aria-label={`Edit trade plan for ${symbol}`}
+                                        className={tradePlans[symbol] ? 'watchlist-chip__plan watchlist-chip__plan--saved' : 'watchlist-chip__plan'}
+                                        onClick={() => openPlanEditor(symbol)}
+                                        type="button">
+                                        Plan
                                     </button>
                                     {canReorder && (
                                         <>
@@ -269,6 +398,21 @@ const Watchlist = ({onAddTicker, onAddTickers, onRemoveTicker, onReorderTicker, 
                                 <p className="watchlist-note-preview">{watchlistNotes[symbol]}</p>
                             )}
 
+                            {tradePlans[symbol] && activePlanTicker !== symbol && (() => {
+                                const analysis = analyzeTradePlan(tradePlans[symbol], riskBudget);
+
+                                return analysis ? (
+                                    <div className="watchlist-plan-preview">
+                                        <strong>{analysis.direction} {analysis.rewardMultiple.toFixed(1)}R</strong>
+                                        <span>Entry ${analysis.entry.toFixed(2)}</span>
+                                        <span>Stop ${analysis.stop.toFixed(2)}</span>
+                                        <span>Target ${analysis.target.toFixed(2)}</span>
+                                        <span>{analysis.shares.toLocaleString()} shares / {formatMoney(analysis.capital)} capital</span>
+                                        <span>{formatMoney(analysis.reward)} planned reward</span>
+                                    </div>
+                                ) : null;
+                            })()}
+
                             {activeNoteTicker === symbol && (
                                 <form className="watchlist-note-editor" onSubmit={(event) => handleSaveNote(event, symbol)}>
                                     <label htmlFor={`watchlist-note-${symbol}`}>Investment thesis or follow-up</label>
@@ -285,6 +429,40 @@ const Watchlist = ({onAddTicker, onAddTickers, onRemoveTicker, onReorderTicker, 
                                         <span>{noteDraft.length}/500</span>
                                         <button onClick={() => setActiveNoteTicker(null)} type="button">Cancel</button>
                                         <button type="submit">{noteDraft.trim() ? 'Save Note' : 'Clear Note'}</button>
+                                    </div>
+                                </form>
+                            )}
+
+                            {activePlanTicker === symbol && (
+                                <form className="watchlist-plan-editor" onSubmit={(event) => handleSaveTradePlan(event, symbol)}>
+                                    <div className="watchlist-plan-editor__header">
+                                        <strong>{symbol} entry, stop, and target</strong>
+                                        <span>Long and short setups supported</span>
+                                    </div>
+                                    <div className="watchlist-plan-editor__fields">
+                                        {['entry', 'stop', 'target'].map((field) => (
+                                            <label key={field}>
+                                                <span>{field}</span>
+                                                <input
+                                                    inputMode="decimal"
+                                                    min="0.01"
+                                                    onChange={(event) => handlePlanDraftChange(field, event.target.value)}
+                                                    placeholder="0.00"
+                                                    step="0.01"
+                                                    type="number"
+                                                    value={planDraft[field]}
+                                                />
+                                            </label>
+                                        ))}
+                                    </div>
+                                    <div className="watchlist-plan-editor__actions">
+                                        {tradePlans[symbol] && (
+                                            <button className="watchlist-plan-editor__clear" onClick={() => handleRemoveTradePlan(symbol)} type="button">
+                                                Clear plan
+                                            </button>
+                                        )}
+                                        <button onClick={() => setActivePlanTicker(null)} type="button">Cancel</button>
+                                        <button type="submit">Save plan</button>
                                     </div>
                                 </form>
                             )}

@@ -76,6 +76,56 @@
     text-transform: uppercase;
 }
 
+.watchlist-risk-budget {
+    align-items: flex-end;
+    background: #1b1f2a;
+    border: 1px solid #303646;
+    border-radius: 6px;
+    display: flex;
+    gap: 1rem;
+    justify-content: space-between;
+    padding: 0.85rem 1rem;
+}
+
+.watchlist-risk-budget h3 {
+    font-size: 1rem;
+    margin: 0 0 0.2rem;
+}
+
+.watchlist-risk-budget > div > span,
+.watchlist-risk-budget label span,
+.watchlist-plan-message {
+    color: #aeb6c5;
+    font-size: 0.8rem;
+}
+
+.watchlist-risk-budget label {
+    display: grid;
+    gap: 0.3rem;
+    min-width: 160px;
+}
+
+.watchlist-risk-budget label span {
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.watchlist-risk-budget input,
+.watchlist-plan-editor input {
+    background: #232733;
+    border: 1px solid #3a4050;
+    border-radius: 4px;
+    color: #f8fafc;
+    min-height: 2.4rem;
+    padding: 0 0.65rem;
+}
+
+.watchlist-plan-message {
+    color: #bfdbfe;
+    margin: -0.25rem 0 0;
+}
+
 .watchlist-baskets {
     background: #1b1f2a;
     border: 1px solid #303646;
@@ -224,6 +274,17 @@
     color: #ffffff;
 }
 
+.watchlist-chip__actions .watchlist-chip__plan {
+    color: #fde68a;
+    font-size: 0.72rem;
+    padding: 0 0.6rem;
+}
+
+.watchlist-chip__actions .watchlist-chip__plan--saved {
+    background: #4a3514;
+    color: #fff7d6;
+}
+
 .watchlist-note-preview {
     -webkit-box-orient: vertical;
     -webkit-line-clamp: 2;
@@ -280,6 +341,78 @@
 
 .watchlist-note-editor button[type="submit"] {
     background: #2563eb;
+}
+
+.watchlist-plan-preview {
+    align-items: center;
+    color: #b8c2d1;
+    display: flex;
+    flex-wrap: wrap;
+    font-size: 0.75rem;
+    gap: 0.35rem 0.7rem;
+    padding: 0 0.75rem 0.7rem;
+}
+
+.watchlist-plan-preview strong {
+    color: #fde68a;
+}
+
+.watchlist-plan-editor {
+    border-top: 1px solid #303646;
+    display: grid;
+    gap: 0.7rem;
+    padding: 0.75rem;
+}
+
+.watchlist-plan-editor__header {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem 0.75rem;
+    justify-content: space-between;
+}
+
+.watchlist-plan-editor__header span,
+.watchlist-plan-editor__fields label span {
+    color: #aeb6c5;
+    font-size: 0.72rem;
+}
+
+.watchlist-plan-editor__fields {
+    display: grid;
+    gap: 0.55rem;
+    grid-template-columns: repeat(3, minmax(90px, 1fr));
+}
+
+.watchlist-plan-editor__fields label {
+    display: grid;
+    gap: 0.25rem;
+}
+
+.watchlist-plan-editor__fields label span {
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.watchlist-plan-editor__actions {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: flex-end;
+}
+
+.watchlist-plan-editor__actions button {
+    background: #303646;
+    border-radius: 4px;
+    color: #f8fafc;
+    padding: 0.4rem 0.65rem;
+}
+
+.watchlist-plan-editor__actions button[type="submit"] {
+    background: #2563eb;
+}
+
+.watchlist-plan-editor__actions .watchlist-plan-editor__clear {
+    background: #4b2430;
+    margin-right: auto;
 }
 
 .watchlist-manager__order-hint {
@@ -401,6 +534,15 @@
     .watchlist-allocation__header {
         align-items: stretch;
         flex-direction: column;
+    }
+
+    .watchlist-risk-budget {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .watchlist-plan-editor__fields {
+        grid-template-columns: 1fr;
     }
 
     .watchlist-manager__add-form button {
