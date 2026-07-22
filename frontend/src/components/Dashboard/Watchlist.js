@@ -83,6 +83,13 @@ const analyzeTradePlan = (plan, riskBudget) => {
     };
 };
 
+const getWorkflowState = (symbol, watchlistNotes, tradePlans) => {
+    const hasNote = Boolean(String(watchlistNotes[symbol] || '').trim());
+    const hasPlan = Boolean(tradePlans[symbol]);
+
+    return {hasNote, hasPlan, ready: hasNote && hasPlan};
+};
+
 const Watchlist = ({onAddTicker, onAddTickers, onRemoveTicker, onReorderTicker, onSaveNote, watchlist, watchlistError, watchlistNotes, watchlistNotice}) => {
 
     const [newTicker, setNewTicker] = useState('');
@@ -96,13 +103,49 @@ const Watchlist = ({onAddTicker, onAddTickers, onRemoveTicker, onReorderTicker, 
     const [planMessage, setPlanMessage] = useState('');
     const [riskBudget, setRiskBudget] = useState('250');
     const [tradePlans, setTradePlans] = useState(loadTradePlans);
-    const canReorder = sortMode === 'added' && searchText.trim().length === 0;
+    const [workflowFilter, setWorkflowFilter] = useState('all');
+    const canReorder = sortMode === 'added' && searchText.trim().length === 0 && workflowFilter === 'all';
+
+    const workflowSummary = useMemo(() => watchlist.reduce((summary, symbol) => {
+        const workflowState = getWorkflowState(symbol, watchlistNotes, tradePlans);
+
+        if (workflowState.ready) {
+            summary.ready += 1;
+        }
+        if (!workflowState.hasNote) {
+            summary.needsNote += 1;
+        }
+        if (!workflowState.hasPlan) {
+            summary.needsPlan += 1;
+        }
+        if (!workflowState.hasNote && !workflowState.hasPlan) {
+            summary.unprepared += 1;
+        }
+
+        return summary;
+    }, {ready: 0, needsNote: 0, needsPlan: 0, unprepared: 0}), [watchlist, watchlistNotes, tradePlans]);
+
+    const workflowViews = [
+        {key: 'all', label: 'All Symbols', count: watchlist.length, detail: 'Full watchlist'},
+        {key: 'ready', label: 'Ready', count: workflowSummary.ready, detail: 'Thesis and plan saved'},
+        {key: 'needs-note', label: 'Needs Thesis', count: workflowSummary.needsNote, detail: 'Missing a thesis note'},
+        {key: 'needs-plan', label: 'Needs Plan', count: workflowSummary.needsPlan, detail: 'Missing entry, stop, or target'},
+        {key: 'unprepared', label: 'Unprepared', count: workflowSummary.unprepared, detail: 'No thesis or trade plan'},
+    ];
 
     const visibleWatchlist = useMemo(() => {
         const normalizedSearch = searchText.trim().toUpperCase();
-        const filteredSymbols = watchlist.filter((symbol) => (
-            normalizedSearch.length === 0 || symbol.toUpperCase().includes(normalizedSearch)
-        ));
+        const filteredSymbols = watchlist.filter((symbol) => {
+            const matchesSearch = normalizedSearch.length === 0 || symbol.toUpperCase().includes(normalizedSearch);
+            const workflowState = getWorkflowState(symbol, watchlistNotes, tradePlans);
+            const matchesWorkflow = workflowFilter === 'all' ||
+                (workflowFilter === 'ready' && workflowState.ready) ||
+                (workflowFilter === 'needs-note' && !workflowState.hasNote) ||
+                (workflowFilter === 'needs-plan' && !workflowState.hasPlan) ||
+                (workflowFilter === 'unprepared' && !workflowState.hasNote && !workflowState.hasPlan);
+
+            return matchesSearch && matchesWorkflow;
+        });
 
         if (sortMode === 'az') {
             return [...filteredSymbols].sort((firstSymbol, secondSymbol) => firstSymbol.localeCompare(secondSymbol));
@@ -113,7 +156,7 @@ const Watchlist = ({onAddTicker, onAddTickers, onRemoveTicker, onReorderTicker, 
         }
 
         return filteredSymbols;
-    }, [watchlist, searchText, sortMode]);
+    }, [watchlist, watchlistNotes, tradePlans, searchText, sortMode, workflowFilter]);
 
     const parsedPortfolioValue = useMemo(() => {
         const value = Number(String(portfolioValue).replace(/[^0-9.]/g, ''));
@@ -317,6 +360,30 @@ const Watchlist = ({onAddTicker, onAddTickers, onRemoveTicker, onReorderTicker, 
                 </label>
             </div>
 
+            <section className="watchlist-workflow" aria-labelledby="watchlist-workflow-title">
+                <div className="watchlist-workflow__header">
+                    <div>
+                        <h3 id="watchlist-workflow-title">Research Readiness</h3>
+                        <span>Focus the dashboard on ideas that are ready or still need planning.</span>
+                    </div>
+                    <strong>{workflowSummary.ready} ready</strong>
+                </div>
+                <div className="watchlist-workflow__grid">
+                    {workflowViews.map((view) => (
+                        <button
+                            aria-pressed={workflowFilter === view.key}
+                            className={workflowFilter === view.key ? 'watchlist-workflow__card watchlist-workflow__card--active' : 'watchlist-workflow__card'}
+                            key={view.key}
+                            onClick={() => setWorkflowFilter(view.key)}
+                            type="button">
+                            <span>{view.label}</span>
+                            <strong>{view.count}</strong>
+                            <small>{view.detail}</small>
+                        </button>
+                    ))}
+                </div>
+            </section>
+
             <div className="watchlist-risk-budget">
                 <div>
                     <h3>Trade Plan Risk Budget</h3>
@@ -341,7 +408,7 @@ const Watchlist = ({onAddTicker, onAddTickers, onRemoveTicker, onReorderTicker, 
                 <p className="watchlist-manager__order-hint">
                     {canReorder
                         ? 'Use the arrows to save a preferred watchlist order.'
-                        : 'Choose Watchlist Order and clear search to rearrange symbols.'}
+                        : 'Choose All Symbols and Watchlist Order, then clear search to rearrange symbols.'}
                 </p>
             )}
 
