@@ -38,13 +38,31 @@ const formatMoney = (value) => new Intl.NumberFormat('en-US', {
 }).format(value);
 
 const tradePlanStorageKey = 'stock-watchlist-trade-plans-v1';
+const watchlistTagStorageKey = 'stock-watchlist-research-tags-v1';
 const emptyTradePlan = {entry: '', stop: '', target: ''};
+const researchTagOptions = [
+    {key: 'core', label: 'Core'},
+    {key: 'swing', label: 'Swing'},
+    {key: 'earnings', label: 'Earnings'},
+    {key: 'income', label: 'Income'},
+];
 
 const loadTradePlans = () => {
     try {
         const storedPlans = JSON.parse(window.localStorage.getItem(tradePlanStorageKey) || '{}');
         return storedPlans && typeof storedPlans === 'object' && !Array.isArray(storedPlans)
             ? storedPlans
+            : {};
+    } catch (error) {
+        return {};
+    }
+};
+
+const loadWatchlistTags = () => {
+    try {
+        const storedTags = JSON.parse(window.localStorage.getItem(watchlistTagStorageKey) || '{}');
+        return storedTags && typeof storedTags === 'object' && !Array.isArray(storedTags)
+            ? storedTags
             : {};
     } catch (error) {
         return {};
@@ -104,7 +122,9 @@ const Watchlist = ({onAddTicker, onAddTickers, onRemoveTicker, onReorderTicker, 
     const [riskBudget, setRiskBudget] = useState('250');
     const [tradePlans, setTradePlans] = useState(loadTradePlans);
     const [workflowFilter, setWorkflowFilter] = useState('all');
-    const canReorder = sortMode === 'added' && searchText.trim().length === 0 && workflowFilter === 'all';
+    const [watchlistTags, setWatchlistTags] = useState(loadWatchlistTags);
+    const [tagFilter, setTagFilter] = useState('all');
+    const canReorder = sortMode === 'added' && searchText.trim().length === 0 && workflowFilter === 'all' && tagFilter === 'all';
 
     const workflowSummary = useMemo(() => watchlist.reduce((summary, symbol) => {
         const workflowState = getWorkflowState(symbol, watchlistNotes, tradePlans);
@@ -143,8 +163,10 @@ const Watchlist = ({onAddTicker, onAddTickers, onRemoveTicker, onReorderTicker, 
                 (workflowFilter === 'needs-note' && !workflowState.hasNote) ||
                 (workflowFilter === 'needs-plan' && !workflowState.hasPlan) ||
                 (workflowFilter === 'unprepared' && !workflowState.hasNote && !workflowState.hasPlan);
+            const symbolTags = Array.isArray(watchlistTags[symbol]) ? watchlistTags[symbol] : [];
+            const matchesTag = tagFilter === 'all' || symbolTags.includes(tagFilter);
 
-            return matchesSearch && matchesWorkflow;
+            return matchesSearch && matchesWorkflow && matchesTag;
         });
 
         if (sortMode === 'az') {
@@ -156,7 +178,14 @@ const Watchlist = ({onAddTicker, onAddTickers, onRemoveTicker, onReorderTicker, 
         }
 
         return filteredSymbols;
-    }, [watchlist, watchlistNotes, tradePlans, searchText, sortMode, workflowFilter]);
+    }, [watchlist, watchlistNotes, tradePlans, watchlistTags, searchText, sortMode, workflowFilter, tagFilter]);
+
+    const tagCounts = useMemo(() => researchTagOptions.reduce((counts, tag) => {
+        counts[tag.key] = watchlist.filter((symbol) => (
+            Array.isArray(watchlistTags[symbol]) && watchlistTags[symbol].includes(tag.key)
+        )).length;
+        return counts;
+    }, {}), [watchlist, watchlistTags]);
 
     const parsedPortfolioValue = useMemo(() => {
         const value = Number(String(portfolioValue).replace(/[^0-9.]/g, ''));
@@ -183,6 +212,14 @@ const Watchlist = ({onAddTicker, onAddTickers, onRemoveTicker, onReorderTicker, 
             setPlanMessage('Trade plans could not be saved in this browser.');
         }
     }, [tradePlans]);
+
+    useEffect(() => {
+        try {
+            window.localStorage.setItem(watchlistTagStorageKey, JSON.stringify(watchlistTags));
+        } catch (error) {
+            setPlanMessage('Research tags could not be saved in this browser.');
+        }
+    }, [watchlistTags]);
 
 
     useEffect(() => {
@@ -249,6 +286,24 @@ const Watchlist = ({onAddTicker, onAddTickers, onRemoveTicker, onReorderTicker, 
 
     const handlePlanDraftChange = (field, value) => {
         setPlanDraft((currentDraft) => ({...currentDraft, [field]: value}));
+    };
+
+    const toggleResearchTag = (symbol, tag) => {
+        setWatchlistTags((currentTags) => {
+            const symbolTags = Array.isArray(currentTags[symbol]) ? currentTags[symbol] : [];
+            const nextSymbolTags = symbolTags.includes(tag)
+                ? symbolTags.filter((savedTag) => savedTag !== tag)
+                : [...symbolTags, tag];
+            const nextTags = {...currentTags};
+
+            if (nextSymbolTags.length > 0) {
+                nextTags[symbol] = nextSymbolTags;
+            } else {
+                delete nextTags[symbol];
+            }
+
+            return nextTags;
+        });
     };
 
     const handleSaveTradePlan = (event, symbol) => {
@@ -358,6 +413,15 @@ const Watchlist = ({onAddTicker, onAddTickers, onRemoveTicker, onReorderTicker, 
                         <option value="za">Ticker Z-A</option>
                     </select>
                 </label>
+                <label>
+                    <span>Research Tag</span>
+                    <select onChange={(event) => setTagFilter(event.target.value)} value={tagFilter}>
+                        <option value="all">All Tags</option>
+                        {researchTagOptions.map((tag) => (
+                            <option key={tag.key} value={tag.key}>{tag.label} ({tagCounts[tag.key] || 0})</option>
+                        ))}
+                    </select>
+                </label>
             </div>
 
             <section className="watchlist-workflow" aria-labelledby="watchlist-workflow-title">
@@ -459,6 +523,24 @@ const Watchlist = ({onAddTicker, onAddTickers, onRemoveTicker, onReorderTicker, 
                                         <FaTimes />
                                     </button>
                                 </div>
+                            </div>
+
+                            <div className="watchlist-research-tags" aria-label={`${symbol} research tags`}>
+                                <span>Tags</span>
+                                {researchTagOptions.map((tag) => {
+                                    const isActive = Array.isArray(watchlistTags[symbol]) && watchlistTags[symbol].includes(tag.key);
+
+                                    return (
+                                        <button
+                                            aria-pressed={isActive}
+                                            className={isActive ? 'watchlist-research-tag watchlist-research-tag--active' : 'watchlist-research-tag'}
+                                            key={tag.key}
+                                            onClick={() => toggleResearchTag(symbol, tag.key)}
+                                            type="button">
+                                            {tag.label}
+                                        </button>
+                                    );
+                                })}
                             </div>
 
                             {watchlistNotes[symbol] && activeNoteTicker !== symbol && (

@@ -27,7 +27,7 @@
 .watchlist-manager__controls {
     display: grid;
     gap: 0.75rem;
-    grid-template-columns: minmax(180px, 2fr) minmax(160px, 1fr);
+    grid-template-columns: minmax(180px, 2fr) repeat(2, minmax(150px, 1fr));
 }
 
 .watchlist-manager__add-form {
@@ -428,6 +428,38 @@
 
 .watchlist-plan-preview strong {
     color: #fde68a;
+}
+
+.watchlist-research-tags {
+    align-items: center;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+    padding: 0 0.75rem 0.7rem;
+}
+
+.watchlist-research-tags > span {
+    color: #8993a5;
+    font-size: 0.66rem;
+    font-weight: 700;
+    margin-right: 0.15rem;
+    text-transform: uppercase;
+}
+
+.watchlist-research-tag {
+    background: #232733;
+    border: 1px solid #3a4050;
+    border-radius: 999px;
+    color: #aeb6c5;
+    cursor: pointer;
+    font-size: 0.68rem;
+    padding: 0.25rem 0.5rem;
+}
+
+.watchlist-research-tag--active {
+    background: #1d4ed8;
+    border-color: #60a5fa;
+    color: #eff6ff;
 }
 
 .watchlist-plan-editor {
