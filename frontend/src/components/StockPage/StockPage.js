@@ -59,7 +59,7 @@ const StockPage = () => {
 
                     <StockRiskChecklist stockData={stockData} />
 
-                    <StockIncomePanel stockData={stockData} />
+                    <StockIncomePanel key={stockData.summary.Symbol} stockData={stockData} />
 
                     <StockChart stockData={stockData} />
 

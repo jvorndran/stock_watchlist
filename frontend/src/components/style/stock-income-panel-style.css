@@ -60,6 +60,107 @@
     color: #d7deea;
 }
 
+.stock-income-planner {
+    background: #171923;
+    border: 1px solid #343947;
+    border-radius: 8px;
+    display: grid;
+    gap: 1rem;
+    padding: 1rem;
+}
+
+.stock-income-planner__header {
+    align-items: flex-start;
+    display: flex;
+    gap: 1rem;
+    justify-content: space-between;
+}
+
+.stock-income-planner__header h3 {
+    font-size: 1rem;
+    font-weight: 700;
+    margin: 0 0 0.25rem;
+}
+
+.stock-income-planner__header span,
+.stock-income-planner__header strong {
+    color: #aeb6c5;
+    font-size: 0.82rem;
+}
+
+.stock-income-planner__controls,
+.stock-income-planner__results {
+    display: grid;
+    gap: 0.75rem;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+}
+
+.stock-income-planner__controls label,
+.stock-income-planner__results article {
+    display: grid;
+    gap: 0.4rem;
+}
+
+.stock-income-planner__controls label > span,
+.stock-income-planner__results span {
+    color: #aeb6c5;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.stock-income-planner__controls input,
+.stock-income-planner__controls select {
+    background: #22232d;
+    border: 1px solid #475066;
+    border-radius: 6px;
+    color: #ffffff;
+    min-width: 0;
+    padding: 0.65rem 0.75rem;
+    width: 100%;
+}
+
+.stock-income-planner__suffix-input {
+    align-items: center;
+    display: grid;
+    grid-template-columns: 1fr auto;
+}
+
+.stock-income-planner__suffix-input input {
+    border-radius: 6px 0 0 6px;
+}
+
+.stock-income-planner__suffix-input span {
+    background: #2c3140;
+    border: 1px solid #475066;
+    border-left: 0;
+    border-radius: 0 6px 6px 0;
+    color: #d7deea;
+    padding: 0.65rem 0.75rem;
+}
+
+.stock-income-planner__results article {
+    background: #22232d;
+    border: 1px solid #343947;
+    border-radius: 6px;
+    padding: 0.8rem;
+}
+
+.stock-income-planner__results strong {
+    color: #67e8f9;
+    font-size: 1.2rem;
+}
+
+.stock-income-planner__results small,
+.stock-income-planner__disclaimer {
+    color: #aeb6c5;
+}
+
+.stock-income-planner__empty {
+    color: #fbbf24;
+    margin: 0;
+}
+
 @media (max-width: 700px) {
     .stock-income-panel {
         margin-left: 1rem;
@@ -68,6 +169,10 @@
 
     .stock-income-panel__header {
         align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .stock-income-planner__header {
         flex-direction: column;
     }
 }
