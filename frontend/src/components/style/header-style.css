@@ -2,8 +2,16 @@
     justify-content: space-between;
 }
 
+.header-compare-link {
+    margin-left: auto;
+}
+
 @media (max-width: 580px){
     .header-container{
         justify-content: center;
+    }
+
+    .header-compare-link {
+        margin-left: 0;
     }
 }
