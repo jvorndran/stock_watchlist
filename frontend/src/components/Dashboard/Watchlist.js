@@ -37,6 +37,8 @@ const formatMoney = (value) => new Intl.NumberFormat('en-US', {
     maximumFractionDigits: 0,
 }).format(value);
 
+const escapeCsvValue = (value) => `"${String(value ?? '').replace(/"/g, '""')}"`;
+
 const tradePlanStorageKey = 'stock-watchlist-trade-plans-v1';
 const watchlistTagStorageKey = 'stock-watchlist-research-tags-v1';
 const emptyTradePlan = {entry: '', stop: '', target: ''};
@@ -124,6 +126,7 @@ const Watchlist = ({onAddTicker, onAddTickers, onRemoveTicker, onReorderTicker, 
     const [workflowFilter, setWorkflowFilter] = useState('all');
     const [watchlistTags, setWatchlistTags] = useState(loadWatchlistTags);
     const [tagFilter, setTagFilter] = useState('all');
+    const [researchExportMessage, setResearchExportMessage] = useState('');
     const canReorder = sortMode === 'added' && searchText.trim().length === 0 && workflowFilter === 'all' && tagFilter === 'all';
 
     const workflowSummary = useMemo(() => watchlist.reduce((summary, symbol) => {
@@ -347,6 +350,64 @@ const Watchlist = ({onAddTicker, onAddTickers, onRemoveTicker, onReorderTicker, 
         }
     };
 
+    const exportResearchView = () => {
+        if (visibleWatchlist.length === 0) {
+            setResearchExportMessage('No visible watchlist symbols to export.');
+            return;
+        }
+
+        const headers = [
+            'Ticker',
+            'Research Tags',
+            'Thesis Note',
+            'Plan Direction',
+            'Entry',
+            'Stop',
+            'Target',
+            'Reward Risk Multiple',
+            'Risk Budget',
+            'Shares',
+            'Capital Required',
+            'Planned Reward'
+        ];
+        const rows = visibleWatchlist.map((symbol) => {
+            const plan = tradePlans[symbol];
+            const analysis = analyzeTradePlan(plan, riskBudget);
+            const tags = (Array.isArray(watchlistTags[symbol]) ? watchlistTags[symbol] : [])
+                .map((tagKey) => researchTagOptions.find((option) => option.key === tagKey)?.label || tagKey)
+                .join('; ');
+
+            return [
+                symbol,
+                tags,
+                watchlistNotes[symbol] || '',
+                analysis?.direction || '',
+                plan?.entry || '',
+                plan?.stop || '',
+                plan?.target || '',
+                analysis ? analysis.rewardMultiple.toFixed(2) : '',
+                analysis ? parsePositiveNumber(riskBudget).toFixed(2) : '',
+                analysis?.shares || '',
+                analysis ? analysis.capital.toFixed(2) : '',
+                analysis ? analysis.reward.toFixed(2) : ''
+            ];
+        });
+        const csv = [headers, ...rows]
+            .map((row) => row.map(escapeCsvValue).join(','))
+            .join('\r\n');
+        const blob = new Blob([csv], {type: 'text/csv;charset=utf-8'});
+        const downloadUrl = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+
+        link.href = downloadUrl;
+        link.download = `watchlist-research-${new Date().toISOString().slice(0, 10)}.csv`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(downloadUrl);
+        setResearchExportMessage(`${rows.length} visible symbol${rows.length === 1 ? '' : 's'} exported with research details.`);
+    };
+
     return (
         <section className="watchlist-manager">
             <div className="watchlist-manager__header">
@@ -354,10 +415,14 @@ const Watchlist = ({onAddTicker, onAddTickers, onRemoveTicker, onReorderTicker, 
                     <h2>Watchlist</h2>
                     <span>{visibleWatchlist.length} of {watchlist.length} tracked symbols</span>
                 </div>
+                <button className="watchlist-manager__export" onClick={exportResearchView} type="button">
+                    Export Research CSV
+                </button>
             </div>
 
             {watchlistError && <p className="watchlist-manager__error">{watchlistError}</p>}
             {watchlistNotice && <p className="watchlist-manager__notice">{watchlistNotice}</p>}
+            {researchExportMessage && <p className="watchlist-manager__export-message" aria-live="polite">{researchExportMessage}</p>}
 
             <form className="watchlist-manager__add-form" onSubmit={handleAddTicker}>
                 <label>
