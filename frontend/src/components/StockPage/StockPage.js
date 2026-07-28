@@ -12,6 +12,7 @@ import StockIncomePanel from './StockIncomePanel';
 import StockRiskChecklist from './StockRiskChecklist';
 import StockTrendPanel from './StockTrendPanel';
 import StockValuationPlanner from './StockValuationPlanner';
+import StockPositionPlanner from './StockPositionPlanner';
 import "../../index.css"
 
 const StockPage = () => {
@@ -54,6 +55,8 @@ const StockPage = () => {
                     <StockTargetPanel stockData={stockData} />
 
                     <StockScorecard stockData={stockData} />
+
+                    <StockPositionPlanner key={stockData.summary.Symbol} stockData={stockData} />
 
                     <StockValuationPlanner key={stockData.summary.Symbol} stockData={stockData} />
 
