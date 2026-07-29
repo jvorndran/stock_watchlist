@@ -33,12 +33,13 @@ const getReferencePrice = (summary) => {
     return {price: null, note: 'Enter an entry, stop, and target to build a position plan.'};
 };
 
-export const calculatePositionPlan = ({accountSize, riskPercent, entry, stop, target}) => {
+export const calculatePositionPlan = ({accountSize, riskPercent, entry, stop, target, direction = 'long'}) => {
     const parsedAccountSize = parsePositiveMetric(accountSize);
     const parsedRiskPercent = parsePositiveMetric(riskPercent);
     const parsedEntry = parsePositiveMetric(entry);
     const parsedStop = parsePositiveMetric(stop);
     const parsedTarget = parsePositiveMetric(target);
+    const isShort = direction === 'short';
 
     if (
         parsedAccountSize === null ||
@@ -47,15 +48,17 @@ export const calculatePositionPlan = ({accountSize, riskPercent, entry, stop, ta
         parsedEntry === null ||
         parsedStop === null ||
         parsedTarget === null ||
-        parsedStop >= parsedEntry ||
-        parsedTarget <= parsedEntry
+        (!isShort && (parsedStop >= parsedEntry || parsedTarget <= parsedEntry)) ||
+        (isShort && (parsedStop <= parsedEntry || parsedTarget >= parsedEntry))
     ) {
         return null;
     }
 
     const riskBudget = parsedAccountSize * (parsedRiskPercent / 100);
-    const riskPerShare = parsedEntry - parsedStop;
-    const rewardPerShare = parsedTarget - parsedEntry;
+    const riskPerShare = Math.abs(parsedEntry - parsedStop);
+    const rewardPerShare = isShort
+        ? parsedEntry - parsedTarget
+        : parsedTarget - parsedEntry;
     const riskSizedShares = Math.floor(riskBudget / riskPerShare);
     const affordableShares = Math.floor(parsedAccountSize / parsedEntry);
     const shares = Math.min(riskSizedShares, affordableShares);
@@ -75,6 +78,7 @@ export const calculatePositionPlan = ({accountSize, riskPercent, entry, stop, ta
         riskPerShare,
         riskSizedShares,
         shares,
+        direction: isShort ? 'short' : 'long',
     };
 };
 
@@ -88,28 +92,37 @@ const StockPositionPlanner = ({stockData}) => {
     const {summary} = stockData;
     const reference = useMemo(() => getReferencePrice(summary), [summary]);
     const initialEntry = reference.price;
-    const initialStop = initialEntry === null ? null : initialEntry * 0.92;
-    const initialTarget = initialEntry === null ? null : initialEntry * 1.16;
+    const [direction, setDirection] = useState('long');
     const [accountSize, setAccountSize] = useState('25000');
     const [riskPercent, setRiskPercent] = useState('1');
     const [entry, setEntry] = useState(formatInput(initialEntry));
-    const [stop, setStop] = useState(formatInput(initialStop));
-    const [target, setTarget] = useState(formatInput(initialTarget));
+    const [stop, setStop] = useState(formatInput(initialEntry === null ? null : initialEntry * 0.92));
+    const [target, setTarget] = useState(formatInput(initialEntry === null ? null : initialEntry * 1.16));
 
     const plan = useMemo(() => calculatePositionPlan({
         accountSize,
+        direction,
         riskPercent,
         entry,
         stop,
         target,
-    }), [accountSize, entry, riskPercent, stop, target]);
+    }), [accountSize, direction, entry, riskPercent, stop, target]);
+
+    const applyDirection = (nextDirection) => {
+        const isShort = nextDirection === 'short';
+        const parsedEntry = parsePositiveMetric(entry) || initialEntry;
+
+        setDirection(nextDirection);
+        setStop(formatInput(parsedEntry === null ? null : parsedEntry * (isShort ? 1.08 : 0.92)));
+        setTarget(formatInput(parsedEntry === null ? null : parsedEntry * (isShort ? 0.84 : 1.16)));
+    };
 
     const resetPlan = () => {
         setAccountSize('25000');
         setRiskPercent('1');
         setEntry(formatInput(initialEntry));
-        setStop(formatInput(initialStop));
-        setTarget(formatInput(initialTarget));
+        setStop(formatInput(initialEntry === null ? null : initialEntry * (direction === 'short' ? 1.08 : 0.92)));
+        setTarget(formatInput(initialEntry === null ? null : initialEntry * (direction === 'short' ? 0.84 : 1.16)));
     };
 
     return (
@@ -117,12 +130,34 @@ const StockPositionPlanner = ({stockData}) => {
             <div className="stock-position-planner__header">
                 <div>
                     <h2>Position Risk Planner</h2>
-                    <span>Size a long position in {summary.Symbol} from maximum account risk</span>
+                    <span>Size a {direction} position in {summary.Symbol} from maximum account risk</span>
                 </div>
                 <button onClick={resetPlan} type="button">Reset plan</button>
             </div>
 
             <p className="stock-position-planner__note">{reference.note}</p>
+
+            <div aria-label="Trade Direction" className="stock-position-planner__direction" role="group">
+                <button
+                    aria-pressed={direction === 'long'}
+                    className={direction === 'long' ? 'is-active' : ''}
+                    onClick={() => applyDirection('long')}
+                    type="button">
+                    Long
+                </button>
+                <button
+                    aria-pressed={direction === 'short'}
+                    className={direction === 'short' ? 'is-active is-short' : ''}
+                    onClick={() => applyDirection('short')}
+                    type="button">
+                    Short
+                </button>
+                <span>
+                    {direction === 'short'
+                        ? 'Stop above entry; target below entry.'
+                        : 'Stop below entry; target above entry.'}
+                </span>
+            </div>
 
             <div className="stock-position-planner__inputs">
                 <label>
@@ -191,7 +226,7 @@ const StockPositionPlanner = ({stockData}) => {
                     <div className="stock-position-planner__results">
                         <article>
                             <span>Position Size</span>
-                            <strong>{plan.shares.toLocaleString()} shares</strong>
+                            <strong>{plan.shares.toLocaleString()} shares {plan.direction === 'short' ? 'short' : 'long'}</strong>
                             <small>{plan.riskLimited ? 'Limited by risk budget' : 'Limited by account buying power'}</small>
                         </article>
                         <article>
@@ -219,7 +254,7 @@ const StockPositionPlanner = ({stockData}) => {
                 </>
             ) : (
                 <p className="stock-position-planner__empty">
-                    Enter an account size with a stop below entry and a target above entry to calculate the position.
+                    Enter an account size with a valid {direction} stop and target to calculate the position.
                 </p>
             )}
 

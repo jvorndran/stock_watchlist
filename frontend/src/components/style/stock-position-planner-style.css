@@ -44,6 +44,42 @@
     margin: 0;
 }
 
+.stock-position-planner__direction {
+    align-items: center;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.stock-position-planner__direction button {
+    background: #272d3c;
+    border: 1px solid #465066;
+    border-radius: 999px;
+    color: #cbd5e1;
+    cursor: pointer;
+    font-size: 0.78rem;
+    font-weight: 700;
+    min-width: 72px;
+    padding: 0.45rem 0.8rem;
+}
+
+.stock-position-planner__direction button.is-active {
+    background: #064e3b;
+    border-color: #34d399;
+    color: #d1fae5;
+}
+
+.stock-position-planner__direction button.is-active.is-short {
+    background: #7f1d1d;
+    border-color: #f87171;
+    color: #fee2e2;
+}
+
+.stock-position-planner__direction > span {
+    color: #aeb6c5;
+    font-size: 0.78rem;
+}
+
 .stock-position-planner__inputs,
 .stock-position-planner__results {
     display: grid;
