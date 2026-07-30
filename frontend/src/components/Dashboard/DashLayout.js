@@ -8,6 +8,7 @@ import React, {useEffect, useMemo, useState} from "react";
 import axios from "axios";
 
 const watchlistTagStorageKey = 'stock-watchlist-research-tags-v1';
+const tradePlanStorageKey = 'stock-watchlist-trade-plans-v1';
 
 const loadWatchlistTags = () => {
     try {
@@ -20,12 +21,24 @@ const loadWatchlistTags = () => {
     }
 };
 
+const loadTradePlans = () => {
+    try {
+        const storedPlans = JSON.parse(window.localStorage.getItem(tradePlanStorageKey) || '{}');
+        return storedPlans && typeof storedPlans === 'object' && !Array.isArray(storedPlans)
+            ? storedPlans
+            : {};
+    } catch (error) {
+        return {};
+    }
+};
+
 const DashLayout = () => {
 
     const [initialNewsData, setInitialNewsData] = useState({});
     const [watchlist, setWatchlist] = useState([]);
     const [watchlistNotes, setWatchlistNotes] = useState({});
     const [watchlistTags, setWatchlistTags] = useState(loadWatchlistTags);
+    const [tradePlans, setTradePlans] = useState(loadTradePlans);
     const [watchlistError, setWatchlistError] = useState('');
     const [watchlistNotice, setWatchlistNotice] = useState('');
 
@@ -47,9 +60,12 @@ const DashLayout = () => {
                     const watchlistData = await response.json();
                     const accountTags = watchlistData.tags || {};
                     const storedTags = loadWatchlistTags();
+                    const accountTradePlans = watchlistData.tradePlans || {};
+                    const storedTradePlans = loadTradePlans();
                     setWatchlist(watchlistData.watchlist);
                     setWatchlistNotes(watchlistData.notes || {});
                     setWatchlistTags({...storedTags, ...accountTags});
+                    setTradePlans({...storedTradePlans, ...accountTradePlans});
                     setWatchlistError('');
                     setWatchlistNotice('');
 
@@ -69,6 +85,25 @@ const DashLayout = () => {
                                     Authorization: `Bearer ${token}`,
                                 },
                                 body: JSON.stringify({tags}),
+                            }
+                        )
+                    )));
+                    const localOnlyTradePlans = Object.entries(storedTradePlans).filter(([symbol, plan]) => (
+                        watchlistData.watchlist.includes(symbol) &&
+                        !accountTradePlans[symbol] &&
+                        plan &&
+                        typeof plan === 'object'
+                    ));
+                    await Promise.allSettled(localOnlyTradePlans.map(([symbol, plan]) => (
+                        fetch(
+                            `https://findashboard-api.onrender.com/api/watchlist/${encodeURIComponent(symbol)}/trade-plan`,
+                            {
+                                method: 'PUT',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    Authorization: `Bearer ${token}`,
+                                },
+                                body: JSON.stringify({plan}),
                             }
                         )
                     )));
@@ -93,6 +128,14 @@ const DashLayout = () => {
             setWatchlistError('Research tags could not be cached in this browser');
         }
     }, [watchlistTags]);
+
+    useEffect(() => {
+        try {
+            window.localStorage.setItem(tradePlanStorageKey, JSON.stringify(tradePlans));
+        } catch (error) {
+            setWatchlistError('Trade plans could not be cached in this browser');
+        }
+    }, [tradePlans]);
 
 
     useEffect(() => {
@@ -242,6 +285,55 @@ const DashLayout = () => {
         }
     };
 
+    const saveWatchlistTradePlan = async (stockTicker, plan) => {
+        const previousPlans = tradePlans;
+        const nextPlans = {...tradePlans};
+
+        if (plan) {
+            nextPlans[stockTicker] = plan;
+        } else {
+            delete nextPlans[stockTicker];
+        }
+        setTradePlans(nextPlans);
+
+        try {
+            const token = localStorage.getItem('jwt');
+            const response = await fetch(
+                `https://findashboard-api.onrender.com/api/watchlist/${encodeURIComponent(stockTicker)}/trade-plan`,
+                {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        Authorization: `Bearer ${token}`,
+                    },
+                    body: JSON.stringify({plan}),
+                }
+            );
+
+            if (response.ok) {
+                const watchlistData = await response.json();
+                setTradePlans(watchlistData.tradePlans || {});
+                setWatchlistNotice(plan
+                    ? `${stockTicker} trade plan synced to your account`
+                    : `${stockTicker} trade plan cleared`);
+                setWatchlistError('');
+                return true;
+            }
+
+            const errorData = await response.json().catch(() => ({}));
+            setTradePlans(previousPlans);
+            setWatchlistError(errorData.message || `Unable to sync ${stockTicker} trade plan`);
+            setWatchlistNotice('');
+            return false;
+        } catch (error) {
+            setTradePlans(previousPlans);
+            setWatchlistError(`Unable to sync ${stockTicker} trade plan`);
+            setWatchlistNotice('');
+            console.error('Error:', error);
+            return false;
+        }
+    };
+
     const addTickersToWatchlist = async (stockTickers) => {
         const normalizedTickers = normalizeTickers(stockTickers);
 
@@ -311,6 +403,7 @@ const DashLayout = () => {
                 setWatchlist(watchlistData.watchlist);
                 setWatchlistNotes(watchlistData.notes || {});
                 setWatchlistTags(watchlistData.tags || {});
+                setTradePlans(watchlistData.tradePlans || {});
                 setWatchlistError('');
                 setWatchlistNotice(`${stockTicker} removed from your watchlist`);
             } else {
@@ -381,6 +474,8 @@ const DashLayout = () => {
                     onReorderTicker={reorderWatchlist}
                     onSaveNote={saveWatchlistNote}
                     onSaveTags={saveWatchlistTags}
+                    onSaveTradePlan={saveWatchlistTradePlan}
+                    tradePlans={tradePlans}
                     watchlist={watchlist}
                     watchlistError={watchlistError}
                     watchlistNotes={watchlistNotes}

@@ -39,7 +39,6 @@ const formatMoney = (value) => new Intl.NumberFormat('en-US', {
 
 const escapeCsvValue = (value) => `"${String(value ?? '').replace(/"/g, '""')}"`;
 
-const tradePlanStorageKey = 'stock-watchlist-trade-plans-v1';
 const emptyTradePlan = {entry: '', stop: '', target: ''};
 const researchTagOptions = [
     {key: 'core', label: 'Core'},
@@ -47,17 +46,6 @@ const researchTagOptions = [
     {key: 'earnings', label: 'Earnings'},
     {key: 'income', label: 'Income'},
 ];
-
-const loadTradePlans = () => {
-    try {
-        const storedPlans = JSON.parse(window.localStorage.getItem(tradePlanStorageKey) || '{}');
-        return storedPlans && typeof storedPlans === 'object' && !Array.isArray(storedPlans)
-            ? storedPlans
-            : {};
-    } catch (error) {
-        return {};
-    }
-};
 
 const parsePositiveNumber = (value) => {
     const parsedValue = Number(value);
@@ -105,6 +93,8 @@ const Watchlist = ({
     onReorderTicker,
     onSaveNote,
     onSaveTags,
+    onSaveTradePlan,
+    tradePlans,
     watchlist,
     watchlistError,
     watchlistNotes,
@@ -122,7 +112,6 @@ const Watchlist = ({
     const [planDraft, setPlanDraft] = useState(emptyTradePlan);
     const [planMessage, setPlanMessage] = useState('');
     const [riskBudget, setRiskBudget] = useState('250');
-    const [tradePlans, setTradePlans] = useState(loadTradePlans);
     const [workflowFilter, setWorkflowFilter] = useState('all');
     const [tagFilter, setTagFilter] = useState('all');
     const [researchExportMessage, setResearchExportMessage] = useState('');
@@ -208,14 +197,6 @@ const Watchlist = ({
     }, [visibleWatchlist, parsedPortfolioValue]);
 
     useEffect(() => {
-        try {
-            window.localStorage.setItem(tradePlanStorageKey, JSON.stringify(tradePlans));
-        } catch (error) {
-            setPlanMessage('Trade plans could not be saved in this browser.');
-        }
-    }, [tradePlans]);
-
-    useEffect(() => {
         const tradingViewContainer = document.getElementById('tradingview-widget-symbols');
 
         const script = document.createElement('script');
@@ -290,7 +271,7 @@ const Watchlist = ({
         await onSaveTags(symbol, nextSymbolTags);
     };
 
-    const handleSaveTradePlan = (event, symbol) => {
+    const handleSaveTradePlan = async (event, symbol) => {
         event.preventDefault();
         const analysis = analyzeTradePlan(planDraft, riskBudget);
 
@@ -304,21 +285,23 @@ const Watchlist = ({
             stop: analysis.stop,
             target: analysis.target,
         };
-        setTradePlans((currentPlans) => ({...currentPlans, [symbol]: normalizedPlan}));
-        setActivePlanTicker(null);
-        setPlanDraft(emptyTradePlan);
-        setPlanMessage(`${symbol} trade plan saved.`);
+        const wasSaved = await onSaveTradePlan(symbol, normalizedPlan);
+
+        if (wasSaved) {
+            setActivePlanTicker(null);
+            setPlanDraft(emptyTradePlan);
+            setPlanMessage(`${symbol} trade plan saved to your account.`);
+        }
     };
 
-    const handleRemoveTradePlan = (symbol) => {
-        setTradePlans((currentPlans) => {
-            const nextPlans = {...currentPlans};
-            delete nextPlans[symbol];
-            return nextPlans;
-        });
-        setActivePlanTicker(null);
-        setPlanDraft(emptyTradePlan);
-        setPlanMessage(`${symbol} trade plan cleared.`);
+    const handleRemoveTradePlan = async (symbol) => {
+        const wasRemoved = await onSaveTradePlan(symbol, null);
+
+        if (wasRemoved) {
+            setActivePlanTicker(null);
+            setPlanDraft(emptyTradePlan);
+            setPlanMessage(`${symbol} trade plan cleared.`);
+        }
     };
 
     const handleSaveNote = async (event, symbol) => {
