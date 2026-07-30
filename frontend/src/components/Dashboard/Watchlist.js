@@ -40,7 +40,6 @@ const formatMoney = (value) => new Intl.NumberFormat('en-US', {
 const escapeCsvValue = (value) => `"${String(value ?? '').replace(/"/g, '""')}"`;
 
 const tradePlanStorageKey = 'stock-watchlist-trade-plans-v1';
-const watchlistTagStorageKey = 'stock-watchlist-research-tags-v1';
 const emptyTradePlan = {entry: '', stop: '', target: ''};
 const researchTagOptions = [
     {key: 'core', label: 'Core'},
@@ -54,17 +53,6 @@ const loadTradePlans = () => {
         const storedPlans = JSON.parse(window.localStorage.getItem(tradePlanStorageKey) || '{}');
         return storedPlans && typeof storedPlans === 'object' && !Array.isArray(storedPlans)
             ? storedPlans
-            : {};
-    } catch (error) {
-        return {};
-    }
-};
-
-const loadWatchlistTags = () => {
-    try {
-        const storedTags = JSON.parse(window.localStorage.getItem(watchlistTagStorageKey) || '{}');
-        return storedTags && typeof storedTags === 'object' && !Array.isArray(storedTags)
-            ? storedTags
             : {};
     } catch (error) {
         return {};
@@ -110,7 +98,19 @@ const getWorkflowState = (symbol, watchlistNotes, tradePlans) => {
     return {hasNote, hasPlan, ready: hasNote && hasPlan};
 };
 
-const Watchlist = ({onAddTicker, onAddTickers, onRemoveTicker, onReorderTicker, onSaveNote, watchlist, watchlistError, watchlistNotes, watchlistNotice}) => {
+const Watchlist = ({
+    onAddTicker,
+    onAddTickers,
+    onRemoveTicker,
+    onReorderTicker,
+    onSaveNote,
+    onSaveTags,
+    watchlist,
+    watchlistError,
+    watchlistNotes,
+    watchlistNotice,
+    watchlistTags,
+}) => {
 
     const [newTicker, setNewTicker] = useState('');
     const [searchText, setSearchText] = useState('');
@@ -124,7 +124,6 @@ const Watchlist = ({onAddTicker, onAddTickers, onRemoveTicker, onReorderTicker, 
     const [riskBudget, setRiskBudget] = useState('250');
     const [tradePlans, setTradePlans] = useState(loadTradePlans);
     const [workflowFilter, setWorkflowFilter] = useState('all');
-    const [watchlistTags, setWatchlistTags] = useState(loadWatchlistTags);
     const [tagFilter, setTagFilter] = useState('all');
     const [researchExportMessage, setResearchExportMessage] = useState('');
     const canReorder = sortMode === 'added' && searchText.trim().length === 0 && workflowFilter === 'all' && tagFilter === 'all';
@@ -217,15 +216,6 @@ const Watchlist = ({onAddTicker, onAddTickers, onRemoveTicker, onReorderTicker, 
     }, [tradePlans]);
 
     useEffect(() => {
-        try {
-            window.localStorage.setItem(watchlistTagStorageKey, JSON.stringify(watchlistTags));
-        } catch (error) {
-            setPlanMessage('Research tags could not be saved in this browser.');
-        }
-    }, [watchlistTags]);
-
-
-    useEffect(() => {
         const tradingViewContainer = document.getElementById('tradingview-widget-symbols');
 
         const script = document.createElement('script');
@@ -291,22 +281,13 @@ const Watchlist = ({onAddTicker, onAddTickers, onRemoveTicker, onReorderTicker, 
         setPlanDraft((currentDraft) => ({...currentDraft, [field]: value}));
     };
 
-    const toggleResearchTag = (symbol, tag) => {
-        setWatchlistTags((currentTags) => {
-            const symbolTags = Array.isArray(currentTags[symbol]) ? currentTags[symbol] : [];
-            const nextSymbolTags = symbolTags.includes(tag)
-                ? symbolTags.filter((savedTag) => savedTag !== tag)
-                : [...symbolTags, tag];
-            const nextTags = {...currentTags};
+    const toggleResearchTag = async (symbol, tag) => {
+        const symbolTags = Array.isArray(watchlistTags[symbol]) ? watchlistTags[symbol] : [];
+        const nextSymbolTags = symbolTags.includes(tag)
+            ? symbolTags.filter((savedTag) => savedTag !== tag)
+            : [...symbolTags, tag];
 
-            if (nextSymbolTags.length > 0) {
-                nextTags[symbol] = nextSymbolTags;
-            } else {
-                delete nextTags[symbol];
-            }
-
-            return nextTags;
-        });
+        await onSaveTags(symbol, nextSymbolTags);
     };
 
     const handleSaveTradePlan = (event, symbol) => {

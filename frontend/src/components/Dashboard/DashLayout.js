@@ -7,12 +7,25 @@ import '../style/dash-layout-style.css'
 import React, {useEffect, useMemo, useState} from "react";
 import axios from "axios";
 
+const watchlistTagStorageKey = 'stock-watchlist-research-tags-v1';
+
+const loadWatchlistTags = () => {
+    try {
+        const storedTags = JSON.parse(window.localStorage.getItem(watchlistTagStorageKey) || '{}');
+        return storedTags && typeof storedTags === 'object' && !Array.isArray(storedTags)
+            ? storedTags
+            : {};
+    } catch (error) {
+        return {};
+    }
+};
 
 const DashLayout = () => {
 
     const [initialNewsData, setInitialNewsData] = useState({});
     const [watchlist, setWatchlist] = useState([]);
     const [watchlistNotes, setWatchlistNotes] = useState({});
+    const [watchlistTags, setWatchlistTags] = useState(loadWatchlistTags);
     const [watchlistError, setWatchlistError] = useState('');
     const [watchlistNotice, setWatchlistNotice] = useState('');
 
@@ -32,10 +45,33 @@ const DashLayout = () => {
 
                 if (response.ok) {
                     const watchlistData = await response.json();
+                    const accountTags = watchlistData.tags || {};
+                    const storedTags = loadWatchlistTags();
                     setWatchlist(watchlistData.watchlist);
                     setWatchlistNotes(watchlistData.notes || {});
+                    setWatchlistTags({...storedTags, ...accountTags});
                     setWatchlistError('');
                     setWatchlistNotice('');
+
+                    const localOnlyTags = Object.entries(storedTags).filter(([symbol, tags]) => (
+                        watchlistData.watchlist.includes(symbol) &&
+                        !accountTags[symbol] &&
+                        Array.isArray(tags) &&
+                        tags.length > 0
+                    ));
+                    await Promise.allSettled(localOnlyTags.map(([symbol, tags]) => (
+                        fetch(
+                            `https://findashboard-api.onrender.com/api/watchlist/${encodeURIComponent(symbol)}/tags`,
+                            {
+                                method: 'PUT',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    Authorization: `Bearer ${token}`,
+                                },
+                                body: JSON.stringify({tags}),
+                            }
+                        )
+                    )));
                 } else {
                     setWatchlistError('Unable to load watchlist');
                     console.error('Failed to fetch watchlist');
@@ -49,6 +85,14 @@ const DashLayout = () => {
         fetchWatchlist();
 
     }, []);
+
+    useEffect(() => {
+        try {
+            window.localStorage.setItem(watchlistTagStorageKey, JSON.stringify(watchlistTags));
+        } catch (error) {
+            setWatchlistError('Research tags could not be cached in this browser');
+        }
+    }, [watchlistTags]);
 
 
     useEffect(() => {
@@ -151,6 +195,53 @@ const DashLayout = () => {
         }
     };
 
+    const saveWatchlistTags = async (stockTicker, tags) => {
+        const previousTags = watchlistTags;
+        const nextTags = {...watchlistTags};
+
+        if (tags.length > 0) {
+            nextTags[stockTicker] = tags;
+        } else {
+            delete nextTags[stockTicker];
+        }
+        setWatchlistTags(nextTags);
+
+        try {
+            const token = localStorage.getItem('jwt');
+            const response = await fetch(
+                `https://findashboard-api.onrender.com/api/watchlist/${encodeURIComponent(stockTicker)}/tags`,
+                {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        Authorization: `Bearer ${token}`,
+                    },
+                    body: JSON.stringify({tags}),
+                }
+            );
+
+            if (response.ok) {
+                const watchlistData = await response.json();
+                setWatchlistTags(watchlistData.tags || {});
+                setWatchlistNotice(`${stockTicker} research tags synced to your account`);
+                setWatchlistError('');
+                return true;
+            }
+
+            const errorData = await response.json().catch(() => ({}));
+            setWatchlistTags(previousTags);
+            setWatchlistError(errorData.message || `Unable to sync ${stockTicker} tags`);
+            setWatchlistNotice('');
+            return false;
+        } catch (error) {
+            setWatchlistTags(previousTags);
+            setWatchlistError(`Unable to sync ${stockTicker} tags`);
+            setWatchlistNotice('');
+            console.error('Error:', error);
+            return false;
+        }
+    };
+
     const addTickersToWatchlist = async (stockTickers) => {
         const normalizedTickers = normalizeTickers(stockTickers);
 
@@ -219,6 +310,7 @@ const DashLayout = () => {
                 const watchlistData = await response.json();
                 setWatchlist(watchlistData.watchlist);
                 setWatchlistNotes(watchlistData.notes || {});
+                setWatchlistTags(watchlistData.tags || {});
                 setWatchlistError('');
                 setWatchlistNotice(`${stockTicker} removed from your watchlist`);
             } else {
@@ -288,10 +380,12 @@ const DashLayout = () => {
                     onRemoveTicker={removeFromWatchlist}
                     onReorderTicker={reorderWatchlist}
                     onSaveNote={saveWatchlistNote}
+                    onSaveTags={saveWatchlistTags}
                     watchlist={watchlist}
                     watchlistError={watchlistError}
                     watchlistNotes={watchlistNotes}
                     watchlistNotice={watchlistNotice}
+                    watchlistTags={watchlistTags}
                 />
 
                 <div className='dash-news-container py-4 z-10'>

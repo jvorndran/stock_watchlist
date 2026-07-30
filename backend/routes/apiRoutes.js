@@ -12,6 +12,14 @@ const serializeWatchlistNotes = (notes = []) => notes.reduce((serializedNotes, i
     return serializedNotes;
 }, {});
 
+const serializeWatchlistTags = (tagGroups = []) => tagGroups.reduce((serializedTags, item) => {
+    if (item?.ticker && Array.isArray(item?.tags) && item.tags.length > 0) {
+        serializedTags[item.ticker] = item.tags;
+    }
+
+    return serializedTags;
+}, {});
+
 router.post('/signup', (req, res) => {
     const { name, username, password } = req.body;
 
@@ -70,7 +78,11 @@ router.get('/watchlist', (req, res) => {
 
             // Return the watchlist as the response
 
-            res.status(200).json({ watchlist: user.watchlist });
+            res.status(200).json({
+                watchlist: user.watchlist,
+                notes: serializeWatchlistNotes(user.watchlistNotes),
+                tags: serializeWatchlistTags(user.watchlistTags)
+            });
 
         });
     } catch (error) {
@@ -113,7 +125,8 @@ router.post('/watchlist', (req, res) => {
 
             res.status(200).json({
                 watchlist: user.watchlist,
-                notes: serializeWatchlistNotes(user.watchlistNotes)
+                notes: serializeWatchlistNotes(user.watchlistNotes),
+                tags: serializeWatchlistTags(user.watchlistTags)
             });
         });
     } catch (error) {
@@ -281,6 +294,71 @@ router.put('/watchlist/:stockTicker/note', (req, res) => {
     }
 });
 
+router.put('/watchlist/:stockTicker/tags', (req, res) => {
+    try {
+        const token = req.headers.authorization?.split(' ')[1];
+        const stockTicker = String(req.params.stockTicker || '').trim().toUpperCase();
+        const allowedTags = new Set(['core', 'swing', 'earnings', 'income']);
+        const requestedTags = Array.isArray(req.body?.tags) ? req.body.tags : [];
+        const tags = [...new Set(requestedTags.map((tag) => String(tag).trim().toLowerCase()))];
+
+        if (!token) {
+            return res.status(401).json({ message: 'Missing token' });
+        }
+
+        if (!stockTicker) {
+            return res.status(400).json({ message: 'Stock ticker is required' });
+        }
+
+        if (tags.some((tag) => !allowedTags.has(tag))) {
+            return res.status(400).json({ message: 'Research tags contain an unsupported value' });
+        }
+
+        jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, async (err, decodedToken) => {
+            if (err) {
+                return res.status(401).json({ message: 'Invalid token' });
+            }
+
+            try {
+                const { username } = decodedToken.UserInfo;
+                const user = await User.findOne({ username });
+
+                if (!user) {
+                    return res.status(404).json({ message: 'User not found' });
+                }
+
+                if (!user.watchlist.includes(stockTicker)) {
+                    return res.status(400).json({ message: 'Add the symbol to your watchlist before saving tags' });
+                }
+
+                const existingTags = user.watchlistTags.find((item) => item.ticker === stockTicker);
+
+                if (tags.length === 0 && existingTags) {
+                    user.watchlistTags.pull(existingTags._id);
+                } else if (existingTags) {
+                    existingTags.tags = tags;
+                    existingTags.updatedAt = new Date();
+                } else if (tags.length > 0) {
+                    user.watchlistTags.push({ ticker: stockTicker, tags, updatedAt: new Date() });
+                }
+
+                await user.save();
+
+                res.status(200).json({
+                    watchlist: user.watchlist,
+                    tags: serializeWatchlistTags(user.watchlistTags)
+                });
+            } catch (error) {
+                console.error('Error:', error);
+                res.status(500).json({ message: 'Server error' });
+            }
+        });
+    } catch (error) {
+        console.error('Error:', error);
+        res.status(500).json({ message: 'Server error' });
+    }
+});
+
 router.delete('/watchlist/:stockTicker', (req, res) => {
     try {
         const token = req.headers.authorization?.split(' ')[1];
@@ -299,7 +377,13 @@ router.delete('/watchlist/:stockTicker', (req, res) => {
 
             const user = await User.findOneAndUpdate(
                 { username },
-                { $pull: { watchlist: stockTicker, watchlistNotes: { ticker: stockTicker } } },
+                {
+                    $pull: {
+                        watchlist: stockTicker,
+                        watchlistNotes: { ticker: stockTicker },
+                        watchlistTags: { ticker: stockTicker }
+                    }
+                },
                 { new: true }
             );
 
@@ -309,7 +393,8 @@ router.delete('/watchlist/:stockTicker', (req, res) => {
 
             res.status(200).json({
                 watchlist: user.watchlist,
-                notes: serializeWatchlistNotes(user.watchlistNotes)
+                notes: serializeWatchlistNotes(user.watchlistNotes),
+                tags: serializeWatchlistTags(user.watchlistTags)
             });
         });
     } catch (error) {

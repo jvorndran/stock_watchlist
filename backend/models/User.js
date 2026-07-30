@@ -24,6 +24,18 @@ const userSchema = new mongoose.Schema({
             updatedAt: { type: Date, default: Date.now }
         }],
         default: []
+    },
+    watchlistTags: {
+        type: [{
+            ticker: { type: String, required: true },
+            tags: {
+                type: [String],
+                enum: ['core', 'swing', 'earnings', 'income'],
+                default: []
+            },
+            updatedAt: { type: Date, default: Date.now }
+        }],
+        default: []
     }
 });
 
