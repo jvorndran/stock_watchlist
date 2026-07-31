@@ -1,0 +1,185 @@
+.stock-analyst-consensus {
+    background: #22232d;
+    border-radius: 8px;
+    color: #ffffff;
+    display: grid;
+    gap: 1rem;
+    margin: 1rem 2.5rem;
+    padding: 1rem;
+}
+
+.stock-analyst-consensus__header {
+    align-items: center;
+    display: flex;
+    gap: 1rem;
+    justify-content: space-between;
+}
+
+.stock-analyst-consensus__header h2 {
+    font-size: 1.25rem;
+    font-weight: 700;
+    margin: 0;
+}
+
+.stock-analyst-consensus__header span {
+    color: #aeb6c5;
+    display: block;
+    margin-top: 0.2rem;
+}
+
+.stock-analyst-consensus__header > strong {
+    background: rgba(37, 99, 235, 0.18);
+    border: 1px solid rgba(96, 165, 250, 0.55);
+    border-radius: 999px;
+    color: #bfdbfe;
+    padding: 0.45rem 0.8rem;
+    white-space: nowrap;
+}
+
+.stock-analyst-consensus__metrics {
+    display: grid;
+    gap: 0.85rem;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.stock-analyst-consensus__metrics article {
+    background: #171923;
+    border: 1px solid #343947;
+    border-radius: 6px;
+    display: grid;
+    gap: 0.45rem;
+    min-height: 7.5rem;
+    padding: 0.9rem;
+}
+
+.stock-analyst-consensus__metrics article > span {
+    color: #aeb6c5;
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.stock-analyst-consensus__metrics article > strong {
+    font-size: 1.45rem;
+}
+
+.stock-analyst-consensus__metrics article > small {
+    color: #d7deea;
+}
+
+.stock-analyst-consensus__metrics .is-bullish > strong {
+    color: #4ade80;
+}
+
+.stock-analyst-consensus__metrics .is-bearish > strong {
+    color: #f87171;
+}
+
+.stock-analyst-consensus__bar {
+    background: #343947;
+    border-radius: 999px;
+    display: flex;
+    height: 1rem;
+    overflow: hidden;
+}
+
+.stock-analyst-consensus__segment {
+    min-width: 2px;
+}
+
+.stock-analyst-consensus__segment--strong-buy,
+.stock-analyst-consensus__dot--strong-buy {
+    background: #16a34a;
+}
+
+.stock-analyst-consensus__segment--buy,
+.stock-analyst-consensus__dot--buy {
+    background: #4ade80;
+}
+
+.stock-analyst-consensus__segment--hold,
+.stock-analyst-consensus__dot--hold {
+    background: #facc15;
+}
+
+.stock-analyst-consensus__segment--sell,
+.stock-analyst-consensus__dot--sell {
+    background: #fb923c;
+}
+
+.stock-analyst-consensus__segment--strong-sell,
+.stock-analyst-consensus__dot--strong-sell {
+    background: #dc2626;
+}
+
+.stock-analyst-consensus__breakdown {
+    display: grid;
+    gap: 0.55rem 1rem;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+
+.stock-analyst-consensus__breakdown > div {
+    align-items: center;
+    background: #171923;
+    border: 1px solid #343947;
+    border-radius: 6px;
+    display: grid;
+    gap: 0.35rem;
+    grid-template-columns: auto 1fr auto;
+    padding: 0.65rem;
+}
+
+.stock-analyst-consensus__breakdown span {
+    color: #d7deea;
+    font-size: 0.8rem;
+}
+
+.stock-analyst-consensus__breakdown small {
+    color: #8f99aa;
+    grid-column: 2 / 4;
+}
+
+.stock-analyst-consensus__dot {
+    border-radius: 50%;
+    height: 0.65rem;
+    width: 0.65rem;
+}
+
+.stock-analyst-consensus__empty {
+    background: #171923;
+    border: 1px dashed #4b5563;
+    border-radius: 6px;
+    color: #d7deea;
+    margin: 0;
+    padding: 1rem;
+}
+
+.stock-analyst-consensus__disclaimer {
+    color: #8f99aa;
+}
+
+@media (max-width: 1050px) {
+    .stock-analyst-consensus__metrics {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .stock-analyst-consensus__breakdown {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 650px) {
+    .stock-analyst-consensus {
+        margin: 1rem;
+    }
+
+    .stock-analyst-consensus__header {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .stock-analyst-consensus__metrics,
+    .stock-analyst-consensus__breakdown {
+        grid-template-columns: 1fr;
+    }
+}

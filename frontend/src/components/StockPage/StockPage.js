@@ -13,6 +13,7 @@ import StockRiskChecklist from './StockRiskChecklist';
 import StockTrendPanel from './StockTrendPanel';
 import StockValuationPlanner from './StockValuationPlanner';
 import StockPositionPlanner from './StockPositionPlanner';
+import StockAnalystConsensus from './StockAnalystConsensus';
 import "../../index.css"
 
 const StockPage = () => {
@@ -53,6 +54,8 @@ const StockPage = () => {
                     <StockTrendPanel stockData={stockData} />
 
                     <StockTargetPanel stockData={stockData} />
+
+                    <StockAnalystConsensus stockData={stockData} />
 
                     <StockScorecard stockData={stockData} />
 
