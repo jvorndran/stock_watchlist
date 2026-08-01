@@ -560,6 +560,106 @@
     margin: 0;
 }
 
+.watchlist-plan-exposure {
+    background: linear-gradient(135deg, #171b25, #202635);
+    border: 1px solid #3b455a;
+    border-radius: 8px;
+    display: grid;
+    gap: 0.9rem;
+    padding: 1rem;
+}
+
+.watchlist-plan-exposure__header {
+    align-items: flex-start;
+    display: flex;
+    gap: 1rem;
+    justify-content: space-between;
+}
+
+.watchlist-plan-exposure__header h3 {
+    font-size: 1.05rem;
+    font-weight: 700;
+    margin: 0;
+}
+
+.watchlist-plan-exposure__header span,
+.watchlist-plan-exposure__direction span,
+.watchlist-plan-exposure__direction small {
+    color: #aeb6c5;
+    font-size: 0.78rem;
+}
+
+.watchlist-plan-exposure__header strong {
+    background: #1e3a5f;
+    border: 1px solid #3b82f6;
+    border-radius: 999px;
+    color: #dbeafe;
+    font-size: 0.75rem;
+    padding: 0.35rem 0.65rem;
+    white-space: nowrap;
+}
+
+.watchlist-plan-exposure__grid {
+    display: grid;
+    gap: 0.65rem;
+    grid-template-columns: repeat(auto-fit, minmax(155px, 1fr));
+}
+
+.watchlist-plan-exposure__grid article {
+    background: rgba(35, 39, 51, 0.82);
+    border: 1px solid #3a4050;
+    border-radius: 6px;
+    display: grid;
+    gap: 0.25rem;
+    padding: 0.75rem;
+}
+
+.watchlist-plan-exposure__grid article > span,
+.watchlist-plan-exposure__grid article > small {
+    color: #aeb6c5;
+    font-size: 0.72rem;
+}
+
+.watchlist-plan-exposure__grid article > strong {
+    color: #f8fafc;
+    font-size: 1.1rem;
+}
+
+.watchlist-plan-exposure__grid article.is-positive > strong {
+    color: #86efac;
+}
+
+.watchlist-plan-exposure__grid article.is-short > strong {
+    color: #fda4af;
+}
+
+.watchlist-plan-exposure__direction {
+    display: grid;
+    gap: 0.45rem;
+}
+
+.watchlist-plan-exposure__direction > div:first-child {
+    display: flex;
+    justify-content: space-between;
+}
+
+.watchlist-plan-exposure__bar {
+    background: #9f3048;
+    border-radius: 999px;
+    height: 0.65rem;
+    overflow: hidden;
+}
+
+.watchlist-plan-exposure__bar > span {
+    background: #3b82f6;
+    display: block;
+    height: 100%;
+}
+
+.watchlist-plan-exposure__direction .watchlist-plan-exposure__warning {
+    color: #fde68a;
+}
+
 .watchlist-allocation {
     background: #1b1f2a;
     border: 1px solid #303646;
@@ -678,6 +778,10 @@
 
     .watchlist-workflow__header {
         align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .watchlist-plan-exposure__header {
         flex-direction: column;
     }
 

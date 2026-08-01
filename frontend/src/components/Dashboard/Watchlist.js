@@ -79,6 +79,68 @@ const analyzeTradePlan = (plan, riskBudget) => {
     };
 };
 
+export const summarizeTradePlanExposure = (symbols, tradePlans, riskBudget) => {
+    const exposure = symbols.reduce((summary, symbol) => {
+        const savedPlan = tradePlans[symbol];
+
+        if (!savedPlan) {
+            return summary;
+        }
+
+        const analysis = analyzeTradePlan(savedPlan, riskBudget);
+
+        if (!analysis) {
+            summary.invalidPlans += 1;
+            return summary;
+        }
+
+        const plannedRisk = analysis.shares * Math.abs(analysis.entry - analysis.stop);
+        summary.validPlans += 1;
+        summary.totalCapital += analysis.capital;
+        summary.totalRisk += plannedRisk;
+        summary.totalReward += analysis.reward;
+
+        if (analysis.direction === 'Long') {
+            summary.longPlans += 1;
+            summary.longCapital += analysis.capital;
+        } else {
+            summary.shortPlans += 1;
+            summary.shortCapital += analysis.capital;
+        }
+
+        if (!summary.largestPosition || analysis.capital > summary.largestPosition.capital) {
+            summary.largestPosition = {symbol, capital: analysis.capital};
+        }
+
+        return summary;
+    }, {
+        invalidPlans: 0,
+        largestPosition: null,
+        longCapital: 0,
+        longPlans: 0,
+        shortCapital: 0,
+        shortPlans: 0,
+        totalCapital: 0,
+        totalReward: 0,
+        totalRisk: 0,
+        validPlans: 0,
+    });
+
+    return {
+        ...exposure,
+        largestPositionShare: exposure.totalCapital > 0 && exposure.largestPosition
+            ? exposure.largestPosition.capital / exposure.totalCapital
+            : 0,
+        longCapitalShare: exposure.totalCapital > 0
+            ? exposure.longCapital / exposure.totalCapital
+            : 0,
+        netDirectionalCapital: exposure.longCapital - exposure.shortCapital,
+        weightedRewardMultiple: exposure.totalRisk > 0
+            ? exposure.totalReward / exposure.totalRisk
+            : 0,
+    };
+};
+
 const getWorkflowState = (symbol, watchlistNotes, tradePlans) => {
     const hasNote = Boolean(String(watchlistNotes[symbol] || '').trim());
     const hasPlan = Boolean(tradePlans[symbol]);
@@ -177,6 +239,12 @@ const Watchlist = ({
         )).length;
         return counts;
     }, {}), [watchlist, watchlistTags]);
+
+    const planExposure = useMemo(() => summarizeTradePlanExposure(
+        visibleWatchlist,
+        tradePlans,
+        riskBudget
+    ), [visibleWatchlist, tradePlans, riskBudget]);
 
     const parsedPortfolioValue = useMemo(() => {
         const value = Number(String(portfolioValue).replace(/[^0-9.]/g, ''));
@@ -496,6 +564,77 @@ const Watchlist = ({
             </div>
 
             {planMessage && <p className="watchlist-plan-message" aria-live="polite">{planMessage}</p>}
+
+            <section className="watchlist-plan-exposure" aria-labelledby="watchlist-plan-exposure-title">
+                <div className="watchlist-plan-exposure__header">
+                    <div>
+                        <h3 id="watchlist-plan-exposure-title">Portfolio Plan Exposure</h3>
+                        <span>Combined sizing for saved plans in the current watchlist view.</span>
+                    </div>
+                    <strong>{planExposure.validPlans} active plan{planExposure.validPlans === 1 ? '' : 's'}</strong>
+                </div>
+
+                {planExposure.validPlans > 0 ? (
+                    <>
+                        <div className="watchlist-plan-exposure__grid">
+                            <article>
+                                <span>Capital Required</span>
+                                <strong>{formatMoney(planExposure.totalCapital)}</strong>
+                                <small>{planExposure.longPlans} long / {planExposure.shortPlans} short</small>
+                            </article>
+                            <article>
+                                <span>Planned Risk</span>
+                                <strong>{formatMoney(planExposure.totalRisk)}</strong>
+                                <small>At {formatMoney(parsePositiveNumber(riskBudget))} risk per setup</small>
+                            </article>
+                            <article className="is-positive">
+                                <span>Planned Reward</span>
+                                <strong>{formatMoney(planExposure.totalReward)}</strong>
+                                <small>{planExposure.weightedRewardMultiple.toFixed(2)}R weighted reward/risk</small>
+                            </article>
+                            <article className={planExposure.netDirectionalCapital < 0 ? 'is-short' : ''}>
+                                <span>Net Direction</span>
+                                <strong>
+                                    {formatMoney(Math.abs(planExposure.netDirectionalCapital))}
+                                    {' '}
+                                    {Math.abs(planExposure.netDirectionalCapital) < 0.01
+                                        ? 'balanced'
+                                        : planExposure.netDirectionalCapital < 0 ? 'short' : 'long'}
+                                </strong>
+                                <small>Long capital minus short capital</small>
+                            </article>
+                        </div>
+
+                        <div className="watchlist-plan-exposure__direction">
+                            <div>
+                                <span>Long capital {formatMoney(planExposure.longCapital)}</span>
+                                <span>Short capital {formatMoney(planExposure.shortCapital)}</span>
+                            </div>
+                            <div
+                                aria-label={`${(planExposure.longCapitalShare * 100).toFixed(0)} percent long capital and ${((1 - planExposure.longCapitalShare) * 100).toFixed(0)} percent short capital`}
+                                className="watchlist-plan-exposure__bar"
+                                role="img">
+                                <span style={{width: `${planExposure.longCapitalShare * 100}%`}}></span>
+                            </div>
+                            {planExposure.largestPosition && (
+                                <small>
+                                    Largest position: {planExposure.largestPosition.symbol} at {formatMoney(planExposure.largestPosition.capital)}
+                                    {' '}({(planExposure.largestPositionShare * 100).toFixed(1)}% of planned capital)
+                                </small>
+                            )}
+                            {planExposure.invalidPlans > 0 && (
+                                <small className="watchlist-plan-exposure__warning">
+                                    {planExposure.invalidPlans} saved plan{planExposure.invalidPlans === 1 ? '' : 's'} need valid entry, stop, and target levels.
+                                </small>
+                            )}
+                        </div>
+                    </>
+                ) : (
+                    <p className="watchlist-manager__empty">
+                        Save an entry, stop, and target on a visible symbol to build the exposure view.
+                    </p>
+                )}
+            </section>
 
             {watchlist.length > 1 && (
                 <p className="watchlist-manager__order-hint">
