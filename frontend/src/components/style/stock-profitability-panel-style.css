@@ -1,0 +1,194 @@
+.stock-profitability-panel {
+    background: #1f2330;
+    border: 1px solid #343b4d;
+    border-radius: 8px;
+    color: #f8fafc;
+    display: grid;
+    gap: 1rem;
+    margin: 1rem 10vw;
+    padding: 1rem;
+}
+
+.stock-profitability-panel__header {
+    align-items: center;
+    display: flex;
+    gap: 1rem;
+    justify-content: space-between;
+}
+
+.stock-profitability-panel__header h2,
+.stock-profitability-panel__analysis h3 {
+    margin: 0;
+}
+
+.stock-profitability-panel__header h2 {
+    font-size: 1.15rem;
+    font-weight: 700;
+}
+
+.stock-profitability-panel__header span,
+.stock-profitability-panel__disclaimer {
+    color: #aeb6c5;
+    font-size: 0.82rem;
+}
+
+.stock-profitability-panel__header > strong {
+    background: #173d3b;
+    border: 1px solid #2f766f;
+    border-radius: 999px;
+    color: #99f6e4;
+    font-size: 0.78rem;
+    padding: 0.45rem 0.75rem;
+    white-space: nowrap;
+}
+
+.stock-profitability-panel__header > strong.is-negative {
+    background: #4c1720;
+    border-color: #9f3448;
+    color: #fecdd3;
+}
+
+.stock-profitability-panel__header > strong.is-neutral {
+    background: #30384a;
+    border-color: #526075;
+    color: #cbd5e1;
+}
+
+.stock-profitability-panel__scale {
+    display: grid;
+    gap: 0.75rem;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.stock-profitability-panel__scale article,
+.stock-profitability-panel__returns article {
+    background: #272d3c;
+    border: 1px solid #3a4358;
+    border-radius: 6px;
+    display: grid;
+    gap: 0.3rem;
+    padding: 0.85rem;
+}
+
+.stock-profitability-panel__scale span,
+.stock-profitability-panel__returns span,
+.stock-profitability-panel__scale small,
+.stock-profitability-panel__returns small,
+.stock-profitability-panel__margin small {
+    color: #aeb6c5;
+    font-size: 0.76rem;
+}
+
+.stock-profitability-panel__scale strong {
+    font-size: 1.35rem;
+}
+
+.stock-profitability-panel__analysis {
+    display: grid;
+    gap: 1rem;
+    grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr);
+}
+
+.stock-profitability-panel__margins,
+.stock-profitability-panel__returns {
+    background: #181c27;
+    border: 1px solid #343b4d;
+    border-radius: 7px;
+    display: grid;
+    gap: 0.75rem;
+    padding: 0.9rem;
+}
+
+.stock-profitability-panel__analysis h3 {
+    font-size: 0.95rem;
+}
+
+.stock-profitability-panel__margin {
+    display: grid;
+    gap: 0.3rem;
+}
+
+.stock-profitability-panel__margin > div:first-child {
+    align-items: center;
+    display: flex;
+    font-size: 0.8rem;
+    justify-content: space-between;
+}
+
+.stock-profitability-panel__margin strong.is-negative,
+.stock-profitability-panel__returns strong.is-negative {
+    color: #fda4af;
+}
+
+.stock-profitability-panel__track {
+    background: #30384a;
+    border-radius: 999px;
+    height: 8px;
+    overflow: hidden;
+}
+
+.stock-profitability-panel__track span {
+    background: linear-gradient(90deg, #14b8a6, #67e8f9);
+    border-radius: inherit;
+    display: block;
+    height: 100%;
+    min-width: 2px;
+}
+
+.stock-profitability-panel__track span.is-negative {
+    background: linear-gradient(90deg, #e11d48, #fda4af);
+}
+
+.stock-profitability-panel__returns {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.stock-profitability-panel__returns h3 {
+    grid-column: 1 / -1;
+}
+
+.stock-profitability-panel__returns strong {
+    color: #99f6e4;
+    font-size: 1.1rem;
+}
+
+.stock-profitability-panel__empty {
+    background: #272d3c;
+    border: 1px dashed #526075;
+    border-radius: 6px;
+    color: #cbd5e1;
+    margin: 0;
+    padding: 1rem;
+}
+
+.stock-profitability-panel__disclaimer {
+    border-top: 1px solid #343b4d;
+    padding-top: 0.75rem;
+}
+
+@media (max-width: 900px) {
+    .stock-profitability-panel__analysis {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 700px) {
+    .stock-profitability-panel {
+        margin-left: 1rem;
+        margin-right: 1rem;
+    }
+
+    .stock-profitability-panel__header {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .stock-profitability-panel__scale,
+    .stock-profitability-panel__returns {
+        grid-template-columns: 1fr;
+    }
+
+    .stock-profitability-panel__returns h3 {
+        grid-column: auto;
+    }
+}
