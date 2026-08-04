@@ -15,6 +15,7 @@ import StockValuationPlanner from './StockValuationPlanner';
 import StockPositionPlanner from './StockPositionPlanner';
 import StockAnalystConsensus from './StockAnalystConsensus';
 import StockProfitabilityPanel from './StockProfitabilityPanel';
+import StockShortInterestPanel from './StockShortInterestPanel';
 import "../../index.css"
 
 const StockPage = () => {
@@ -57,6 +58,8 @@ const StockPage = () => {
                     <StockTargetPanel stockData={stockData} />
 
                     <StockAnalystConsensus stockData={stockData} />
+
+                    <StockShortInterestPanel stockData={stockData} />
 
                     <StockScorecard stockData={stockData} />
 
