@@ -1,0 +1,137 @@
+.stock-earnings-outlook {
+    display: grid;
+    gap: 1rem;
+    margin: 1rem 10vw;
+    padding: 1rem;
+    border: 1px solid #36556c;
+    border-radius: 8px;
+    background: linear-gradient(135deg, #172a3a, #111c2a);
+    color: #f8fafc;
+}
+
+.stock-earnings-outlook__header,
+.stock-earnings-outlook__reference {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.stock-earnings-outlook__header h2 {
+    margin: 0 0 0.25rem;
+    font-size: 1.15rem;
+}
+
+.stock-earnings-outlook__header span,
+.stock-earnings-outlook__metrics small,
+.stock-earnings-outlook__reference small,
+.stock-earnings-outlook__disclaimer {
+    color: #adc3d2;
+    font-size: 0.8rem;
+}
+
+.stock-earnings-outlook__header > strong {
+    padding: 0.4rem 0.65rem;
+    border: 1px solid #397993;
+    border-radius: 999px;
+    background: #133d50;
+    color: #a7f3d0;
+    font-size: 0.76rem;
+    white-space: nowrap;
+}
+
+.stock-earnings-outlook__header > strong.is-negative {
+    border-color: #b4525f;
+    background: #49232d;
+    color: #fecdd3;
+}
+
+.stock-earnings-outlook__header > strong.is-neutral {
+    border-color: #56677a;
+    background: #263746;
+    color: #d5e0e9;
+}
+
+.stock-earnings-outlook__metrics {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 0.7rem;
+}
+
+.stock-earnings-outlook__metrics article,
+.stock-earnings-outlook__reference > div {
+    display: grid;
+    gap: 0.35rem;
+    padding: 0.75rem;
+    border: 1px solid #314d60;
+    border-radius: 6px;
+    background: rgba(7, 18, 29, 0.55);
+}
+
+.stock-earnings-outlook__metrics span,
+.stock-earnings-outlook__reference span {
+    color: #90b9ce;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.stock-earnings-outlook__metrics strong,
+.stock-earnings-outlook__reference strong {
+    color: #f8fafc;
+    font-size: 1.1rem;
+}
+
+.stock-earnings-outlook strong.is-negative {
+    color: #fda4af;
+}
+
+.stock-earnings-outlook__reference {
+    align-items: stretch;
+}
+
+.stock-earnings-outlook__reference > div {
+    flex: 1;
+}
+
+.stock-earnings-outlook__empty {
+    margin: 0;
+    padding: 0.85rem;
+    border: 1px dashed #476276;
+    border-radius: 6px;
+    color: #c2d2df;
+}
+
+.stock-earnings-outlook__disclaimer {
+    border-top: 1px solid #314d60;
+    padding-top: 0.75rem;
+}
+
+@media (max-width: 900px) {
+    .stock-earnings-outlook__metrics {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 650px) {
+    .stock-earnings-outlook {
+        margin-right: 1rem;
+        margin-left: 1rem;
+    }
+
+    .stock-earnings-outlook__header,
+    .stock-earnings-outlook__reference {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .stock-earnings-outlook__reference {
+        width: 100%;
+    }
+
+    .stock-earnings-outlook__reference > div {
+        width: 100%;
+        box-sizing: border-box;
+    }
+}
