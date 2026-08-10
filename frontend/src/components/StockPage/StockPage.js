@@ -18,6 +18,7 @@ import StockProfitabilityPanel from './StockProfitabilityPanel';
 import StockShortInterestPanel from './StockShortInterestPanel';
 import StockCompanyProfile from './StockCompanyProfile';
 import StockEarningsOutlook from './StockEarningsOutlook';
+import StockBalanceSheetHealth from './StockBalanceSheetHealth';
 import "../../index.css"
 
 const StockPage = () => {
@@ -58,6 +59,8 @@ const StockPage = () => {
                     <StockInsights stockData={stockData} />
 
                     <StockEarningsOutlook stockData={stockData} />
+
+                    <StockBalanceSheetHealth stockData={stockData} />
 
                     <StockTrendPanel stockData={stockData} />
 
