@@ -1,4 +1,37 @@
-import {summarizeTradePlanExposure} from './Watchlist';
+import {buildResearchPriority, summarizeTradePlanExposure} from './Watchlist';
+
+describe('buildResearchPriority', () => {
+    it('ranks a missing thesis and plan above prepared research', () => {
+        const unprepared = buildResearchPriority('UNPREPARED', {}, {}, 100);
+        const prepared = buildResearchPriority('PREPARED', {PREPARED: 'A documented thesis'}, {
+            PREPARED: {entry: 100, stop: 95, target: 112},
+        }, 100);
+
+        expect(unprepared).toMatchObject({
+            action: 'Write a thesis',
+            issueCount: 2,
+            score: 7,
+            symbol: 'UNPREPARED',
+        });
+        expect(prepared).toMatchObject({
+            action: 'Research complete',
+            issueCount: 0,
+            score: 0,
+        });
+    });
+
+    it('surfaces malformed plans before lower reward/risk concerns', () => {
+        const invalidPlan = buildResearchPriority('BROKEN', {BROKEN: 'Needs a valid setup'}, {
+            BROKEN: {entry: 25, stop: 25, target: 35},
+        }, 100);
+        const lowReward = buildResearchPriority('LOWR', {LOWR: 'Has a plan'}, {
+            LOWR: {entry: 100, stop: 95, target: 107},
+        }, 100);
+
+        expect(invalidPlan).toMatchObject({action: 'Repair the trade plan', score: 5});
+        expect(lowReward).toMatchObject({action: 'Review reward/risk', score: 2});
+    });
+});
 
 describe('summarizeTradePlanExposure', () => {
     it('combines long and short plans into portfolio exposure totals', () => {

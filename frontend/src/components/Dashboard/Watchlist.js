@@ -148,6 +148,39 @@ const getWorkflowState = (symbol, watchlistNotes, tradePlans) => {
     return {hasNote, hasPlan, ready: hasNote && hasPlan};
 };
 
+export const buildResearchPriority = (symbol, watchlistNotes, tradePlans, riskBudget) => {
+    const hasNote = Boolean(String(watchlistNotes[symbol] || '').trim());
+    const savedPlan = tradePlans[symbol];
+    const analysis = savedPlan ? analyzeTradePlan(savedPlan, riskBudget) : null;
+    const issues = [];
+
+    if (savedPlan && !analysis) {
+        issues.push({action: 'Repair the trade plan', detail: 'Saved levels must form a valid long or short setup.', score: 5});
+    }
+
+    if (!hasNote) {
+        issues.push({action: 'Write a thesis', detail: 'Capture what would confirm or invalidate the idea.', score: 4});
+    }
+
+    if (!savedPlan) {
+        issues.push({action: 'Define a trade plan', detail: 'Add an entry, stop, and target to size the setup.', score: 3});
+    }
+
+    if (analysis && analysis.rewardMultiple < 2) {
+        issues.push({action: 'Review reward/risk', detail: `${analysis.rewardMultiple.toFixed(1)}R is below the 2.0R planning threshold.`, score: 2});
+    }
+
+    const primaryIssue = issues[0];
+
+    return {
+        action: primaryIssue?.action || 'Research complete',
+        detail: primaryIssue?.detail || 'Thesis and valid trade plan are both saved.',
+        issueCount: issues.length,
+        score: issues.reduce((total, issue) => total + issue.score, 0),
+        symbol,
+    };
+};
+
 const Watchlist = ({
     onAddTicker,
     onAddTickers,
@@ -245,6 +278,12 @@ const Watchlist = ({
         tradePlans,
         riskBudget
     ), [visibleWatchlist, tradePlans, riskBudget]);
+
+    const researchPriorities = useMemo(() => visibleWatchlist
+        .map((symbol) => buildResearchPriority(symbol, watchlistNotes, tradePlans, riskBudget))
+        .filter((priority) => priority.score > 0)
+        .sort((first, second) => second.score - first.score || first.symbol.localeCompare(second.symbol))
+        .slice(0, 3), [visibleWatchlist, watchlistNotes, tradePlans, riskBudget]);
 
     const parsedPortfolioValue = useMemo(() => {
         const value = Number(String(portfolioValue).replace(/[^0-9.]/g, ''));
@@ -543,6 +582,35 @@ const Watchlist = ({
                         </button>
                     ))}
                 </div>
+            </section>
+
+            <section className="watchlist-priority" aria-labelledby="watchlist-priority-title">
+                <div className="watchlist-priority__header">
+                    <div>
+                        <h3 id="watchlist-priority-title">Research Priority Queue</h3>
+                        <span>Focus your next research task on the gaps that most affect execution.</span>
+                    </div>
+                    <strong>{researchPriorities.length} action{researchPriorities.length === 1 ? '' : 's'}</strong>
+                </div>
+
+                {researchPriorities.length > 0 ? (
+                    <div className="watchlist-priority__grid">
+                        {researchPriorities.map((priority) => (
+                            <Link className="watchlist-priority__item" key={priority.symbol} to={`/dash/${priority.symbol}`}>
+                                <div>
+                                    <span>Priority {priority.score}</span>
+                                    <strong>{priority.symbol}</strong>
+                                </div>
+                                <p>{priority.action}</p>
+                                <small>{priority.detail} {priority.issueCount > 1 ? `${priority.issueCount} gaps found.` : ''}</small>
+                            </Link>
+                        ))}
+                    </div>
+                ) : (
+                    <p className="watchlist-manager__empty">
+                        Every visible symbol has a thesis and a valid trade plan with at least 2.0R reward/risk.
+                    </p>
+                )}
             </section>
 
             <div className="watchlist-risk-budget">

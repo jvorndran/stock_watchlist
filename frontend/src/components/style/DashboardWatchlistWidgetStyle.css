@@ -173,6 +173,96 @@
     font-size: 1.4rem;
 }
 
+.watchlist-priority {
+    background: linear-gradient(135deg, #1d2433, #262338);
+    border: 1px solid #5b557e;
+    border-radius: 6px;
+    display: grid;
+    gap: 0.75rem;
+    padding: 1rem;
+}
+
+.watchlist-priority__header {
+    align-items: baseline;
+    display: flex;
+    gap: 1rem;
+    justify-content: space-between;
+}
+
+.watchlist-priority__header h3 {
+    font-size: 1.05rem;
+    font-weight: 700;
+    margin: 0 0 0.2rem;
+}
+
+.watchlist-priority__header span,
+.watchlist-priority__item small {
+    color: #c4c5dc;
+    font-size: 0.8rem;
+}
+
+.watchlist-priority__header > strong {
+    background: #453c6f;
+    border: 1px solid #8275bd;
+    border-radius: 999px;
+    color: #e4dfff;
+    font-size: 0.75rem;
+    padding: 0.35rem 0.65rem;
+    white-space: nowrap;
+}
+
+.watchlist-priority__grid {
+    display: grid;
+    gap: 0.6rem;
+    grid-template-columns: repeat(auto-fit, minmax(205px, 1fr));
+}
+
+.watchlist-priority__item {
+    background: rgba(38, 35, 56, 0.84);
+    border: 1px solid #5f5a84;
+    border-radius: 5px;
+    color: #f8fafc;
+    display: grid;
+    gap: 0.3rem;
+    padding: 0.75rem;
+    text-decoration: none;
+    transition: border-color 160ms ease, transform 160ms ease;
+}
+
+.watchlist-priority__item:hover,
+.watchlist-priority__item:focus-visible {
+    border-color: #a78bfa;
+    transform: translateY(-1px);
+}
+
+.watchlist-priority__item > div {
+    align-items: center;
+    display: flex;
+    justify-content: space-between;
+}
+
+.watchlist-priority__item span {
+    color: #c4b5fd;
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.watchlist-priority__item strong {
+    color: #ffffff;
+}
+
+.watchlist-priority__item p {
+    color: #ede9fe;
+    font-size: 0.88rem;
+    font-weight: 700;
+    margin: 0;
+}
+
+.watchlist-priority__item small {
+    line-height: 1.35;
+}
+
 .watchlist-risk-budget {
     align-items: flex-end;
     background: #1b1f2a;
@@ -777,6 +867,11 @@
     }
 
     .watchlist-workflow__header {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .watchlist-priority__header {
         align-items: flex-start;
         flex-direction: column;
     }
