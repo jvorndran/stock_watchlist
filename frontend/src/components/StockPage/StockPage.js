@@ -22,6 +22,7 @@ import StockBalanceSheetHealth from './StockBalanceSheetHealth';
 import StockCashFlowPanel from './StockCashFlowPanel';
 import StockGrowthMomentum from './StockGrowthMomentum';
 import StockEnterpriseValueLens from './StockEnterpriseValueLens';
+import StockCapitalAllocation from './StockCapitalAllocation';
 import "../../index.css"
 
 const StockPage = () => {
@@ -66,6 +67,8 @@ const StockPage = () => {
                     <StockBalanceSheetHealth stockData={stockData} />
 
                     <StockCashFlowPanel stockData={stockData} />
+
+                    <StockCapitalAllocation stockData={stockData} />
 
                     <StockEnterpriseValueLens stockData={stockData} />
 

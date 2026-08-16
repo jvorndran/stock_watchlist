@@ -1,0 +1,119 @@
+.stock-capital-allocation {
+    display: grid;
+    gap: 1rem;
+    margin: 1rem 10vw;
+    padding: 1rem;
+    border: 1px solid #397a73;
+    border-radius: 8px;
+    background: linear-gradient(135deg, #102b2a, #151f28);
+    color: #f8fafc;
+}
+
+.stock-capital-allocation__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.stock-capital-allocation__header h2 {
+    margin: 0 0 0.25rem;
+    font-size: 1.15rem;
+}
+
+.stock-capital-allocation__header span,
+.stock-capital-allocation article small,
+.stock-capital-allocation__disclaimer {
+    color: #b8d6d2;
+    font-size: 0.8rem;
+}
+
+.stock-capital-allocation__header > strong {
+    padding: 0.4rem 0.65rem;
+    border: 1px solid #4ba595;
+    border-radius: 999px;
+    background: #164c47;
+    color: #c9fff5;
+    font-size: 0.76rem;
+    white-space: nowrap;
+}
+
+.stock-capital-allocation__header > strong.is-negative,
+.stock-capital-allocation article.is-negative > strong,
+.stock-capital-allocation article > strong.is-negative {
+    border-color: #e88b86;
+    color: #ffc2bd;
+}
+
+.stock-capital-allocation__header > strong.is-neutral {
+    border-color: #596273;
+    background: #262d38;
+    color: #c5ccd8;
+}
+
+.stock-capital-allocation__metrics,
+.stock-capital-allocation__analysis {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.75rem;
+}
+
+.stock-capital-allocation article {
+    display: grid;
+    gap: 0.35rem;
+    min-height: 86px;
+    padding: 0.8rem;
+    border: 1px solid #2f7069;
+    border-radius: 6px;
+    background: rgba(17, 53, 52, 0.68);
+}
+
+.stock-capital-allocation article > span {
+    color: #b8f1e8;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+}
+
+.stock-capital-allocation article > strong {
+    color: #f8fafc;
+    font-size: 1rem;
+}
+
+.stock-capital-allocation article > small {
+    line-height: 1.3;
+}
+
+.stock-capital-allocation__empty {
+    margin: 0;
+    padding: 0.85rem;
+    border: 1px solid #2f7069;
+    border-radius: 6px;
+    color: #c7e9e3;
+}
+
+.stock-capital-allocation__disclaimer {
+    padding-top: 0.8rem;
+    border-top: 1px solid #2f7069;
+    line-height: 1.4;
+}
+
+@media (max-width: 750px) {
+    .stock-capital-allocation__metrics,
+    .stock-capital-allocation__analysis {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 650px) {
+    .stock-capital-allocation {
+        margin-right: 1rem;
+        margin-left: 1rem;
+    }
+
+    .stock-capital-allocation__header {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+}
