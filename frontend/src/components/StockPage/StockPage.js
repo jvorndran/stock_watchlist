@@ -20,6 +20,7 @@ import StockCompanyProfile from './StockCompanyProfile';
 import StockEarningsOutlook from './StockEarningsOutlook';
 import StockBalanceSheetHealth from './StockBalanceSheetHealth';
 import StockCashFlowPanel from './StockCashFlowPanel';
+import StockEarningsCashBridge from './StockEarningsCashBridge';
 import StockGrowthMomentum from './StockGrowthMomentum';
 import StockEnterpriseValueLens from './StockEnterpriseValueLens';
 import StockCapitalAllocation from './StockCapitalAllocation';
@@ -67,6 +68,8 @@ const StockPage = () => {
                     <StockBalanceSheetHealth stockData={stockData} />
 
                     <StockCashFlowPanel stockData={stockData} />
+
+                    <StockEarningsCashBridge stockData={stockData} />
 
                     <StockCapitalAllocation stockData={stockData} />
 

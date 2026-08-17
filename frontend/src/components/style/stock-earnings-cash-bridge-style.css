@@ -1,0 +1,118 @@
+.stock-earnings-cash-bridge {
+    display: grid;
+    gap: 1rem;
+    margin: 1rem 10vw;
+    padding: 1rem;
+    border: 1px solid #4e6478;
+    border-radius: 8px;
+    background: linear-gradient(135deg, #172b38, #131d2a);
+    color: #f8fafc;
+}
+
+.stock-earnings-cash-bridge__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.stock-earnings-cash-bridge__header h2 {
+    margin: 0 0 0.25rem;
+    font-size: 1.15rem;
+}
+
+.stock-earnings-cash-bridge__header span,
+.stock-earnings-cash-bridge article small,
+.stock-earnings-cash-bridge__disclaimer {
+    color: #b8ccd9;
+    font-size: 0.8rem;
+}
+
+.stock-earnings-cash-bridge__header > strong {
+    border: 1px solid #437a99;
+    border-radius: 999px;
+    background: #183d52;
+    color: #b7ecff;
+    font-size: 0.76rem;
+    padding: 0.4rem 0.65rem;
+    white-space: nowrap;
+}
+
+.stock-earnings-cash-bridge__header > strong.is-negative,
+.stock-earnings-cash-bridge strong.is-negative {
+    border-color: #914a54;
+    color: #ffabb4;
+}
+
+.stock-earnings-cash-bridge__header > strong.is-neutral {
+    border-color: #596273;
+    background: #262d38;
+    color: #c5ccd8;
+}
+
+.stock-earnings-cash-bridge__metrics,
+.stock-earnings-cash-bridge__analysis {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.75rem;
+}
+
+.stock-earnings-cash-bridge article {
+    display: grid;
+    gap: 0.35rem;
+    min-height: 86px;
+    padding: 0.8rem;
+    border: 1px solid #3d596d;
+    border-radius: 6px;
+    background: rgba(7, 18, 29, 0.58);
+}
+
+.stock-earnings-cash-bridge article > span {
+    color: #c2dceb;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+}
+
+.stock-earnings-cash-bridge article > strong {
+    color: #f8fafc;
+    font-size: 1rem;
+}
+
+.stock-earnings-cash-bridge article > small {
+    line-height: 1.3;
+}
+
+.stock-earnings-cash-bridge__empty {
+    margin: 0;
+    padding: 0.85rem;
+    border: 1px solid #3d596d;
+    border-radius: 6px;
+    color: #d7e9f4;
+}
+
+.stock-earnings-cash-bridge__disclaimer {
+    padding-top: 0.8rem;
+    border-top: 1px solid #3d596d;
+    line-height: 1.4;
+}
+
+@media (max-width: 750px) {
+    .stock-earnings-cash-bridge__metrics,
+    .stock-earnings-cash-bridge__analysis {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 650px) {
+    .stock-earnings-cash-bridge {
+        margin-right: 1rem;
+        margin-left: 1rem;
+    }
+
+    .stock-earnings-cash-bridge__header {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+}
