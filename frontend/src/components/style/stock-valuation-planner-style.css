@@ -133,6 +133,89 @@
     padding-top: 0.75rem;
 }
 
+.stock-valuation-planner__sensitivity {
+    display: grid;
+    gap: 0.75rem;
+    padding: 0.9rem;
+    border: 1px solid #3a4358;
+    border-radius: 6px;
+    background: #181d29;
+}
+
+.stock-valuation-planner__sensitivity-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.stock-valuation-planner__sensitivity-header h3 {
+    margin: 0 0 0.25rem;
+    font-size: 0.95rem;
+}
+
+.stock-valuation-planner__sensitivity-header span,
+.stock-valuation-planner__sensitivity td small {
+    color: #aeb6c5;
+    font-size: 0.78rem;
+}
+
+.stock-valuation-planner__sensitivity-header > strong {
+    border: 1px solid #526075;
+    border-radius: 999px;
+    color: #dbeafe;
+    font-size: 0.75rem;
+    padding: 0.35rem 0.55rem;
+    white-space: nowrap;
+}
+
+.stock-valuation-planner__sensitivity-table-wrap {
+    overflow-x: auto;
+}
+
+.stock-valuation-planner__sensitivity table {
+    width: 100%;
+    min-width: 560px;
+    border-collapse: collapse;
+}
+
+.stock-valuation-planner__sensitivity th,
+.stock-valuation-planner__sensitivity td {
+    padding: 0.7rem;
+    border: 1px solid #3a4358;
+    text-align: left;
+}
+
+.stock-valuation-planner__sensitivity thead th {
+    color: #cbd5e1;
+    background: #252c3c;
+    font-size: 0.78rem;
+}
+
+.stock-valuation-planner__sensitivity tbody th {
+    color: #cbd5e1;
+    font-size: 0.82rem;
+}
+
+.stock-valuation-planner__sensitivity td {
+    display: table-cell;
+    background: #202737;
+}
+
+.stock-valuation-planner__sensitivity td.is-negative {
+    background: #3d252d;
+}
+
+.stock-valuation-planner__sensitivity td strong,
+.stock-valuation-planner__sensitivity td small {
+    display: block;
+}
+
+.stock-valuation-planner__sensitivity td strong {
+    color: #f8fafc;
+    font-size: 0.95rem;
+}
+
 @media (max-width: 700px) {
     .stock-valuation-planner {
         margin-left: 1rem;
@@ -140,6 +223,11 @@
     }
 
     .stock-valuation-planner__header {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .stock-valuation-planner__sensitivity-header {
         align-items: flex-start;
         flex-direction: column;
     }

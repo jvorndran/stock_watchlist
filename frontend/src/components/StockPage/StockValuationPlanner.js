@@ -60,6 +60,60 @@ const formatPercent = (value) => value === null
     ? '-'
     : `${value >= 0 ? '+' : ''}${(value * 100).toFixed(1)}%`;
 
+const calculateScenario = ({currentPrice, baseEps, annualGrowth, targetMultiple, years}) => {
+    const parsedCurrentPrice = parseMetric(currentPrice);
+    const parsedBaseEps = parseMetric(baseEps);
+    const parsedGrowth = parseMetric(annualGrowth);
+    const parsedMultiple = parseMetric(targetMultiple);
+    const parsedYears = parseMetric(years);
+
+    if (parsedCurrentPrice === null || parsedCurrentPrice <= 0 ||
+        parsedBaseEps === null || parsedBaseEps <= 0 ||
+        parsedGrowth === null || parsedGrowth <= -100 ||
+        parsedMultiple === null || parsedMultiple <= 0 ||
+        parsedYears === null || parsedYears < 1) {
+        return null;
+    }
+
+    const projectedEps = parsedBaseEps * ((1 + (parsedGrowth / 100)) ** parsedYears);
+    const targetValue = projectedEps * parsedMultiple;
+
+    if (projectedEps <= 0 || targetValue <= 0) {
+        return null;
+    }
+
+    const totalReturn = (targetValue / parsedCurrentPrice) - 1;
+    const annualizedReturn = ((targetValue / parsedCurrentPrice) ** (1 / parsedYears)) - 1;
+
+    return {projectedEps, targetValue, totalReturn, annualizedReturn};
+};
+
+export const buildValuationSensitivity = (assumptions) => {
+    const baseGrowth = parseMetric(assumptions.annualGrowth);
+    const baseMultiple = parseMetric(assumptions.targetMultiple);
+
+    if (baseGrowth === null || baseGrowth <= -100 || baseMultiple === null || baseMultiple <= 0) {
+        return [];
+    }
+
+    const growthAdjustments = [-5, 0, 5];
+    const multipleAdjustments = [-0.2, 0, 0.2];
+
+    return growthAdjustments.map((growthAdjustment) => {
+        const annualGrowth = baseGrowth + growthAdjustment;
+
+        return {
+            annualGrowth,
+            scenarios: multipleAdjustments.map((multipleAdjustment) => {
+                const targetMultiple = baseMultiple * (1 + multipleAdjustment);
+                const scenario = calculateScenario({...assumptions, annualGrowth, targetMultiple});
+
+                return {multipleAdjustment, targetMultiple, scenario};
+            }),
+        };
+    });
+};
+
 const StockValuationPlanner = ({stockData}) => {
     const {summary} = stockData;
     const initialAssumptions = useMemo(() => getInitialAssumptions(summary), [summary]);
@@ -69,33 +123,14 @@ const StockValuationPlanner = ({stockData}) => {
     const [targetMultiple, setTargetMultiple] = useState(initialAssumptions.targetMultiple);
     const [years, setYears] = useState(initialAssumptions.years);
 
-    const scenario = useMemo(() => {
-        const parsedCurrentPrice = parseMetric(currentPrice);
-        const parsedBaseEps = parseMetric(baseEps);
-        const parsedGrowth = parseMetric(annualGrowth);
-        const parsedMultiple = parseMetric(targetMultiple);
-        const parsedYears = parseMetric(years);
-
-        if (parsedCurrentPrice === null || parsedCurrentPrice <= 0 ||
-            parsedBaseEps === null || parsedBaseEps <= 0 ||
-            parsedGrowth === null || parsedGrowth <= -100 ||
-            parsedMultiple === null || parsedMultiple <= 0 ||
-            parsedYears === null || parsedYears < 1) {
-            return null;
-        }
-
-        const projectedEps = parsedBaseEps * ((1 + (parsedGrowth / 100)) ** parsedYears);
-        const targetValue = projectedEps * parsedMultiple;
-
-        if (projectedEps <= 0 || targetValue <= 0) {
-            return null;
-        }
-
-        const totalReturn = (targetValue / parsedCurrentPrice) - 1;
-        const annualizedReturn = ((targetValue / parsedCurrentPrice) ** (1 / parsedYears)) - 1;
-
-        return {projectedEps, targetValue, totalReturn, annualizedReturn};
-    }, [annualGrowth, baseEps, currentPrice, targetMultiple, years]);
+    const scenario = useMemo(() => calculateScenario({currentPrice, baseEps, annualGrowth, targetMultiple, years}), [annualGrowth, baseEps, currentPrice, targetMultiple, years]);
+    const sensitivityMatrix = useMemo(() => buildValuationSensitivity({
+        currentPrice,
+        baseEps,
+        annualGrowth,
+        targetMultiple,
+        years,
+    }), [annualGrowth, baseEps, currentPrice, targetMultiple, years]);
 
     const resetAssumptions = () => {
         setCurrentPrice(initialAssumptions.currentPrice);
@@ -148,28 +183,67 @@ const StockValuationPlanner = ({stockData}) => {
             </div>
 
             {scenario ? (
-                <div className="stock-valuation-planner__results">
-                    <article>
-                        <span>Projected EPS</span>
-                        <strong>{formatCurrency(scenario.projectedEps)}</strong>
-                        <small>After the selected growth period</small>
-                    </article>
-                    <article>
-                        <span>Scenario value</span>
-                        <strong>{formatCurrency(scenario.targetValue)}</strong>
-                        <small>Projected EPS × target P/E</small>
-                    </article>
-                    <article className={scenario.totalReturn >= 0 ? 'is-positive' : 'is-negative'}>
-                        <span>Total return</span>
-                        <strong>{formatPercent(scenario.totalReturn)}</strong>
-                        <small>Versus the reference price</small>
-                    </article>
-                    <article className={scenario.annualizedReturn >= 0 ? 'is-positive' : 'is-negative'}>
-                        <span>Annualized return</span>
-                        <strong>{formatPercent(scenario.annualizedReturn)}</strong>
-                        <small>Compound return over {years} year{years === '1' ? '' : 's'}</small>
-                    </article>
-                </div>
+                <>
+                    <div className="stock-valuation-planner__results">
+                        <article>
+                            <span>Projected EPS</span>
+                            <strong>{formatCurrency(scenario.projectedEps)}</strong>
+                            <small>After the selected growth period</small>
+                        </article>
+                        <article>
+                            <span>Scenario value</span>
+                            <strong>{formatCurrency(scenario.targetValue)}</strong>
+                            <small>Projected EPS × target P/E</small>
+                        </article>
+                        <article className={scenario.totalReturn >= 0 ? 'is-positive' : 'is-negative'}>
+                            <span>Total return</span>
+                            <strong>{formatPercent(scenario.totalReturn)}</strong>
+                            <small>Versus the reference price</small>
+                        </article>
+                        <article className={scenario.annualizedReturn >= 0 ? 'is-positive' : 'is-negative'}>
+                            <span>Annualized return</span>
+                            <strong>{formatPercent(scenario.annualizedReturn)}</strong>
+                            <small>Compound return over {years} year{years === '1' ? '' : 's'}</small>
+                        </article>
+                    </div>
+
+                    {sensitivityMatrix.length > 0 && (
+                        <div className="stock-valuation-planner__sensitivity">
+                            <div className="stock-valuation-planner__sensitivity-header">
+                                <div>
+                                    <h3>Valuation Sensitivity</h3>
+                                    <span>Compare scenario values when annual EPS growth shifts by 5 points and target P/E shifts by 20%.</span>
+                                </div>
+                                <strong>{years} year horizon</strong>
+                            </div>
+                            <div className="stock-valuation-planner__sensitivity-table-wrap">
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th scope="col">Annual EPS growth</th>
+                                            {sensitivityMatrix[0].scenarios.map((column) => (
+                                                <th key={column.multipleAdjustment} scope="col">{column.targetMultiple.toFixed(1)}x P/E</th>
+                                            ))}
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {sensitivityMatrix.map((row) => (
+                                            <tr key={row.annualGrowth}>
+                                                <th scope="row">{row.annualGrowth.toFixed(1)}%</th>
+                                                {row.scenarios.map((column) => (
+                                                    <td key={column.multipleAdjustment} className={column.scenario && column.scenario.totalReturn < 0 ? 'is-negative' : ''}>
+                                                        <strong>{formatCurrency(column.scenario?.targetValue ?? null)}</strong>
+                                                        <small>{formatPercent(column.scenario?.annualizedReturn ?? null)} annualized</small>
+                                                    </td>
+                                                ))}
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    )}
+                </>
             ) : (
                 <p className="stock-valuation-planner__empty">
                     Enter a positive reference price, EPS, target P/E, and time horizon to calculate a scenario.
