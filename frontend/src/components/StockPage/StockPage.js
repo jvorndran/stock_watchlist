@@ -24,6 +24,7 @@ import StockEarningsCashBridge from './StockEarningsCashBridge';
 import StockGrowthMomentum from './StockGrowthMomentum';
 import StockEnterpriseValueLens from './StockEnterpriseValueLens';
 import StockCapitalAllocation from './StockCapitalAllocation';
+import StockMultipleDashboard from './StockMultipleDashboard';
 import "../../index.css"
 
 const StockPage = () => {
@@ -74,6 +75,8 @@ const StockPage = () => {
                     <StockCapitalAllocation stockData={stockData} />
 
                     <StockEnterpriseValueLens stockData={stockData} />
+
+                    <StockMultipleDashboard stockData={stockData} />
 
                     <StockGrowthMomentum stockData={stockData} />
 
