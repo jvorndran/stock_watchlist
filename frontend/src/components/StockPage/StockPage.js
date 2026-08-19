@@ -25,6 +25,7 @@ import StockGrowthMomentum from './StockGrowthMomentum';
 import StockEnterpriseValueLens from './StockEnterpriseValueLens';
 import StockCapitalAllocation from './StockCapitalAllocation';
 import StockMultipleDashboard from './StockMultipleDashboard';
+import StockOwnershipProfile from './StockOwnershipProfile';
 import "../../index.css"
 
 const StockPage = () => {
@@ -61,6 +62,8 @@ const StockPage = () => {
                     {/*</div>*/}
 
                     <StockCompanyProfile stockData={stockData} />
+
+                    <StockOwnershipProfile stockData={stockData} />
 
                     <StockInsights stockData={stockData} />
 

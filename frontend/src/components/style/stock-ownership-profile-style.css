@@ -1,0 +1,146 @@
+.stock-ownership-profile {
+    background: #22232d;
+    border: 1px solid #343947;
+    border-radius: 8px;
+    color: #ffffff;
+    display: grid;
+    gap: 1rem;
+    margin: 1rem 10vw;
+    padding: 1rem;
+}
+
+.stock-ownership-profile__header,
+.stock-ownership-profile__float > div:first-child {
+    align-items: center;
+    display: flex;
+    gap: 1rem;
+    justify-content: space-between;
+}
+
+.stock-ownership-profile__header h2 {
+    font-size: 1.15rem;
+    font-weight: 700;
+    margin: 0;
+}
+
+.stock-ownership-profile__header span,
+.stock-ownership-profile__metrics article > span,
+.stock-ownership-profile__metrics article > small,
+.stock-ownership-profile__float small,
+.stock-ownership-profile__disclaimer {
+    color: #aeb6c5;
+    font-size: 0.82rem;
+}
+
+.stock-ownership-profile__header > strong {
+    background: #153d4a;
+    border: 1px solid #287488;
+    border-radius: 999px;
+    color: #a5f3fc;
+    font-size: 0.78rem;
+    padding: 0.45rem 0.75rem;
+    white-space: nowrap;
+}
+
+.stock-ownership-profile__header > strong.is-watch {
+    background: #4c3417;
+    border-color: #a86a1b;
+    color: #fde68a;
+}
+
+.stock-ownership-profile__header > strong.is-neutral {
+    background: #30384a;
+    border-color: #526075;
+    color: #cbd5e1;
+}
+
+.stock-ownership-profile__metrics {
+    display: grid;
+    gap: 0.75rem;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.stock-ownership-profile__metrics article,
+.stock-ownership-profile__float {
+    background: #171923;
+    border: 1px solid #343947;
+    border-radius: 6px;
+    display: grid;
+    gap: 0.4rem;
+    padding: 0.85rem;
+}
+
+.stock-ownership-profile__metrics article > span {
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.stock-ownership-profile__metrics article > strong,
+.stock-ownership-profile__float strong {
+    color: #a5f3fc;
+    font-size: 1.3rem;
+}
+
+.stock-ownership-profile__float {
+    gap: 0.65rem;
+}
+
+.stock-ownership-profile__float > div:first-child span {
+    font-weight: 700;
+}
+
+.stock-ownership-profile__float > div:first-child strong {
+    font-size: 1.05rem;
+}
+
+.stock-ownership-profile__track {
+    background: #30384a;
+    border-radius: 999px;
+    height: 0.8rem;
+    overflow: hidden;
+}
+
+.stock-ownership-profile__track span {
+    background: linear-gradient(90deg, #38bdf8, #2dd4bf);
+    border-radius: inherit;
+    display: block;
+    height: 100%;
+    min-width: 2px;
+}
+
+.stock-ownership-profile__empty {
+    background: #171923;
+    border: 1px dashed #4b5563;
+    border-radius: 6px;
+    color: #d7deea;
+    margin: 0;
+    padding: 1rem;
+}
+
+.stock-ownership-profile__disclaimer {
+    border-top: 1px solid #343947;
+    padding-top: 0.75rem;
+}
+
+@media (max-width: 800px) {
+    .stock-ownership-profile__metrics {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 650px) {
+    .stock-ownership-profile {
+        margin-left: 1rem;
+        margin-right: 1rem;
+    }
+
+    .stock-ownership-profile__header,
+    .stock-ownership-profile__float > div:first-child {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .stock-ownership-profile__metrics {
+        grid-template-columns: 1fr;
+    }
+}
