@@ -141,11 +141,19 @@ export const summarizeTradePlanExposure = (symbols, tradePlans, riskBudget) => {
     };
 };
 
-const getWorkflowState = (symbol, watchlistNotes, tradePlans) => {
+export const getWorkflowState = (symbol, watchlistNotes, tradePlans, riskBudget = 100) => {
     const hasNote = Boolean(String(watchlistNotes[symbol] || '').trim());
-    const hasPlan = Boolean(tradePlans[symbol]);
+    const plan = tradePlans[symbol];
+    const hasPlan = Boolean(plan);
+    const analysis = hasPlan ? analyzeTradePlan(plan, riskBudget) : null;
 
-    return {hasNote, hasPlan, ready: hasNote && hasPlan};
+    return {
+        hasNote,
+        hasPlan,
+        hasQualityPlan: Boolean(analysis && analysis.rewardMultiple >= 2),
+        hasValidPlan: Boolean(analysis),
+        ready: hasNote && hasPlan,
+    };
 };
 
 export const buildResearchPriority = (symbol, watchlistNotes, tradePlans, riskBudget) => {
@@ -213,7 +221,7 @@ const Watchlist = ({
     const canReorder = sortMode === 'added' && searchText.trim().length === 0 && workflowFilter === 'all' && tagFilter === 'all';
 
     const workflowSummary = useMemo(() => watchlist.reduce((summary, symbol) => {
-        const workflowState = getWorkflowState(symbol, watchlistNotes, tradePlans);
+        const workflowState = getWorkflowState(symbol, watchlistNotes, tradePlans, riskBudget);
 
         if (workflowState.ready) {
             summary.ready += 1;
@@ -224,18 +232,22 @@ const Watchlist = ({
         if (!workflowState.hasPlan) {
             summary.needsPlan += 1;
         }
+        if (workflowState.hasPlan && !workflowState.hasQualityPlan) {
+            summary.needsQuality += 1;
+        }
         if (!workflowState.hasNote && !workflowState.hasPlan) {
             summary.unprepared += 1;
         }
 
         return summary;
-    }, {ready: 0, needsNote: 0, needsPlan: 0, unprepared: 0}), [watchlist, watchlistNotes, tradePlans]);
+    }, {ready: 0, needsNote: 0, needsPlan: 0, needsQuality: 0, unprepared: 0}), [watchlist, watchlistNotes, tradePlans, riskBudget]);
 
     const workflowViews = [
         {key: 'all', label: 'All Symbols', count: watchlist.length, detail: 'Full watchlist'},
         {key: 'ready', label: 'Ready', count: workflowSummary.ready, detail: 'Thesis and plan saved'},
         {key: 'needs-note', label: 'Needs Thesis', count: workflowSummary.needsNote, detail: 'Missing a thesis note'},
         {key: 'needs-plan', label: 'Needs Plan', count: workflowSummary.needsPlan, detail: 'Missing entry, stop, or target'},
+        {key: 'needs-quality', label: 'Needs 2R Plan', count: workflowSummary.needsQuality, detail: 'Invalid or below 2.0R'},
         {key: 'unprepared', label: 'Unprepared', count: workflowSummary.unprepared, detail: 'No thesis or trade plan'},
     ];
 
@@ -243,11 +255,12 @@ const Watchlist = ({
         const normalizedSearch = searchText.trim().toUpperCase();
         const filteredSymbols = watchlist.filter((symbol) => {
             const matchesSearch = normalizedSearch.length === 0 || symbol.toUpperCase().includes(normalizedSearch);
-            const workflowState = getWorkflowState(symbol, watchlistNotes, tradePlans);
+            const workflowState = getWorkflowState(symbol, watchlistNotes, tradePlans, riskBudget);
             const matchesWorkflow = workflowFilter === 'all' ||
                 (workflowFilter === 'ready' && workflowState.ready) ||
                 (workflowFilter === 'needs-note' && !workflowState.hasNote) ||
                 (workflowFilter === 'needs-plan' && !workflowState.hasPlan) ||
+                (workflowFilter === 'needs-quality' && workflowState.hasPlan && !workflowState.hasQualityPlan) ||
                 (workflowFilter === 'unprepared' && !workflowState.hasNote && !workflowState.hasPlan);
             const symbolTags = Array.isArray(watchlistTags[symbol]) ? watchlistTags[symbol] : [];
             const matchesTag = tagFilter === 'all' || symbolTags.includes(tagFilter);
@@ -264,7 +277,7 @@ const Watchlist = ({
         }
 
         return filteredSymbols;
-    }, [watchlist, watchlistNotes, tradePlans, watchlistTags, searchText, sortMode, workflowFilter, tagFilter]);
+    }, [watchlist, watchlistNotes, tradePlans, watchlistTags, searchText, sortMode, workflowFilter, tagFilter, riskBudget]);
 
     const tagCounts = useMemo(() => researchTagOptions.reduce((counts, tag) => {
         counts[tag.key] = watchlist.filter((symbol) => (

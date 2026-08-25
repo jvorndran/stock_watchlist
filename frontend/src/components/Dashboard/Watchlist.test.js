@@ -1,4 +1,20 @@
-import {buildResearchPriority, summarizeTradePlanExposure} from './Watchlist';
+import {buildResearchPriority, getWorkflowState, summarizeTradePlanExposure} from './Watchlist';
+
+describe('getWorkflowState', () => {
+    it('flags saved plans that are invalid or below the 2R quality threshold', () => {
+        expect(getWorkflowState('LOWR', {LOWR: 'Thesis'}, {
+            LOWR: {entry: 100, stop: 95, target: 107},
+        }, 100)).toMatchObject({hasPlan: true, hasValidPlan: true, hasQualityPlan: false, ready: true});
+
+        expect(getWorkflowState('QUALITY', {QUALITY: 'Thesis'}, {
+            QUALITY: {entry: 100, stop: 95, target: 112},
+        }, 100)).toMatchObject({hasPlan: true, hasValidPlan: true, hasQualityPlan: true, ready: true});
+
+        expect(getWorkflowState('BROKEN', {}, {
+            BROKEN: {entry: 100, stop: 100, target: 112},
+        }, 100)).toMatchObject({hasPlan: true, hasValidPlan: false, hasQualityPlan: false});
+    });
+});
 
 describe('buildResearchPriority', () => {
     it('ranks a missing thesis and plan above prepared research', () => {
