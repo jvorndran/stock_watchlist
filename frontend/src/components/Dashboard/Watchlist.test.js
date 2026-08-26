@@ -1,4 +1,4 @@
-import {buildResearchPriority, getWorkflowState, summarizeTradePlanExposure} from './Watchlist';
+import {buildPlanCapacitySnapshot, buildResearchPriority, getWorkflowState, summarizeTradePlanExposure} from './Watchlist';
 
 describe('getWorkflowState', () => {
     it('flags saved plans that are invalid or below the 2R quality threshold', () => {
@@ -95,6 +95,35 @@ describe('summarizeTradePlanExposure', () => {
             totalRisk: 0,
             validPlans: 0,
             weightedRewardMultiple: 0,
+        });
+    });
+});
+
+describe('buildPlanCapacitySnapshot', () => {
+    it('reports remaining capacity and modeled risk for plans within the portfolio value', () => {
+        const snapshot = buildPlanCapacitySnapshot({totalCapital: 6000, totalRisk: 300}, 10000);
+
+        expect(snapshot).toMatchObject({
+            capitalOverage: 0,
+            capitalRemaining: 4000,
+            capitalUtilization: 0.6,
+            hasPortfolioValue: true,
+            riskPercent: 0.03,
+            status: 'open',
+        });
+    });
+
+    it('flags over-capacity plans and handles a missing portfolio value', () => {
+        expect(buildPlanCapacitySnapshot({totalCapital: 12000, totalRisk: 600}, 10000)).toMatchObject({
+            capitalOverage: 2000,
+            capitalRemaining: 0,
+            capitalUtilization: 1.2,
+            riskPercent: 0.06,
+            status: 'over',
+        });
+        expect(buildPlanCapacitySnapshot({totalCapital: 12000, totalRisk: 600}, 0)).toMatchObject({
+            hasPortfolioValue: false,
+            status: 'unavailable',
         });
     });
 });

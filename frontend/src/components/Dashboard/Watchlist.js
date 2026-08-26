@@ -141,6 +141,34 @@ export const summarizeTradePlanExposure = (symbols, tradePlans, riskBudget) => {
     };
 };
 
+export const buildPlanCapacitySnapshot = (exposure, portfolioValue) => {
+    const capacity = parsePositiveNumber(portfolioValue);
+
+    if (!capacity) {
+        return {
+            capacity: 0,
+            capitalOverage: 0,
+            capitalRemaining: 0,
+            capitalUtilization: 0,
+            hasPortfolioValue: false,
+            riskPercent: 0,
+            status: 'unavailable',
+        };
+    }
+
+    const capitalUtilization = exposure.totalCapital / capacity;
+
+    return {
+        capacity,
+        capitalOverage: Math.max(exposure.totalCapital - capacity, 0),
+        capitalRemaining: Math.max(capacity - exposure.totalCapital, 0),
+        capitalUtilization,
+        hasPortfolioValue: true,
+        riskPercent: exposure.totalRisk / capacity,
+        status: capitalUtilization > 1 ? 'over' : capitalUtilization >= 0.8 ? 'tight' : 'open',
+    };
+};
+
 export const getWorkflowState = (symbol, watchlistNotes, tradePlans, riskBudget = 100) => {
     const hasNote = Boolean(String(watchlistNotes[symbol] || '').trim());
     const plan = tradePlans[symbol];
@@ -302,6 +330,8 @@ const Watchlist = ({
         const value = Number(String(portfolioValue).replace(/[^0-9.]/g, ''));
         return Number.isFinite(value) && value > 0 ? value : 0;
     }, [portfolioValue]);
+
+    const planCapacity = useMemo(() => buildPlanCapacitySnapshot(planExposure, parsedPortfolioValue), [planExposure, parsedPortfolioValue]);
 
     const allocationRows = useMemo(() => {
         const allocation = visibleWatchlist.length > 0 && parsedPortfolioValue > 0
@@ -716,6 +746,59 @@ const Watchlist = ({
                     </p>
                 )}
             </section>
+
+            {planExposure.validPlans > 0 && (
+                <section className={`watchlist-plan-capacity watchlist-plan-capacity--${planCapacity.status}`} aria-labelledby="watchlist-plan-capacity-title">
+                    <div className="watchlist-plan-capacity__header">
+                        <div>
+                            <h3 id="watchlist-plan-capacity-title">Plan Capacity Check</h3>
+                            <span>Compare planned long and short notional amounts with the portfolio value below.</span>
+                        </div>
+                        <strong>
+                            {planCapacity.status === 'over'
+                                ? 'Over capacity'
+                                : planCapacity.status === 'tight'
+                                    ? 'Nearly allocated'
+                                    : planCapacity.status === 'open'
+                                        ? 'Capacity available'
+                                        : 'Set portfolio value'}
+                        </strong>
+                    </div>
+
+                    {planCapacity.hasPortfolioValue ? (
+                        <>
+                            <div className="watchlist-plan-capacity__grid">
+                                <article>
+                                    <span>Plan utilization</span>
+                                    <strong>{(planCapacity.capitalUtilization * 100).toFixed(1)}%</strong>
+                                    <small>{formatMoney(planExposure.totalCapital)} of {formatMoney(planCapacity.capacity)}</small>
+                                </article>
+                                <article className={planCapacity.capitalOverage > 0 ? 'is-warning' : 'is-positive'}>
+                                    <span>{planCapacity.capitalOverage > 0 ? 'Over capacity' : 'Capacity remaining'}</span>
+                                    <strong>{formatMoney(planCapacity.capitalOverage || planCapacity.capitalRemaining)}</strong>
+                                    <small>{planCapacity.capitalOverage > 0 ? 'Reduce plan sizes or add portfolio capacity' : 'Before planned capital reaches the portfolio value'}</small>
+                                </article>
+                                <article>
+                                    <span>Portfolio risk</span>
+                                    <strong>{(planCapacity.riskPercent * 100).toFixed(2)}%</strong>
+                                    <small>{formatMoney(planExposure.totalRisk)} modeled loss across saved plans</small>
+                                </article>
+                            </div>
+                            <div
+                                aria-label={`${Math.min(planCapacity.capitalUtilization * 100, 100).toFixed(1)} percent of portfolio capacity allocated to visible saved plans`}
+                                className="watchlist-plan-capacity__bar"
+                                role="img">
+                                <span style={{width: `${Math.min(planCapacity.capitalUtilization * 100, 100)}%`}}></span>
+                            </div>
+                            <small className="watchlist-plan-capacity__note">
+                                This is a planning check using saved plan notional amounts; short margin requirements and overlapping positions can differ.
+                            </small>
+                        </>
+                    ) : (
+                        <p className="watchlist-manager__empty">Enter a portfolio value in the Equal Weight Plan to run this capacity check.</p>
+                    )}
+                </section>
+            )}
 
             {watchlist.length > 1 && (
                 <p className="watchlist-manager__order-hint">

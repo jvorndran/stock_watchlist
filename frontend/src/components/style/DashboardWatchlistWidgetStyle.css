@@ -750,6 +750,119 @@
     color: #fde68a;
 }
 
+.watchlist-plan-capacity {
+    background: linear-gradient(135deg, #172434, #1d2939);
+    border: 1px solid #31506e;
+    border-radius: 8px;
+    display: grid;
+    gap: 0.85rem;
+    padding: 1rem;
+}
+
+.watchlist-plan-capacity--tight {
+    border-color: #a16207;
+}
+
+.watchlist-plan-capacity--over {
+    border-color: #be123c;
+}
+
+.watchlist-plan-capacity__header {
+    align-items: flex-start;
+    display: flex;
+    gap: 1rem;
+    justify-content: space-between;
+}
+
+.watchlist-plan-capacity__header h3 {
+    font-size: 1.05rem;
+    font-weight: 700;
+    margin: 0;
+}
+
+.watchlist-plan-capacity__header span,
+.watchlist-plan-capacity__grid article > span,
+.watchlist-plan-capacity__grid article > small,
+.watchlist-plan-capacity__note {
+    color: #b4c4d6;
+    font-size: 0.78rem;
+}
+
+.watchlist-plan-capacity__header > strong {
+    background: #164e63;
+    border: 1px solid #38bdf8;
+    border-radius: 999px;
+    color: #e0f2fe;
+    font-size: 0.75rem;
+    padding: 0.35rem 0.65rem;
+    white-space: nowrap;
+}
+
+.watchlist-plan-capacity--tight .watchlist-plan-capacity__header > strong {
+    background: #713f12;
+    border-color: #fbbf24;
+    color: #fef3c7;
+}
+
+.watchlist-plan-capacity--over .watchlist-plan-capacity__header > strong {
+    background: #881337;
+    border-color: #fda4af;
+    color: #fff1f2;
+}
+
+.watchlist-plan-capacity__grid {
+    display: grid;
+    gap: 0.65rem;
+    grid-template-columns: repeat(auto-fit, minmax(175px, 1fr));
+}
+
+.watchlist-plan-capacity__grid article {
+    background: rgba(35, 39, 51, 0.82);
+    border: 1px solid #3a4050;
+    border-radius: 6px;
+    display: grid;
+    gap: 0.25rem;
+    padding: 0.75rem;
+}
+
+.watchlist-plan-capacity__grid article > strong {
+    color: #f8fafc;
+    font-size: 1.1rem;
+}
+
+.watchlist-plan-capacity__grid article.is-positive > strong {
+    color: #86efac;
+}
+
+.watchlist-plan-capacity__grid article.is-warning > strong {
+    color: #fda4af;
+}
+
+.watchlist-plan-capacity__bar {
+    background: #314158;
+    border-radius: 999px;
+    height: 0.7rem;
+    overflow: hidden;
+}
+
+.watchlist-plan-capacity__bar > span {
+    background: #38bdf8;
+    display: block;
+    height: 100%;
+}
+
+.watchlist-plan-capacity--tight .watchlist-plan-capacity__bar > span {
+    background: #fbbf24;
+}
+
+.watchlist-plan-capacity--over .watchlist-plan-capacity__bar > span {
+    background: #fb7185;
+}
+
+.watchlist-plan-capacity__note {
+    line-height: 1.4;
+}
+
 .watchlist-allocation {
     background: #1b1f2a;
     border: 1px solid #303646;
@@ -877,6 +990,10 @@
     }
 
     .watchlist-plan-exposure__header {
+        flex-direction: column;
+    }
+
+    .watchlist-plan-capacity__header {
         flex-direction: column;
     }
 
