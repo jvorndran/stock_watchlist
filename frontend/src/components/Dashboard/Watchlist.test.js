@@ -1,4 +1,4 @@
-import {buildPlanCapacitySnapshot, buildResearchPriority, getWorkflowState, summarizeTradePlanExposure} from './Watchlist';
+import {buildPlanCapacitySnapshot, buildResearchPriority, getWorkflowState, summarizeTradePlanByTag, summarizeTradePlanExposure} from './Watchlist';
 
 describe('getWorkflowState', () => {
     it('flags saved plans that are invalid or below the 2R quality threshold', () => {
@@ -96,6 +96,26 @@ describe('summarizeTradePlanExposure', () => {
             validPlans: 0,
             weightedRewardMultiple: 0,
         });
+    });
+});
+
+describe('summarizeTradePlanByTag', () => {
+    it('groups valid tagged plans while keeping multi-tag symbols visible in each theme', () => {
+        const summaries = summarizeTradePlanByTag(['CORE', 'EARNINGS', 'BROKEN'], {
+            CORE: {entry: 100, stop: 90, target: 130},
+            EARNINGS: {entry: 50, stop: 45, target: 65},
+            BROKEN: {entry: 100, stop: 100, target: 130},
+        }, {
+            CORE: ['core', 'income'],
+            EARNINGS: ['earnings'],
+            BROKEN: ['earnings'],
+        }, 100);
+
+        expect(summaries).toEqual(expect.arrayContaining([
+            expect.objectContaining({key: 'core', symbolCount: 1, validPlans: 1, capital: 1000, plannedRisk: 100, weightedRewardMultiple: 3}),
+            expect.objectContaining({key: 'income', symbolCount: 1, validPlans: 1, capital: 1000}),
+            expect.objectContaining({key: 'earnings', symbolCount: 2, validPlans: 1, invalidPlans: 1, plannedRisk: 100, weightedRewardMultiple: 3}),
+        ]));
     });
 });
 

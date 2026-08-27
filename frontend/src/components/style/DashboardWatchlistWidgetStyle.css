@@ -750,6 +750,107 @@
     color: #fde68a;
 }
 
+.watchlist-tag-exposure {
+    background: linear-gradient(135deg, #18222f, #1f2937);
+    border: 1px solid #3f5d78;
+    border-radius: 8px;
+    display: grid;
+    gap: 0.85rem;
+    padding: 1rem;
+}
+
+.watchlist-tag-exposure__header {
+    align-items: flex-start;
+    display: flex;
+    gap: 1rem;
+    justify-content: space-between;
+}
+
+.watchlist-tag-exposure__header h3 {
+    font-size: 1.05rem;
+    font-weight: 700;
+    margin: 0 0 0.2rem;
+}
+
+.watchlist-tag-exposure__header span,
+.watchlist-tag-exposure__grid article > div > span,
+.watchlist-tag-exposure__grid dt,
+.watchlist-tag-exposure__grid p,
+.watchlist-tag-exposure__grid small,
+.watchlist-tag-exposure__note {
+    color: #b4c4d6;
+    font-size: 0.78rem;
+}
+
+.watchlist-tag-exposure__header > strong {
+    background: #193d5b;
+    border: 1px solid #38bdf8;
+    border-radius: 999px;
+    color: #e0f2fe;
+    font-size: 0.75rem;
+    padding: 0.35rem 0.65rem;
+    white-space: nowrap;
+}
+
+.watchlist-tag-exposure__grid {
+    display: grid;
+    gap: 0.65rem;
+    grid-template-columns: repeat(auto-fit, minmax(185px, 1fr));
+}
+
+.watchlist-tag-exposure__grid article {
+    background: rgba(35, 39, 51, 0.82);
+    border: 1px solid #3a4050;
+    border-radius: 6px;
+    display: grid;
+    gap: 0.55rem;
+    padding: 0.75rem;
+}
+
+.watchlist-tag-exposure__grid article > div {
+    display: grid;
+    gap: 0.15rem;
+}
+
+.watchlist-tag-exposure__grid article > div > strong,
+.watchlist-tag-exposure__grid dd {
+    color: #f8fafc;
+}
+
+.watchlist-tag-exposure__grid dl {
+    display: grid;
+    gap: 0.35rem;
+    margin: 0;
+}
+
+.watchlist-tag-exposure__grid dl > div {
+    align-items: baseline;
+    display: flex;
+    justify-content: space-between;
+}
+
+.watchlist-tag-exposure__grid dt,
+.watchlist-tag-exposure__grid dd {
+    margin: 0;
+}
+
+.watchlist-tag-exposure__grid dd {
+    font-size: 0.84rem;
+    font-weight: 700;
+}
+
+.watchlist-tag-exposure__grid p {
+    margin: 0;
+}
+
+.watchlist-tag-exposure__grid small {
+    color: #fde68a;
+}
+
+.watchlist-tag-exposure__note {
+    line-height: 1.4;
+}
+
 .watchlist-plan-capacity {
     background: linear-gradient(135deg, #172434, #1d2939);
     border: 1px solid #31506e;
@@ -990,6 +1091,10 @@
     }
 
     .watchlist-plan-exposure__header {
+        flex-direction: column;
+    }
+
+    .watchlist-tag-exposure__header {
         flex-direction: column;
     }
 

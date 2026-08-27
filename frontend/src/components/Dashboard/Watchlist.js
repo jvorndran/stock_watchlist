@@ -141,6 +141,49 @@ export const summarizeTradePlanExposure = (symbols, tradePlans, riskBudget) => {
     };
 };
 
+export const summarizeTradePlanByTag = (symbols, tradePlans, watchlistTags, riskBudget) => researchTagOptions
+    .map((tag) => symbols.reduce((summary, symbol) => {
+        const symbolTags = Array.isArray(watchlistTags[symbol]) ? watchlistTags[symbol] : [];
+
+        if (!symbolTags.includes(tag.key)) {
+            return summary;
+        }
+
+        summary.symbolCount += 1;
+        const savedPlan = tradePlans[symbol];
+
+        if (!savedPlan) {
+            return summary;
+        }
+
+        const analysis = analyzeTradePlan(savedPlan, riskBudget);
+
+        if (!analysis) {
+            summary.invalidPlans += 1;
+            return summary;
+        }
+
+        summary.validPlans += 1;
+        summary.capital += analysis.capital;
+        summary.plannedRisk += analysis.shares * Math.abs(analysis.entry - analysis.stop);
+        summary.plannedReward += analysis.reward;
+        return summary;
+    }, {
+        capital: 0,
+        invalidPlans: 0,
+        key: tag.key,
+        label: tag.label,
+        plannedReward: 0,
+        plannedRisk: 0,
+        symbolCount: 0,
+        validPlans: 0,
+    }))
+    .filter((summary) => summary.symbolCount > 0)
+    .map((summary) => ({
+        ...summary,
+        weightedRewardMultiple: summary.plannedRisk > 0 ? summary.plannedReward / summary.plannedRisk : 0,
+    }));
+
 export const buildPlanCapacitySnapshot = (exposure, portfolioValue) => {
     const capacity = parsePositiveNumber(portfolioValue);
 
@@ -319,6 +362,13 @@ const Watchlist = ({
         tradePlans,
         riskBudget
     ), [visibleWatchlist, tradePlans, riskBudget]);
+
+    const planTagExposures = useMemo(() => summarizeTradePlanByTag(
+        visibleWatchlist,
+        tradePlans,
+        watchlistTags,
+        riskBudget
+    ), [visibleWatchlist, tradePlans, watchlistTags, riskBudget]);
 
     const researchPriorities = useMemo(() => visibleWatchlist
         .map((symbol) => buildResearchPriority(symbol, watchlistNotes, tradePlans, riskBudget))
@@ -746,6 +796,42 @@ const Watchlist = ({
                     </p>
                 )}
             </section>
+
+            {planTagExposures.length > 0 && (
+                <section className="watchlist-tag-exposure" aria-labelledby="watchlist-tag-exposure-title">
+                    <div className="watchlist-tag-exposure__header">
+                        <div>
+                            <h3 id="watchlist-tag-exposure-title">Research Tag Exposure</h3>
+                            <span>See planned capital and reward/risk across the investment themes in this view.</span>
+                        </div>
+                        <strong>{planTagExposures.length} tag{planTagExposures.length === 1 ? '' : 's'} represented</strong>
+                    </div>
+
+                    <div className="watchlist-tag-exposure__grid">
+                        {planTagExposures.map((summary) => (
+                            <article key={summary.key}>
+                                <div>
+                                    <strong>{summary.label}</strong>
+                                    <span>{summary.symbolCount} tagged symbol{summary.symbolCount === 1 ? '' : 's'}</span>
+                                </div>
+                                {summary.validPlans > 0 ? (
+                                    <dl>
+                                        <div><dt>Planned capital</dt><dd>{formatMoney(summary.capital)}</dd></div>
+                                        <div><dt>Planned risk</dt><dd>{formatMoney(summary.plannedRisk)}</dd></div>
+                                        <div><dt>Reward/risk</dt><dd>{summary.weightedRewardMultiple.toFixed(2)}R</dd></div>
+                                    </dl>
+                                ) : (
+                                    <p>No valid saved plan in this tag yet.</p>
+                                )}
+                                {summary.invalidPlans > 0 && (
+                                    <small>{summary.invalidPlans} tagged plan{summary.invalidPlans === 1 ? '' : 's'} need valid levels.</small>
+                                )}
+                            </article>
+                        ))}
+                    </div>
+                    <small className="watchlist-tag-exposure__note">Symbols with more than one tag appear in each applicable theme, so tag totals are not a portfolio total.</small>
+                </section>
+            )}
 
             {planExposure.validPlans > 0 && (
                 <section className={`watchlist-plan-capacity watchlist-plan-capacity--${planCapacity.status}`} aria-labelledby="watchlist-plan-capacity-title">
