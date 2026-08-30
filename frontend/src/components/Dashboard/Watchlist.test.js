@@ -1,4 +1,4 @@
-import {buildPlanCapacitySnapshot, buildResearchPriority, getWorkflowState, summarizeTradePlanByTag, summarizeTradePlanExposure} from './Watchlist';
+import {buildPlanCapacitySnapshot, buildResearchPriority, getWorkflowState, normalizeResearchSnapshot, summarizeTradePlanByTag, summarizeTradePlanExposure} from './Watchlist';
 
 describe('getWorkflowState', () => {
     it('flags saved plans that are invalid or below the 2R quality threshold', () => {
@@ -145,5 +145,36 @@ describe('buildPlanCapacitySnapshot', () => {
             hasPortfolioValue: false,
             status: 'unavailable',
         });
+    });
+});
+
+describe('normalizeResearchSnapshot', () => {
+    it('keeps a complete research backup ready for account restoration', () => {
+        expect(normalizeResearchSnapshot({
+            watchlist: [' aapl ', 'MSFT'],
+            notes: {aapl: 'Compounder thesis'},
+            tags: {MSFT: ['core', 'income']},
+            tradePlans: {AAPL: {entry: 200, stop: 190, target: 225}},
+        })).toEqual({
+            watchlist: ['AAPL', 'MSFT'],
+            notes: {AAPL: 'Compounder thesis'},
+            tags: {MSFT: ['core', 'income']},
+            tradePlans: {AAPL: {entry: 200, stop: 190, target: 225}},
+        });
+    });
+
+    it('rejects backups with unknown symbols, tags, or invalid trade-plan levels', () => {
+        expect(normalizeResearchSnapshot({
+            watchlist: ['AAPL'],
+            notes: {MSFT: 'Not included'},
+        })).toBeNull();
+        expect(normalizeResearchSnapshot({
+            watchlist: ['AAPL'],
+            tags: {AAPL: ['unsupported']},
+        })).toBeNull();
+        expect(normalizeResearchSnapshot({
+            watchlist: ['AAPL'],
+            tradePlans: {AAPL: {entry: 100, stop: 100, target: 110}},
+        })).toBeNull();
     });
 });

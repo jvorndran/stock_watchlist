@@ -32,6 +32,85 @@ const serializeWatchlistTradePlans = (tradePlans = []) => tradePlans.reduce((ser
     return serializedPlans;
 }, {});
 
+const researchTagKeys = new Set(['core', 'swing', 'earnings', 'income']);
+const validTickerPattern = /^[A-Z0-9.-]{1,12}$/;
+
+const normalizeResearchSnapshot = (snapshot = {}) => {
+    snapshot = snapshot && typeof snapshot === 'object' ? snapshot : {};
+    const watchlist = Array.isArray(snapshot.watchlist) ? snapshot.watchlist : null;
+
+    if (!watchlist || watchlist.length > 100) {
+        return null;
+    }
+
+    const tickers = watchlist.map((ticker) => String(ticker || '').trim().toUpperCase());
+
+    if (tickers.some((ticker) => !validTickerPattern.test(ticker)) || new Set(tickers).size !== tickers.length) {
+        return null;
+    }
+
+    const tickerSet = new Set(tickers);
+    const notes = snapshot.notes && typeof snapshot.notes === 'object' && !Array.isArray(snapshot.notes)
+        ? snapshot.notes
+        : {};
+    const tags = snapshot.tags && typeof snapshot.tags === 'object' && !Array.isArray(snapshot.tags)
+        ? snapshot.tags
+        : {};
+    const tradePlans = snapshot.tradePlans && typeof snapshot.tradePlans === 'object' && !Array.isArray(snapshot.tradePlans)
+        ? snapshot.tradePlans
+        : {};
+    const normalizedNotes = [];
+    const normalizedTags = [];
+    const normalizedPlans = [];
+
+    for (const [ticker, note] of Object.entries(notes)) {
+        const normalizedTicker = String(ticker).trim().toUpperCase();
+        const normalizedNote = typeof note === 'string' ? note.trim() : null;
+
+        if (!tickerSet.has(normalizedTicker) || normalizedNote === null || normalizedNote.length > 500) {
+            return null;
+        }
+
+        if (normalizedNote) {
+            normalizedNotes.push({ticker: normalizedTicker, note: normalizedNote, updatedAt: new Date()});
+        }
+    }
+
+    for (const [ticker, savedTags] of Object.entries(tags)) {
+        const normalizedTicker = String(ticker).trim().toUpperCase();
+        const normalizedTagsForTicker = Array.isArray(savedTags)
+            ? [...new Set(savedTags.map((tag) => String(tag).trim().toLowerCase()))]
+            : null;
+
+        if (!tickerSet.has(normalizedTicker) || !normalizedTagsForTicker ||
+            normalizedTagsForTicker.some((tag) => !researchTagKeys.has(tag))) {
+            return null;
+        }
+
+        if (normalizedTagsForTicker.length > 0) {
+            normalizedTags.push({ticker: normalizedTicker, tags: normalizedTagsForTicker, updatedAt: new Date()});
+        }
+    }
+
+    for (const [ticker, plan] of Object.entries(tradePlans)) {
+        const normalizedTicker = String(ticker).trim().toUpperCase();
+        const entry = Number(plan?.entry);
+        const stop = Number(plan?.stop);
+        const target = Number(plan?.target);
+        const isLongPlan = stop < entry && entry < target;
+        const isShortPlan = target < entry && entry < stop;
+
+        if (!tickerSet.has(normalizedTicker) || !Number.isFinite(entry) || !Number.isFinite(stop) || !Number.isFinite(target) ||
+            entry <= 0 || stop <= 0 || target <= 0 || (!isLongPlan && !isShortPlan)) {
+            return null;
+        }
+
+        normalizedPlans.push({ticker: normalizedTicker, entry, stop, target, updatedAt: new Date()});
+    }
+
+    return {watchlist: tickers, notes: normalizedNotes, tags: normalizedTags, tradePlans: normalizedPlans};
+};
+
 router.post('/signup', (req, res) => {
     const { name, username, password } = req.body;
 
@@ -182,6 +261,55 @@ router.post('/watchlist/bulk', (req, res) => {
             }
 
             res.status(200).json({ watchlist: user.watchlist, requestedTickers: stockTickers });
+        });
+    } catch (error) {
+        console.error('Error:', error);
+        res.status(500).json({ message: 'Server error' });
+    }
+});
+
+router.put('/watchlist/research-snapshot', (req, res) => {
+    try {
+        const token = req.headers.authorization?.split(' ')[1];
+        const snapshot = normalizeResearchSnapshot(req.body);
+
+        if (!token) {
+            return res.status(401).json({ message: 'Missing token' });
+        }
+
+        if (!snapshot) {
+            return res.status(400).json({ message: 'Choose a valid watchlist research backup' });
+        }
+
+        jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, async (err, decodedToken) => {
+            if (err) {
+                return res.status(401).json({ message: 'Invalid token' });
+            }
+
+            try {
+                const { username } = decodedToken.UserInfo;
+                const user = await User.findOne({ username });
+
+                if (!user) {
+                    return res.status(404).json({ message: 'User not found' });
+                }
+
+                user.watchlist = snapshot.watchlist;
+                user.watchlistNotes = snapshot.notes;
+                user.watchlistTags = snapshot.tags;
+                user.watchlistTradePlans = snapshot.tradePlans;
+                await user.save();
+
+                res.status(200).json({
+                    watchlist: user.watchlist,
+                    notes: serializeWatchlistNotes(user.watchlistNotes),
+                    tags: serializeWatchlistTags(user.watchlistTags),
+                    tradePlans: serializeWatchlistTradePlans(user.watchlistTradePlans)
+                });
+            } catch (error) {
+                console.error('Error:', error);
+                res.status(500).json({ message: 'Server error' });
+            }
         });
     } catch (error) {
         console.error('Error:', error);

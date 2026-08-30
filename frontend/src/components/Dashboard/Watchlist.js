@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { FaArrowDown, FaArrowUp, FaPlus, FaTimes } from 'react-icons/fa';
 import '../style/DashboardWatchlistWidgetStyle.css';
@@ -46,6 +46,8 @@ const researchTagOptions = [
     {key: 'earnings', label: 'Earnings'},
     {key: 'income', label: 'Income'},
 ];
+const researchTagKeys = new Set(researchTagOptions.map((tag) => tag.key));
+const validTickerPattern = /^[A-Z0-9.-]{1,12}$/;
 
 const parsePositiveNumber = (value) => {
     const parsedValue = Number(value);
@@ -77,6 +79,73 @@ const analyzeTradePlan = (plan, riskBudget) => {
         stop,
         target,
     };
+};
+
+export const normalizeResearchSnapshot = (snapshot) => {
+    if (!snapshot || !Array.isArray(snapshot.watchlist) || snapshot.watchlist.length > 100) {
+        return null;
+    }
+
+    const watchlist = snapshot.watchlist.map((ticker) => String(ticker || '').trim().toUpperCase());
+
+    if (watchlist.some((ticker) => !validTickerPattern.test(ticker)) || new Set(watchlist).size !== watchlist.length) {
+        return null;
+    }
+
+    const tickerSet = new Set(watchlist);
+    const rawNotes = snapshot.notes && typeof snapshot.notes === 'object' && !Array.isArray(snapshot.notes) ? snapshot.notes : {};
+    const rawTags = snapshot.tags && typeof snapshot.tags === 'object' && !Array.isArray(snapshot.tags) ? snapshot.tags : {};
+    const rawTradePlans = snapshot.tradePlans && typeof snapshot.tradePlans === 'object' && !Array.isArray(snapshot.tradePlans)
+        ? snapshot.tradePlans
+        : {};
+    const notes = {};
+    const tags = {};
+    const tradePlans = {};
+
+    for (const [ticker, note] of Object.entries(rawNotes)) {
+        const normalizedTicker = ticker.trim().toUpperCase();
+        const normalizedNote = typeof note === 'string' ? note.trim() : null;
+
+        if (!tickerSet.has(normalizedTicker) || normalizedNote === null || normalizedNote.length > 500) {
+            return null;
+        }
+
+        if (normalizedNote) {
+            notes[normalizedTicker] = normalizedNote;
+        }
+    }
+
+    for (const [ticker, savedTags] of Object.entries(rawTags)) {
+        const normalizedTicker = ticker.trim().toUpperCase();
+        const normalizedTags = Array.isArray(savedTags)
+            ? [...new Set(savedTags.map((tag) => String(tag).trim().toLowerCase()))]
+            : null;
+
+        if (!tickerSet.has(normalizedTicker) || !normalizedTags || normalizedTags.some((tag) => !researchTagKeys.has(tag))) {
+            return null;
+        }
+
+        if (normalizedTags.length > 0) {
+            tags[normalizedTicker] = normalizedTags;
+        }
+    }
+
+    for (const [ticker, plan] of Object.entries(rawTradePlans)) {
+        const normalizedTicker = ticker.trim().toUpperCase();
+        const analysis = analyzeTradePlan(plan, 100);
+
+        if (!tickerSet.has(normalizedTicker) || !analysis) {
+            return null;
+        }
+
+        tradePlans[normalizedTicker] = {
+            entry: analysis.entry,
+            stop: analysis.stop,
+            target: analysis.target,
+        };
+    }
+
+    return {watchlist, notes, tags, tradePlans};
 };
 
 export const summarizeTradePlanExposure = (symbols, tradePlans, riskBudget) => {
@@ -265,6 +334,7 @@ const Watchlist = ({
     onAddTickers,
     onRemoveTicker,
     onReorderTicker,
+    onRestoreResearchSnapshot,
     onSaveNote,
     onSaveTags,
     onSaveTradePlan,
@@ -289,6 +359,8 @@ const Watchlist = ({
     const [workflowFilter, setWorkflowFilter] = useState('all');
     const [tagFilter, setTagFilter] = useState('all');
     const [researchExportMessage, setResearchExportMessage] = useState('');
+    const [pendingResearchSnapshot, setPendingResearchSnapshot] = useState(null);
+    const researchBackupInputRef = useRef(null);
     const canReorder = sortMode === 'added' && searchText.trim().length === 0 && workflowFilter === 'all' && tagFilter === 'all';
 
     const workflowSummary = useMemo(() => watchlist.reduce((summary, symbol) => {
@@ -572,6 +644,69 @@ const Watchlist = ({
         setResearchExportMessage(`${rows.length} visible symbol${rows.length === 1 ? '' : 's'} exported with research details.`);
     };
 
+    const downloadResearchBackup = () => {
+        const backup = JSON.stringify({
+            version: 1,
+            exportedAt: new Date().toISOString(),
+            watchlist,
+            notes: watchlistNotes,
+            tags: watchlistTags,
+            tradePlans,
+        }, null, 2);
+        const blob = new Blob([backup], {type: 'application/json'});
+        const downloadUrl = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+
+        link.href = downloadUrl;
+        link.download = `watchlist-research-backup-${new Date().toISOString().slice(0, 10)}.json`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(downloadUrl);
+        setResearchExportMessage(`${watchlist.length} tracked symbol${watchlist.length === 1 ? '' : 's'} saved to a research backup.`);
+    };
+
+    const selectResearchBackup = async (event) => {
+        const file = event.target.files?.item(0);
+        event.target.value = '';
+
+        if (!file) {
+            return;
+        }
+
+        if (file.size > 1024 * 1024) {
+            setResearchExportMessage('Choose a watchlist research backup smaller than 1 MB.');
+            return;
+        }
+
+        try {
+            const snapshot = normalizeResearchSnapshot(JSON.parse(await file.text()));
+
+            if (!snapshot) {
+                throw new Error('Invalid research snapshot');
+            }
+
+            setPendingResearchSnapshot(snapshot);
+            setResearchExportMessage(`${snapshot.watchlist.length} symbols are ready to restore. Confirming replaces the current watchlist research.`);
+        } catch (error) {
+            setPendingResearchSnapshot(null);
+            setResearchExportMessage('That file is not a valid watchlist research backup.');
+        }
+    };
+
+    const restoreResearchBackup = async () => {
+        if (!pendingResearchSnapshot) {
+            return;
+        }
+
+        const wasRestored = await onRestoreResearchSnapshot(pendingResearchSnapshot);
+
+        if (wasRestored) {
+            setPendingResearchSnapshot(null);
+            setResearchExportMessage(`${pendingResearchSnapshot.watchlist.length} symbols and their research were restored.`);
+        }
+    };
+
     return (
         <section className="watchlist-manager">
             <div className="watchlist-manager__header">
@@ -579,14 +714,38 @@ const Watchlist = ({
                     <h2>Watchlist</h2>
                     <span>{visibleWatchlist.length} of {watchlist.length} tracked symbols</span>
                 </div>
-                <button className="watchlist-manager__export" onClick={exportResearchView} type="button">
-                    Export Research CSV
-                </button>
+                <div className="watchlist-manager__backup-actions">
+                    <button className="watchlist-manager__export" onClick={exportResearchView} type="button">
+                        Export Research CSV
+                    </button>
+                    <button className="watchlist-manager__export" onClick={downloadResearchBackup} type="button">
+                        Download Backup
+                    </button>
+                    <label className="watchlist-manager__export">
+                        Restore Backup
+                        <input
+                            accept="application/json,.json"
+                            className="watchlist-manager__backup-input"
+                            onChange={selectResearchBackup}
+                            ref={researchBackupInputRef}
+                            type="file"
+                        />
+                    </label>
+                </div>
             </div>
 
             {watchlistError && <p className="watchlist-manager__error">{watchlistError}</p>}
             {watchlistNotice && <p className="watchlist-manager__notice">{watchlistNotice}</p>}
             {researchExportMessage && <p className="watchlist-manager__export-message" aria-live="polite">{researchExportMessage}</p>}
+            {pendingResearchSnapshot && (
+                <div className="watchlist-manager__backup-confirm" role="status">
+                    <span>Restore {pendingResearchSnapshot.watchlist.length} symbols, notes, tags, and trade plans?</span>
+                    <div>
+                        <button onClick={() => setPendingResearchSnapshot(null)} type="button">Cancel</button>
+                        <button onClick={restoreResearchBackup} type="button">Confirm restore</button>
+                    </div>
+                </div>
+            )}
 
             <form className="watchlist-manager__add-form" onSubmit={handleAddTicker}>
                 <label>

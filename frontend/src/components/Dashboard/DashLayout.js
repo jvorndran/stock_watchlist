@@ -334,6 +334,40 @@ const DashLayout = () => {
         }
     };
 
+    const restoreWatchlistResearchSnapshot = async (snapshot) => {
+        try {
+            const token = localStorage.getItem('jwt');
+            const response = await fetch('https://findashboard-api.onrender.com/api/watchlist/research-snapshot', {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`,
+                },
+                body: JSON.stringify(snapshot),
+            });
+
+            if (response.ok) {
+                const watchlistData = await response.json();
+                setWatchlist(watchlistData.watchlist || []);
+                setWatchlistNotes(watchlistData.notes || {});
+                setWatchlistTags(watchlistData.tags || {});
+                setTradePlans(watchlistData.tradePlans || {});
+                setWatchlistError('');
+                setWatchlistNotice('Watchlist research restored from backup');
+                return true;
+            }
+
+            setWatchlistError('Unable to restore the watchlist research backup');
+            setWatchlistNotice('');
+            return false;
+        } catch (error) {
+            setWatchlistError('Unable to restore the watchlist research backup');
+            setWatchlistNotice('');
+            console.error('Error:', error);
+            return false;
+        }
+    };
+
     const addTickersToWatchlist = async (stockTickers) => {
         const normalizedTickers = normalizeTickers(stockTickers);
 
@@ -472,6 +506,7 @@ const DashLayout = () => {
                     onAddTicker={addToWatchlist}
                     onRemoveTicker={removeFromWatchlist}
                     onReorderTicker={reorderWatchlist}
+                    onRestoreResearchSnapshot={restoreWatchlistResearchSnapshot}
                     onSaveNote={saveWatchlistNote}
                     onSaveTags={saveWatchlistTags}
                     onSaveTradePlan={saveWatchlistTradePlan}
