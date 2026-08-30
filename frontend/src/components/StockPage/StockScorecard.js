@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useMemo, useState} from 'react';
 import '../style/stock-scorecard-style.css';
 
 const parseMetric = (value) => {
@@ -81,11 +81,51 @@ const getScoreLabel = (score) => {
     return 'Caution';
 };
 
-const StockScorecard = ({ stockData }) => {
-    const { summary } = stockData;
+const scorecardLenses = [
+    {
+        key: 'balanced',
+        label: 'Balanced',
+        detail: 'Treat valuation, growth, profitability, and risk equally.',
+        weights: {Valuation: 1, Growth: 1, Profitability: 1, 'Risk And Target': 1},
+    },
+    {
+        key: 'value',
+        label: 'Value',
+        detail: 'Put more emphasis on valuation while keeping quality in view.',
+        weights: {Valuation: 1.75, Growth: 0.75, Profitability: 1, 'Risk And Target': 1},
+    },
+    {
+        key: 'growth',
+        label: 'Growth',
+        detail: 'Prioritize revenue, earnings, and profitability momentum.',
+        weights: {Valuation: 0.75, Growth: 1.75, Profitability: 1.25, 'Risk And Target': 1},
+    },
+    {
+        key: 'defensive',
+        label: 'Defensive',
+        detail: 'Give additional weight to financial quality and risk context.',
+        weights: {Valuation: 1, Growth: 0.75, Profitability: 1.25, 'Risk And Target': 1.75},
+    },
+];
+
+export const buildWeightedScorecard = (scorecards, weights) => {
+    const scoredCards = scorecards.filter((card) => card.score !== null);
+
+    if (scoredCards.length === 0) {
+        return null;
+    }
+
+    const totalWeight = scoredCards.reduce((total, card) => total + (weights[card.label] || 1), 0);
+
+    return scoredCards.reduce((total, card) => (
+        total + (card.score * (weights[card.label] || 1))
+    ), 0) / totalWeight;
+};
+
+export const buildInvestmentScorecards = (summary = {}) => {
     const targetUpside = getTargetUpside(summary);
 
-    const scorecards = [
+    return [
         {
             label: 'Valuation',
             score: averageScores([
@@ -121,8 +161,14 @@ const StockScorecard = ({ stockData }) => {
             detail: `Beta ${formatRatio(summary.Beta)} | Target gap ${formatPercent(targetUpside)}`,
         },
     ];
+};
 
-    const overallScore = averageScores(scorecards.map((card) => card.score));
+const StockScorecard = ({ stockData }) => {
+    const { summary } = stockData;
+    const [selectedLensKey, setSelectedLensKey] = useState('balanced');
+    const selectedLens = scorecardLenses.find((lens) => lens.key === selectedLensKey) || scorecardLenses[0];
+    const scorecards = useMemo(() => buildInvestmentScorecards(summary), [summary]);
+    const overallScore = useMemo(() => buildWeightedScorecard(scorecards, selectedLens.weights), [scorecards, selectedLens]);
 
     return (
         <section className="stock-scorecard">
@@ -133,7 +179,26 @@ const StockScorecard = ({ stockData }) => {
                 </div>
                 <div className="stock-scorecard__overall">
                     <strong>{formatScore(overallScore)}</strong>
-                    <span>{getScoreLabel(overallScore)}</span>
+                    <span>{getScoreLabel(overallScore)} · {selectedLens.label}</span>
+                </div>
+            </div>
+
+            <div className="stock-scorecard__lenses">
+                <div>
+                    <strong>Scorecard Lens</strong>
+                    <span>{selectedLens.detail}</span>
+                </div>
+                <div aria-label="Investment scorecard lens" role="group">
+                    {scorecardLenses.map((lens) => (
+                        <button
+                            aria-pressed={lens.key === selectedLens.key}
+                            className={lens.key === selectedLens.key ? 'is-active' : ''}
+                            key={lens.key}
+                            onClick={() => setSelectedLensKey(lens.key)}
+                            type="button">
+                            {lens.label}
+                        </button>
+                    ))}
                 </div>
             </div>
 
@@ -147,7 +212,7 @@ const StockScorecard = ({ stockData }) => {
                         <div className="stock-scorecard__track">
                             <span style={{width: `${card.score === null ? 0 : card.score}%`}} />
                         </div>
-                        <small>{card.detail}</small>
+                        <small>{card.detail} · {selectedLens.weights[card.label]}x lens weight</small>
                     </article>
                 ))}
             </div>

@@ -45,6 +45,56 @@
     font-weight: 700;
 }
 
+.stock-scorecard__lenses {
+    align-items: center;
+    background: #171b25;
+    border: 1px solid #3a4358;
+    border-radius: 6px;
+    display: flex;
+    gap: 1rem;
+    justify-content: space-between;
+    padding: 0.75rem;
+}
+
+.stock-scorecard__lenses > div:first-child {
+    display: grid;
+    gap: 0.2rem;
+}
+
+.stock-scorecard__lenses > div:first-child strong {
+    color: #f8fafc;
+    font-size: 0.86rem;
+}
+
+.stock-scorecard__lenses > div:first-child span {
+    color: #aeb6c5;
+    font-size: 0.78rem;
+}
+
+.stock-scorecard__lenses > div:last-child {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    justify-content: flex-end;
+}
+
+.stock-scorecard__lenses button {
+    background: #272d3c;
+    border: 1px solid #4b556d;
+    border-radius: 999px;
+    color: #dbeafe;
+    cursor: pointer;
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 0.4rem 0.65rem;
+}
+
+.stock-scorecard__lenses button.is-active {
+    background: #1d4ed8;
+    border-color: #60a5fa;
+    color: #ffffff;
+}
+
 .stock-scorecard__grid {
     display: grid;
     gap: 0.75rem;
@@ -108,6 +158,15 @@
     .stock-scorecard__header {
         align-items: flex-start;
         flex-direction: column;
+    }
+
+    .stock-scorecard__lenses {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .stock-scorecard__lenses > div:last-child {
+        justify-content: flex-start;
     }
 
     .stock-scorecard__overall {
