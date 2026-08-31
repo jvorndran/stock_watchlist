@@ -46,6 +46,11 @@ const researchTagOptions = [
     {key: 'earnings', label: 'Earnings'},
     {key: 'income', label: 'Income'},
 ];
+const planScenarioOptions = [
+    {key: 'stop', label: 'Stops respected', detail: 'Every valid plan exits at its saved stop.'},
+    {key: 'midpoint', label: 'Halfway to target', detail: 'Every valid plan reaches half of its planned reward.'},
+    {key: 'target', label: 'Targets reached', detail: 'Every valid plan reaches its saved target.'},
+];
 const researchTagKeys = new Set(researchTagOptions.map((tag) => tag.key));
 const validTickerPattern = /^[A-Z0-9.-]{1,12}$/;
 
@@ -281,6 +286,39 @@ export const buildPlanCapacitySnapshot = (exposure, portfolioValue) => {
     };
 };
 
+export const summarizePlanScenario = (symbols, tradePlans, riskBudget, scenario = 'target') => {
+    const scenarioMultiplier = scenario === 'stop' ? -1 : scenario === 'midpoint' ? 0.5 : 1;
+    const summary = symbols.reduce((result, symbol) => {
+        const savedPlan = tradePlans[symbol];
+
+        if (!savedPlan) {
+            return result;
+        }
+
+        const analysis = analyzeTradePlan(savedPlan, riskBudget);
+
+        if (!analysis) {
+            result.invalidPlans += 1;
+            return result;
+        }
+
+        const plannedRisk = analysis.shares * Math.abs(analysis.entry - analysis.stop);
+        result.validPlans += 1;
+        result.totalRisk += plannedRisk;
+        result.totalReward += analysis.reward;
+        result.totalOutcome += scenario === 'stop'
+            ? -plannedRisk
+            : analysis.reward * scenarioMultiplier;
+        return result;
+    }, {invalidPlans: 0, totalOutcome: 0, totalReward: 0, totalRisk: 0, validPlans: 0});
+
+    return {
+        ...summary,
+        outcomeMultiple: summary.totalRisk > 0 ? summary.totalOutcome / summary.totalRisk : 0,
+        scenario: planScenarioOptions.some((option) => option.key === scenario) ? scenario : 'target',
+    };
+};
+
 export const getWorkflowState = (symbol, watchlistNotes, tradePlans, riskBudget = 100) => {
     const hasNote = Boolean(String(watchlistNotes[symbol] || '').trim());
     const plan = tradePlans[symbol];
@@ -356,6 +394,7 @@ const Watchlist = ({
     const [planDraft, setPlanDraft] = useState(emptyTradePlan);
     const [planMessage, setPlanMessage] = useState('');
     const [riskBudget, setRiskBudget] = useState('250');
+    const [planScenario, setPlanScenario] = useState('stop');
     const [workflowFilter, setWorkflowFilter] = useState('all');
     const [tagFilter, setTagFilter] = useState('all');
     const [researchExportMessage, setResearchExportMessage] = useState('');
@@ -454,6 +493,14 @@ const Watchlist = ({
     }, [portfolioValue]);
 
     const planCapacity = useMemo(() => buildPlanCapacitySnapshot(planExposure, parsedPortfolioValue), [planExposure, parsedPortfolioValue]);
+
+    const scenarioSummary = useMemo(() => summarizePlanScenario(
+        visibleWatchlist,
+        tradePlans,
+        riskBudget,
+        planScenario
+    ), [visibleWatchlist, tradePlans, riskBudget, planScenario]);
+    const selectedScenario = planScenarioOptions.find((option) => option.key === scenarioSummary.scenario) || planScenarioOptions[2];
 
     const allocationRows = useMemo(() => {
         const allocation = visibleWatchlist.length > 0 && parsedPortfolioValue > 0
@@ -1042,6 +1089,43 @@ const Watchlist = ({
                     ) : (
                         <p className="watchlist-manager__empty">Enter a portfolio value in the Equal Weight Plan to run this capacity check.</p>
                     )}
+                </section>
+            )}
+
+            {scenarioSummary.validPlans > 0 && (
+                <section className="watchlist-plan-scenario" aria-labelledby="watchlist-plan-scenario-title">
+                    <div className="watchlist-plan-scenario__header">
+                        <div>
+                            <h3 id="watchlist-plan-scenario-title">Plan Scenario Explorer</h3>
+                            <span>Model one common outcome across valid plans in the current view.</span>
+                        </div>
+                        <label>
+                            <span>Scenario</span>
+                            <select onChange={(event) => setPlanScenario(event.target.value)} value={scenarioSummary.scenario}>
+                                {planScenarioOptions.map((option) => <option key={option.key} value={option.key}>{option.label}</option>)}
+                            </select>
+                        </label>
+                    </div>
+                    <div className="watchlist-plan-scenario__grid">
+                        <article className={scenarioSummary.totalOutcome < 0 ? 'is-loss' : 'is-gain'}>
+                            <span>Modeled outcome</span>
+                            <strong>{formatMoney(scenarioSummary.totalOutcome)}</strong>
+                            <small>{selectedScenario.detail}</small>
+                        </article>
+                        <article>
+                            <span>Outcome / risk</span>
+                            <strong>{scenarioSummary.outcomeMultiple.toFixed(2)}R</strong>
+                            <small>{formatMoney(scenarioSummary.totalRisk)} combined modeled risk</small>
+                        </article>
+                        <article>
+                            <span>Plans included</span>
+                            <strong>{scenarioSummary.validPlans}</strong>
+                            <small>{scenarioSummary.invalidPlans > 0
+                                ? `${scenarioSummary.invalidPlans} invalid saved plan${scenarioSummary.invalidPlans === 1 ? '' : 's'} excluded`
+                                : 'All saved plans have valid levels'}</small>
+                        </article>
+                    </div>
+                    <small className="watchlist-plan-scenario__note">This is a common-outcome planning view, not a forecast; actual fills, gaps, and short margin can differ.</small>
                 </section>
             )}
 

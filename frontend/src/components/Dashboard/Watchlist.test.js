@@ -1,4 +1,4 @@
-import {buildPlanCapacitySnapshot, buildResearchPriority, getWorkflowState, normalizeResearchSnapshot, summarizeTradePlanByTag, summarizeTradePlanExposure} from './Watchlist';
+import {buildPlanCapacitySnapshot, buildResearchPriority, getWorkflowState, normalizeResearchSnapshot, summarizePlanScenario, summarizeTradePlanByTag, summarizeTradePlanExposure} from './Watchlist';
 
 describe('getWorkflowState', () => {
     it('flags saved plans that are invalid or below the 2R quality threshold', () => {
@@ -144,6 +144,38 @@ describe('buildPlanCapacitySnapshot', () => {
         expect(buildPlanCapacitySnapshot({totalCapital: 12000, totalRisk: 600}, 0)).toMatchObject({
             hasPortfolioValue: false,
             status: 'unavailable',
+        });
+    });
+});
+
+describe('summarizePlanScenario', () => {
+    const plans = {
+        LONG: {entry: 100, stop: 90, target: 130},
+        SHORT: {entry: 100, stop: 110, target: 70},
+        INVALID: {entry: 50, stop: 50, target: 70},
+    };
+
+    it('models the combined loss when every valid plan exits at its stop', () => {
+        expect(summarizePlanScenario(['LONG', 'SHORT', 'INVALID'], plans, 100, 'stop')).toMatchObject({
+            invalidPlans: 1,
+            outcomeMultiple: -1,
+            scenario: 'stop',
+            totalOutcome: -200,
+            totalRisk: 200,
+            validPlans: 2,
+        });
+    });
+
+    it('models partial and full target outcomes for both long and short plans', () => {
+        expect(summarizePlanScenario(['LONG', 'SHORT'], plans, 100, 'midpoint')).toMatchObject({
+            outcomeMultiple: 1.5,
+            totalOutcome: 300,
+            totalReward: 600,
+        });
+        expect(summarizePlanScenario(['LONG', 'SHORT'], plans, 100, 'target')).toMatchObject({
+            outcomeMultiple: 3,
+            totalOutcome: 600,
+            totalReward: 600,
         });
     });
 });

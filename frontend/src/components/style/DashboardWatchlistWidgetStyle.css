@@ -1017,6 +1017,90 @@ label.watchlist-manager__export {
     line-height: 1.4;
 }
 
+.watchlist-plan-scenario {
+    background: linear-gradient(135deg, #231b35, #1f2937);
+    border: 1px solid #5b4780;
+    border-radius: 8px;
+    display: grid;
+    gap: 0.85rem;
+    padding: 1rem;
+}
+
+.watchlist-plan-scenario__header {
+    align-items: flex-end;
+    display: flex;
+    gap: 1rem;
+    justify-content: space-between;
+}
+
+.watchlist-plan-scenario__header h3 {
+    font-size: 1.05rem;
+    font-weight: 700;
+    margin: 0 0 0.2rem;
+}
+
+.watchlist-plan-scenario__header > div > span,
+.watchlist-plan-scenario__header label span,
+.watchlist-plan-scenario__grid article > span,
+.watchlist-plan-scenario__grid article > small,
+.watchlist-plan-scenario__note {
+    color: #c4b5d9;
+    font-size: 0.78rem;
+}
+
+.watchlist-plan-scenario__header label {
+    display: grid;
+    gap: 0.3rem;
+    min-width: 185px;
+}
+
+.watchlist-plan-scenario__header label span {
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.watchlist-plan-scenario__header select {
+    background: #29223b;
+    border: 1px solid #74618f;
+    border-radius: 4px;
+    color: #f8fafc;
+    min-height: 2.4rem;
+    padding: 0 0.65rem;
+}
+
+.watchlist-plan-scenario__grid {
+    display: grid;
+    gap: 0.65rem;
+    grid-template-columns: repeat(auto-fit, minmax(175px, 1fr));
+}
+
+.watchlist-plan-scenario__grid article {
+    background: rgba(35, 39, 51, 0.82);
+    border: 1px solid #4c4762;
+    border-radius: 6px;
+    display: grid;
+    gap: 0.25rem;
+    padding: 0.75rem;
+}
+
+.watchlist-plan-scenario__grid article > strong {
+    color: #f8fafc;
+    font-size: 1.1rem;
+}
+
+.watchlist-plan-scenario__grid article.is-gain > strong {
+    color: #86efac;
+}
+
+.watchlist-plan-scenario__grid article.is-loss > strong {
+    color: #fda4af;
+}
+
+.watchlist-plan-scenario__note {
+    line-height: 1.4;
+}
+
 .watchlist-allocation {
     background: #1b1f2a;
     border: 1px solid #303646;
@@ -1161,6 +1245,11 @@ label.watchlist-manager__export {
     }
 
     .watchlist-plan-capacity__header {
+        flex-direction: column;
+    }
+
+    .watchlist-plan-scenario__header {
+        align-items: stretch;
         flex-direction: column;
     }
 
