@@ -1,4 +1,21 @@
-import {buildPlanCapacitySnapshot, buildResearchPriority, getWorkflowState, normalizeResearchSnapshot, summarizePlanScenario, summarizeTradePlanByTag, summarizeTradePlanExposure} from './Watchlist';
+import {buildPlanCapacitySnapshot, buildResearchPriority, getWorkflowState, matchesTradePlanDirection, normalizeResearchSnapshot, summarizePlanScenario, summarizeTradePlanByTag, summarizeTradePlanExposure} from './Watchlist';
+
+describe('matchesTradePlanDirection', () => {
+    const plans = {
+        LONG: {entry: 100, stop: 90, target: 125},
+        SHORT: {entry: 100, stop: 110, target: 75},
+        INVALID: {entry: 100, stop: 100, target: 125},
+    };
+
+    it('isolates valid long and short setups while keeping invalid or absent levels in the planning queue', () => {
+        expect(matchesTradePlanDirection('LONG', plans, 100, 'long')).toBe(true);
+        expect(matchesTradePlanDirection('LONG', plans, 100, 'short')).toBe(false);
+        expect(matchesTradePlanDirection('SHORT', plans, 100, 'short')).toBe(true);
+        expect(matchesTradePlanDirection('INVALID', plans, 100, 'unplanned')).toBe(true);
+        expect(matchesTradePlanDirection('MISSING', plans, 100, 'unplanned')).toBe(true);
+        expect(matchesTradePlanDirection('MISSING', plans, 100, 'all')).toBe(true);
+    });
+});
 
 describe('getWorkflowState', () => {
     it('flags saved plans that are invalid or below the 2R quality threshold', () => {

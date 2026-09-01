@@ -51,6 +51,12 @@ const planScenarioOptions = [
     {key: 'midpoint', label: 'Halfway to target', detail: 'Every valid plan reaches half of its planned reward.'},
     {key: 'target', label: 'Targets reached', detail: 'Every valid plan reaches its saved target.'},
 ];
+const planDirectionOptions = [
+    {key: 'all', label: 'All Ideas', detail: 'Show every symbol in this watchlist view.'},
+    {key: 'long', label: 'Long Setups', detail: 'Focus on plans with stop < entry < target.'},
+    {key: 'short', label: 'Short Setups', detail: 'Focus on plans with target < entry < stop.'},
+    {key: 'unplanned', label: 'Needs Direction', detail: 'Show plans that still need valid levels.'},
+];
 const researchTagKeys = new Set(researchTagOptions.map((tag) => tag.key));
 const validTickerPattern = /^[A-Z0-9.-]{1,12}$/;
 
@@ -84,6 +90,20 @@ const analyzeTradePlan = (plan, riskBudget) => {
         stop,
         target,
     };
+};
+
+export const matchesTradePlanDirection = (symbol, tradePlans, riskBudget, direction = 'all') => {
+    if (direction === 'all') {
+        return true;
+    }
+
+    const analysis = analyzeTradePlan(tradePlans[symbol], riskBudget);
+
+    if (direction === 'unplanned') {
+        return !analysis;
+    }
+
+    return analysis?.direction.toLowerCase() === direction;
 };
 
 export const normalizeResearchSnapshot = (snapshot) => {
@@ -397,10 +417,11 @@ const Watchlist = ({
     const [planScenario, setPlanScenario] = useState('stop');
     const [workflowFilter, setWorkflowFilter] = useState('all');
     const [tagFilter, setTagFilter] = useState('all');
+    const [planDirectionFilter, setPlanDirectionFilter] = useState('all');
     const [researchExportMessage, setResearchExportMessage] = useState('');
     const [pendingResearchSnapshot, setPendingResearchSnapshot] = useState(null);
     const researchBackupInputRef = useRef(null);
-    const canReorder = sortMode === 'added' && searchText.trim().length === 0 && workflowFilter === 'all' && tagFilter === 'all';
+    const canReorder = sortMode === 'added' && searchText.trim().length === 0 && workflowFilter === 'all' && tagFilter === 'all' && planDirectionFilter === 'all';
 
     const workflowSummary = useMemo(() => watchlist.reduce((summary, symbol) => {
         const workflowState = getWorkflowState(symbol, watchlistNotes, tradePlans, riskBudget);
@@ -446,8 +467,9 @@ const Watchlist = ({
                 (workflowFilter === 'unprepared' && !workflowState.hasNote && !workflowState.hasPlan);
             const symbolTags = Array.isArray(watchlistTags[symbol]) ? watchlistTags[symbol] : [];
             const matchesTag = tagFilter === 'all' || symbolTags.includes(tagFilter);
+            const matchesDirection = matchesTradePlanDirection(symbol, tradePlans, riskBudget, planDirectionFilter);
 
-            return matchesSearch && matchesWorkflow && matchesTag;
+            return matchesSearch && matchesWorkflow && matchesTag && matchesDirection;
         });
 
         if (sortMode === 'az') {
@@ -459,7 +481,7 @@ const Watchlist = ({
         }
 
         return filteredSymbols;
-    }, [watchlist, watchlistNotes, tradePlans, watchlistTags, searchText, sortMode, workflowFilter, tagFilter, riskBudget]);
+    }, [watchlist, watchlistNotes, tradePlans, watchlistTags, searchText, sortMode, workflowFilter, tagFilter, planDirectionFilter, riskBudget]);
 
     const tagCounts = useMemo(() => researchTagOptions.reduce((counts, tag) => {
         counts[tag.key] = watchlist.filter((symbol) => (
@@ -467,6 +489,13 @@ const Watchlist = ({
         )).length;
         return counts;
     }, {}), [watchlist, watchlistTags]);
+
+    const planDirectionCounts = useMemo(() => planDirectionOptions.reduce((counts, direction) => {
+        counts[direction.key] = watchlist.filter((symbol) => (
+            matchesTradePlanDirection(symbol, tradePlans, riskBudget, direction.key)
+        )).length;
+        return counts;
+    }, {}), [watchlist, tradePlans, riskBudget]);
 
     const planExposure = useMemo(() => summarizeTradePlanExposure(
         visibleWatchlist,
@@ -878,6 +907,30 @@ const Watchlist = ({
                             <span>{view.label}</span>
                             <strong>{view.count}</strong>
                             <small>{view.detail}</small>
+                        </button>
+                    ))}
+                </div>
+            </section>
+
+            <section className="watchlist-direction-filter" aria-labelledby="watchlist-direction-filter-title">
+                <div className="watchlist-direction-filter__header">
+                    <div>
+                        <h3 id="watchlist-direction-filter-title">Trade Direction Queue</h3>
+                        <span>Isolate long, short, or unplanned ideas; all downstream planning panels follow this view.</span>
+                    </div>
+                    <strong>{planDirectionCounts[planDirectionFilter] || 0} in view</strong>
+                </div>
+                <div className="watchlist-direction-filter__grid">
+                    {planDirectionOptions.map((direction) => (
+                        <button
+                            aria-pressed={planDirectionFilter === direction.key}
+                            className={planDirectionFilter === direction.key ? 'watchlist-direction-filter__card watchlist-direction-filter__card--active' : 'watchlist-direction-filter__card'}
+                            key={direction.key}
+                            onClick={() => setPlanDirectionFilter(direction.key)}
+                            type="button">
+                            <span>{direction.label}</span>
+                            <strong>{planDirectionCounts[direction.key] || 0}</strong>
+                            <small>{direction.detail}</small>
                         </button>
                     ))}
                 </div>
