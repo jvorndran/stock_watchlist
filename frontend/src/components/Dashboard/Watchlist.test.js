@@ -1,4 +1,4 @@
-import {buildPlanCapacitySnapshot, buildResearchPriority, getWorkflowState, matchesTradePlanDirection, normalizeResearchSnapshot, summarizePlanScenario, summarizeTradePlanByTag, summarizeTradePlanExposure} from './Watchlist';
+import {buildPlanCapacitySnapshot, buildResearchPriority, getWorkflowState, matchesTradePlanDirection, matchesTradePlanRewardMultiple, normalizeResearchSnapshot, summarizePlanScenario, summarizeTradePlanByTag, summarizeTradePlanExposure} from './Watchlist';
 
 describe('matchesTradePlanDirection', () => {
     const plans = {
@@ -14,6 +14,31 @@ describe('matchesTradePlanDirection', () => {
         expect(matchesTradePlanDirection('INVALID', plans, 100, 'unplanned')).toBe(true);
         expect(matchesTradePlanDirection('MISSING', plans, 100, 'unplanned')).toBe(true);
         expect(matchesTradePlanDirection('MISSING', plans, 100, 'all')).toBe(true);
+    });
+});
+
+describe('matchesTradePlanRewardMultiple', () => {
+    const plans = {
+        LOW: {entry: 100, stop: 95, target: 107},
+        MODERATE: {entry: 100, stop: 95, target: 112},
+        HIGH: {entry: 100, stop: 95, target: 120},
+        EXTENDED: {entry: 100, stop: 95, target: 130},
+        INVALID: {entry: 100, stop: 100, target: 125},
+    };
+
+    it('groups valid plans into reward-to-risk lanes while keeping missing or malformed levels in the repair lane', () => {
+        expect(matchesTradePlanRewardMultiple('LOW', plans, 100, 'belowTwo')).toBe(true);
+        expect(matchesTradePlanRewardMultiple('MODERATE', plans, 100, 'twoToThree')).toBe(true);
+        expect(matchesTradePlanRewardMultiple('HIGH', plans, 100, 'threeToFive')).toBe(true);
+        expect(matchesTradePlanRewardMultiple('EXTENDED', plans, 100, 'fivePlus')).toBe(true);
+        expect(matchesTradePlanRewardMultiple('INVALID', plans, 100, 'needsPlan')).toBe(true);
+        expect(matchesTradePlanRewardMultiple('MISSING', plans, 100, 'needsPlan')).toBe(true);
+    });
+
+    it('does not place invalid plans in a valid reward-to-risk lane', () => {
+        expect(matchesTradePlanRewardMultiple('INVALID', plans, 100, 'belowTwo')).toBe(false);
+        expect(matchesTradePlanRewardMultiple('MODERATE', plans, 100, 'belowTwo')).toBe(false);
+        expect(matchesTradePlanRewardMultiple('LOW', plans, 100, 'all')).toBe(true);
     });
 });
 

@@ -57,6 +57,14 @@ const planDirectionOptions = [
     {key: 'short', label: 'Short Setups', detail: 'Focus on plans with target < entry < stop.'},
     {key: 'unplanned', label: 'Needs Direction', detail: 'Show plans that still need valid levels.'},
 ];
+const planRewardMultipleOptions = [
+    {key: 'all', label: 'All Ideas', detail: 'Keep every current watchlist symbol in view.'},
+    {key: 'belowTwo', label: 'Below 2R', detail: 'Valid plans below the 2.0R planning threshold.'},
+    {key: 'twoToThree', label: '2R to <3R', detail: 'Plans with a moderate reward/risk profile.'},
+    {key: 'threeToFive', label: '3R to <5R', detail: 'Plans with a higher planned reward/risk profile.'},
+    {key: 'fivePlus', label: '5R+', detail: 'Plans with the furthest target relative to risk.'},
+    {key: 'needsPlan', label: 'Needs Valid Plan', detail: 'Missing or malformed entry, stop, or target levels.'},
+];
 const researchTagKeys = new Set(researchTagOptions.map((tag) => tag.key));
 const validTickerPattern = /^[A-Z0-9.-]{1,12}$/;
 
@@ -104,6 +112,36 @@ export const matchesTradePlanDirection = (symbol, tradePlans, riskBudget, direct
     }
 
     return analysis?.direction.toLowerCase() === direction;
+};
+
+export const matchesTradePlanRewardMultiple = (symbol, tradePlans, riskBudget, lane = 'all') => {
+    if (lane === 'all') {
+        return true;
+    }
+
+    const analysis = analyzeTradePlan(tradePlans[symbol], riskBudget);
+
+    if (lane === 'needsPlan') {
+        return !analysis;
+    }
+
+    if (!analysis) {
+        return false;
+    }
+
+    if (lane === 'belowTwo') {
+        return analysis.rewardMultiple < 2;
+    }
+
+    if (lane === 'twoToThree') {
+        return analysis.rewardMultiple >= 2 && analysis.rewardMultiple < 3;
+    }
+
+    if (lane === 'threeToFive') {
+        return analysis.rewardMultiple >= 3 && analysis.rewardMultiple < 5;
+    }
+
+    return lane === 'fivePlus' && analysis.rewardMultiple >= 5;
 };
 
 export const normalizeResearchSnapshot = (snapshot) => {
@@ -418,10 +456,11 @@ const Watchlist = ({
     const [workflowFilter, setWorkflowFilter] = useState('all');
     const [tagFilter, setTagFilter] = useState('all');
     const [planDirectionFilter, setPlanDirectionFilter] = useState('all');
+    const [planRewardMultipleFilter, setPlanRewardMultipleFilter] = useState('all');
     const [researchExportMessage, setResearchExportMessage] = useState('');
     const [pendingResearchSnapshot, setPendingResearchSnapshot] = useState(null);
     const researchBackupInputRef = useRef(null);
-    const canReorder = sortMode === 'added' && searchText.trim().length === 0 && workflowFilter === 'all' && tagFilter === 'all' && planDirectionFilter === 'all';
+    const canReorder = sortMode === 'added' && searchText.trim().length === 0 && workflowFilter === 'all' && tagFilter === 'all' && planDirectionFilter === 'all' && planRewardMultipleFilter === 'all';
 
     const workflowSummary = useMemo(() => watchlist.reduce((summary, symbol) => {
         const workflowState = getWorkflowState(symbol, watchlistNotes, tradePlans, riskBudget);
@@ -468,8 +507,9 @@ const Watchlist = ({
             const symbolTags = Array.isArray(watchlistTags[symbol]) ? watchlistTags[symbol] : [];
             const matchesTag = tagFilter === 'all' || symbolTags.includes(tagFilter);
             const matchesDirection = matchesTradePlanDirection(symbol, tradePlans, riskBudget, planDirectionFilter);
+            const matchesRewardMultiple = matchesTradePlanRewardMultiple(symbol, tradePlans, riskBudget, planRewardMultipleFilter);
 
-            return matchesSearch && matchesWorkflow && matchesTag && matchesDirection;
+            return matchesSearch && matchesWorkflow && matchesTag && matchesDirection && matchesRewardMultiple;
         });
 
         if (sortMode === 'az') {
@@ -481,7 +521,7 @@ const Watchlist = ({
         }
 
         return filteredSymbols;
-    }, [watchlist, watchlistNotes, tradePlans, watchlistTags, searchText, sortMode, workflowFilter, tagFilter, planDirectionFilter, riskBudget]);
+    }, [watchlist, watchlistNotes, tradePlans, watchlistTags, searchText, sortMode, workflowFilter, tagFilter, planDirectionFilter, planRewardMultipleFilter, riskBudget]);
 
     const tagCounts = useMemo(() => researchTagOptions.reduce((counts, tag) => {
         counts[tag.key] = watchlist.filter((symbol) => (
@@ -493,6 +533,13 @@ const Watchlist = ({
     const planDirectionCounts = useMemo(() => planDirectionOptions.reduce((counts, direction) => {
         counts[direction.key] = watchlist.filter((symbol) => (
             matchesTradePlanDirection(symbol, tradePlans, riskBudget, direction.key)
+        )).length;
+        return counts;
+    }, {}), [watchlist, tradePlans, riskBudget]);
+
+    const planRewardMultipleCounts = useMemo(() => planRewardMultipleOptions.reduce((counts, lane) => {
+        counts[lane.key] = watchlist.filter((symbol) => (
+            matchesTradePlanRewardMultiple(symbol, tradePlans, riskBudget, lane.key)
         )).length;
         return counts;
     }, {}), [watchlist, tradePlans, riskBudget]);
@@ -931,6 +978,30 @@ const Watchlist = ({
                             <span>{direction.label}</span>
                             <strong>{planDirectionCounts[direction.key] || 0}</strong>
                             <small>{direction.detail}</small>
+                        </button>
+                    ))}
+                </div>
+            </section>
+
+            <section className="watchlist-reward-filter" aria-labelledby="watchlist-reward-filter-title">
+                <div className="watchlist-reward-filter__header">
+                    <div>
+                        <h3 id="watchlist-reward-filter-title">Reward / Risk Lanes</h3>
+                        <span>Filter ideas by their saved target-to-risk multiple; downstream planning panels follow this view.</span>
+                    </div>
+                    <strong>{planRewardMultipleCounts[planRewardMultipleFilter] || 0} in view</strong>
+                </div>
+                <div className="watchlist-reward-filter__grid">
+                    {planRewardMultipleOptions.map((lane) => (
+                        <button
+                            aria-pressed={planRewardMultipleFilter === lane.key}
+                            className={planRewardMultipleFilter === lane.key ? 'watchlist-reward-filter__card watchlist-reward-filter__card--active' : 'watchlist-reward-filter__card'}
+                            key={lane.key}
+                            onClick={() => setPlanRewardMultipleFilter(lane.key)}
+                            type="button">
+                            <span>{lane.label}</span>
+                            <strong>{planRewardMultipleCounts[lane.key] || 0}</strong>
+                            <small>{lane.detail}</small>
                         </button>
                     ))}
                 </div>
