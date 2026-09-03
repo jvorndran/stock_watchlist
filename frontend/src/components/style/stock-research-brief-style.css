@@ -1,0 +1,154 @@
+.stock-research-brief {
+    background: #1f2330;
+    border: 1px solid #343b4d;
+    border-radius: 8px;
+    color: #f8fafc;
+    display: grid;
+    gap: 0.85rem;
+    margin: 1rem 10vw;
+    padding: 1rem;
+}
+
+.stock-research-brief__header {
+    align-items: center;
+    display: flex;
+    gap: 1rem;
+    justify-content: space-between;
+}
+
+.stock-research-brief__header h2 {
+    font-size: 1.15rem;
+    font-weight: 700;
+    margin: 0 0 0.2rem;
+}
+
+.stock-research-brief__header span,
+.stock-research-brief__next-step,
+.stock-research-brief__note,
+.stock-research-brief__message {
+    color: #aeb6c5;
+    font-size: 0.82rem;
+}
+
+.stock-research-brief__header > strong {
+    background: #334155;
+    border: 1px solid #526075;
+    border-radius: 999px;
+    color: #cbd5e1;
+    font-size: 0.78rem;
+    padding: 0.4rem 0.65rem;
+    white-space: nowrap;
+}
+
+.stock-research-brief__header > strong.is-complete {
+    background: #064e3b;
+    border-color: #34d399;
+    color: #d1fae5;
+}
+
+.stock-research-brief__progress {
+    background: #151720;
+    border-radius: 999px;
+    height: 7px;
+    overflow: hidden;
+}
+
+.stock-research-brief__progress span {
+    background: linear-gradient(90deg, #38bdf8, #34d399);
+    display: block;
+    height: 100%;
+    transition: width 180ms ease;
+}
+
+.stock-research-brief__next-step,
+.stock-research-brief__message {
+    margin: 0;
+}
+
+.stock-research-brief__fields {
+    display: grid;
+    gap: 0.75rem;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+
+.stock-research-brief__fields label {
+    display: grid;
+    gap: 0.4rem;
+}
+
+.stock-research-brief__fields label > span {
+    color: #cbd5e1;
+    font-size: 0.78rem;
+    font-weight: 700;
+}
+
+.stock-research-brief__fields textarea {
+    background: #151720;
+    border: 1px solid #465066;
+    border-radius: 5px;
+    color: #f8fafc;
+    min-height: 94px;
+    padding: 0.6rem 0.65rem;
+    resize: vertical;
+    width: 100%;
+}
+
+.stock-research-brief__fields textarea:focus {
+    border-color: #38bdf8;
+    outline: 2px solid rgba(56, 189, 248, 0.2);
+}
+
+.stock-research-brief__fields small {
+    color: #94a3b8;
+    font-size: 0.72rem;
+    text-align: right;
+}
+
+.stock-research-brief__actions {
+    display: flex;
+    gap: 0.6rem;
+    justify-content: flex-end;
+    margin-top: 0.85rem;
+}
+
+.stock-research-brief__actions button {
+    background: #0f766e;
+    border: 1px solid #2dd4bf;
+    border-radius: 5px;
+    color: #ecfeff;
+    cursor: pointer;
+    font-size: 0.8rem;
+    font-weight: 700;
+    padding: 0.55rem 0.8rem;
+}
+
+.stock-research-brief__actions .stock-research-brief__clear {
+    background: #334155;
+    border-color: #526075;
+    color: #e2e8f0;
+}
+
+.stock-research-brief__note {
+    border-top: 1px solid #343b4d;
+    padding-top: 0.75rem;
+}
+
+@media (max-width: 700px) {
+    .stock-research-brief {
+        margin-left: 1rem;
+        margin-right: 1rem;
+    }
+
+    .stock-research-brief__header {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .stock-research-brief__actions {
+        justify-content: stretch;
+    }
+
+    .stock-research-brief__actions button {
+        flex: 1;
+    }
+}

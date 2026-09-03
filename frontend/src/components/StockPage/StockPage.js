@@ -26,6 +26,7 @@ import StockEnterpriseValueLens from './StockEnterpriseValueLens';
 import StockCapitalAllocation from './StockCapitalAllocation';
 import StockMultipleDashboard from './StockMultipleDashboard';
 import StockOwnershipProfile from './StockOwnershipProfile';
+import StockResearchBrief from './StockResearchBrief';
 import "../../index.css"
 
 const StockPage = () => {
@@ -92,6 +93,8 @@ const StockPage = () => {
                     <StockShortInterestPanel stockData={stockData} />
 
                     <StockScorecard stockData={stockData} />
+
+                    <StockResearchBrief key={stockData.summary.Symbol} stockData={stockData} />
 
                     <StockProfitabilityPanel stockData={stockData} />
 
