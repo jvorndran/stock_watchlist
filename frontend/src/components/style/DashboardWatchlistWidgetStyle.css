@@ -1343,6 +1343,95 @@ label.watchlist-manager__export {
     grid-column: 1 / -1;
 }
 
+.watchlist-brief-coverage {
+    background: #1b1f2a;
+    border: 1px solid #303646;
+    border-radius: 6px;
+    display: grid;
+    gap: 0.85rem;
+    padding: 1rem;
+}
+
+.watchlist-brief-coverage__header {
+    align-items: center;
+    display: flex;
+    gap: 1rem;
+    justify-content: space-between;
+}
+
+.watchlist-brief-coverage__header h3 {
+    font-size: 1.05rem;
+    font-weight: 700;
+    margin: 0 0 0.25rem;
+}
+
+.watchlist-brief-coverage__header span,
+.watchlist-brief-coverage__grid span,
+.watchlist-brief-coverage__grid small,
+.watchlist-brief-coverage__queue > span,
+.watchlist-brief-coverage__queue small {
+    color: #aeb6c5;
+    font-size: 0.8rem;
+}
+
+.watchlist-brief-coverage__header > strong {
+    color: #c4b5fd;
+    white-space: nowrap;
+}
+
+.watchlist-brief-coverage__grid {
+    display: grid;
+    gap: 0.6rem;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+}
+
+.watchlist-brief-coverage__grid article {
+    background: #232733;
+    border: 1px solid #3a4050;
+    border-radius: 5px;
+    display: grid;
+    gap: 0.3rem;
+    padding: 0.7rem;
+}
+
+.watchlist-brief-coverage__grid strong {
+    color: #ddd6fe;
+    font-size: 1.3rem;
+}
+
+.watchlist-brief-coverage__queue {
+    display: grid;
+    gap: 0.45rem;
+}
+
+.watchlist-brief-coverage__queue > span {
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.watchlist-brief-coverage__queue > div {
+    display: grid;
+    gap: 0.45rem;
+    grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+}
+
+.watchlist-brief-coverage__queue a {
+    background: #232733;
+    border: 1px solid #3a4050;
+    border-radius: 5px;
+    display: grid;
+    gap: 0.25rem;
+    padding: 0.65rem;
+}
+
+.watchlist-brief-coverage__queue a:hover {
+    border-color: #8b5cf6;
+}
+
+.watchlist-brief-coverage__queue strong {
+    color: #f8fafc;
+}
+
 @media (max-width: 640px) {
     .watchlist-manager__header {
         align-items: stretch;
@@ -1380,6 +1469,11 @@ label.watchlist-manager__export {
     }
 
     .watchlist-priority__header {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .watchlist-brief-coverage__header {
         align-items: flex-start;
         flex-direction: column;
     }

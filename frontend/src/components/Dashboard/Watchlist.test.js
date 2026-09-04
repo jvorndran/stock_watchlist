@@ -1,4 +1,4 @@
-import {buildPlanCapacitySnapshot, buildResearchPriority, getWorkflowState, matchesTradePlanDirection, matchesTradePlanRewardMultiple, normalizeResearchSnapshot, summarizePlanScenario, summarizeTradePlanByTag, summarizeTradePlanExposure} from './Watchlist';
+import {buildPlanCapacitySnapshot, buildResearchPriority, getWorkflowState, matchesTradePlanDirection, matchesTradePlanRewardMultiple, normalizeResearchSnapshot, summarizePlanScenario, summarizeResearchBriefCoverage, summarizeTradePlanByTag, summarizeTradePlanExposure} from './Watchlist';
 
 describe('matchesTradePlanDirection', () => {
     const plans = {
@@ -88,6 +88,29 @@ describe('buildResearchPriority', () => {
 
         expect(invalidPlan).toMatchObject({action: 'Repair the trade plan', score: 5});
         expect(lowReward).toMatchObject({action: 'Review reward/risk', score: 2});
+    });
+});
+
+describe('summarizeResearchBriefCoverage', () => {
+    it('summarizes complete, partial, and undocumented briefs while prioritizing the largest gaps', () => {
+        const coverage = summarizeResearchBriefCoverage(['COMPLETE', 'PARTIAL', 'EMPTY'], {
+            COMPLETE: {thesis: 'Durable demand', catalyst: 'New products', invalidation: 'Margin pressure'},
+            PARTIAL: {thesis: 'Recovery thesis'},
+        });
+
+        expect(coverage).toMatchObject({
+            completeCount: 1,
+            completionRate: 4 / 9,
+            documentedCount: 2,
+            documentedFields: 4,
+            symbolCount: 3,
+            totalFields: 9,
+            undocumentedCount: 1,
+        });
+        expect(coverage.nextUp).toEqual([
+            expect.objectContaining({symbol: 'EMPTY', completedCount: 0, nextStep: 'Add investment thesis.'}),
+            expect.objectContaining({symbol: 'PARTIAL', completedCount: 1, nextStep: 'Add catalyst to watch.'}),
+        ]);
     });
 });
 

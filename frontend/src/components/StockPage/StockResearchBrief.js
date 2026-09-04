@@ -25,7 +25,7 @@ const emptyBrief = () => ({
     invalidation: '',
 });
 
-const getStorageKey = (symbol) => `stock-watchlist-research-brief:${String(symbol || '').trim().toUpperCase()}`;
+export const getResearchBriefStorageKey = (symbol) => `stock-watchlist-research-brief:${String(symbol || '').trim().toUpperCase()}`;
 
 export const normalizeResearchBrief = (brief) => fields.reduce((normalized, field) => {
     const value = brief && typeof brief[field.key] === 'string' ? brief[field.key].trim() : '';
@@ -47,9 +47,9 @@ export const buildResearchBriefSummary = (brief) => {
     };
 };
 
-const loadResearchBrief = (symbol) => {
+export const loadResearchBrief = (symbol) => {
     try {
-        const stored = window.localStorage.getItem(getStorageKey(symbol));
+        const stored = window.localStorage.getItem(getResearchBriefStorageKey(symbol));
         return stored ? normalizeResearchBrief(JSON.parse(stored)) : emptyBrief();
     } catch (error) {
         return emptyBrief();
@@ -73,7 +73,7 @@ const StockResearchBrief = ({stockData}) => {
         const normalized = normalizeResearchBrief(brief);
 
         try {
-            window.localStorage.setItem(getStorageKey(symbol), JSON.stringify(normalized));
+            window.localStorage.setItem(getResearchBriefStorageKey(symbol), JSON.stringify(normalized));
             setBrief(normalized);
             setMessage(`${symbol} research brief saved to this browser.`);
         } catch (error) {
@@ -83,7 +83,7 @@ const StockResearchBrief = ({stockData}) => {
 
     const clearBrief = () => {
         try {
-            window.localStorage.removeItem(getStorageKey(symbol));
+            window.localStorage.removeItem(getResearchBriefStorageKey(symbol));
             setBrief(emptyBrief());
             setMessage(`${symbol} research brief cleared from this browser.`);
         } catch (error) {

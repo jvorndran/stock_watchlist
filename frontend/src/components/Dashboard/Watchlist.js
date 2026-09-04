@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { FaArrowDown, FaArrowUp, FaPlus, FaTimes } from 'react-icons/fa';
+import {buildResearchBriefSummary, loadResearchBrief} from '../StockPage/StockResearchBrief';
 import '../style/DashboardWatchlistWidgetStyle.css';
 
 const parseTickerEntry = (entry) => [...new Set(entry
@@ -425,6 +426,32 @@ export const buildResearchPriority = (symbol, watchlistNotes, tradePlans, riskBu
     };
 };
 
+export const summarizeResearchBriefCoverage = (symbols, briefs = {}) => {
+    const entries = symbols.map((symbol) => ({
+        symbol,
+        ...buildResearchBriefSummary(briefs[symbol]),
+    }));
+    const completeCount = entries.filter((entry) => entry.isComplete).length;
+    const documentedCount = entries.filter((entry) => entry.completedCount > 0).length;
+    const documentedFields = entries.reduce((total, entry) => total + entry.completedCount, 0);
+    const totalFields = entries.reduce((total, entry) => total + entry.totalCount, 0);
+    const nextUp = entries
+        .filter((entry) => !entry.isComplete)
+        .sort((first, second) => first.completedCount - second.completedCount || first.symbol.localeCompare(second.symbol))
+        .slice(0, 3);
+
+    return {
+        completeCount,
+        completionRate: totalFields > 0 ? documentedFields / totalFields : 0,
+        documentedCount,
+        documentedFields,
+        nextUp,
+        symbolCount: entries.length,
+        totalFields,
+        undocumentedCount: entries.length - documentedCount,
+    };
+};
+
 const Watchlist = ({
     onAddTicker,
     onAddTickers,
@@ -562,6 +589,15 @@ const Watchlist = ({
         .filter((priority) => priority.score > 0)
         .sort((first, second) => second.score - first.score || first.symbol.localeCompare(second.symbol))
         .slice(0, 3), [visibleWatchlist, watchlistNotes, tradePlans, riskBudget]);
+
+    const researchBriefCoverage = useMemo(() => {
+        const briefs = visibleWatchlist.reduce((savedBriefs, symbol) => {
+            savedBriefs[symbol] = loadResearchBrief(symbol);
+            return savedBriefs;
+        }, {});
+
+        return summarizeResearchBriefCoverage(visibleWatchlist, briefs);
+    }, [visibleWatchlist]);
 
     const parsedPortfolioValue = useMemo(() => {
         const value = Number(String(portfolioValue).replace(/[^0-9.]/g, ''));
@@ -1033,6 +1069,56 @@ const Watchlist = ({
                     <p className="watchlist-manager__empty">
                         Every visible symbol has a thesis and a valid trade plan with at least 2.0R reward/risk.
                     </p>
+                )}
+            </section>
+
+            <section className="watchlist-brief-coverage" aria-labelledby="watchlist-brief-coverage-title">
+                <div className="watchlist-brief-coverage__header">
+                    <div>
+                        <h3 id="watchlist-brief-coverage-title">Research Brief Coverage</h3>
+                        <span>Track thesis, catalyst, and invalidation notes across the current watchlist view.</span>
+                    </div>
+                    <strong>{researchBriefCoverage.completeCount} of {researchBriefCoverage.symbolCount} complete</strong>
+                </div>
+
+                {researchBriefCoverage.symbolCount > 0 ? (
+                    <>
+                        <div className="watchlist-brief-coverage__grid">
+                            <article>
+                                <span>Documented symbols</span>
+                                <strong>{researchBriefCoverage.documentedCount}</strong>
+                                <small>At least one research-brief field saved.</small>
+                            </article>
+                            <article>
+                                <span>Undocumented</span>
+                                <strong>{researchBriefCoverage.undocumentedCount}</strong>
+                                <small>Still need a first thesis, catalyst, or risk note.</small>
+                            </article>
+                            <article>
+                                <span>Field coverage</span>
+                                <strong>{Math.round(researchBriefCoverage.completionRate * 100)}%</strong>
+                                <small>{researchBriefCoverage.documentedFields} of {researchBriefCoverage.totalFields} fields captured.</small>
+                            </article>
+                        </div>
+
+                        {researchBriefCoverage.nextUp.length > 0 ? (
+                            <div className="watchlist-brief-coverage__queue">
+                                <span>Next research briefs</span>
+                                <div>
+                                    {researchBriefCoverage.nextUp.map((brief) => (
+                                        <Link key={brief.symbol} to={`/dash/${brief.symbol}`}>
+                                            <strong>{brief.symbol}</strong>
+                                            <small>{brief.completedCount} of {brief.totalCount} documented · {brief.nextStep}</small>
+                                        </Link>
+                                    ))}
+                                </div>
+                            </div>
+                        ) : (
+                            <p className="watchlist-manager__empty">Every visible symbol has a complete research brief.</p>
+                        )}
+                    </>
+                ) : (
+                    <p className="watchlist-manager__empty">Add symbols to begin tracking research-brief coverage.</p>
                 )}
             </section>
 
