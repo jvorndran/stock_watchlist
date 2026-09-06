@@ -18,6 +18,44 @@ const formatPercent = (value) => value === null
     ? '-'
     : `${value > 0 ? '+' : ''}${value.toFixed(1)}%`;
 
+const getPercentChange = (data, lookbackDays) => {
+    if (!data || data.length <= lookbackDays) {
+        return null;
+    }
+
+    const latestClose = Number(data[data.length - 1].close);
+    const previousClose = Number(data[data.length - 1 - lookbackDays].close);
+
+    if (!Number.isFinite(latestClose) || !Number.isFinite(previousClose) || previousClose <= 0) {
+        return null;
+    }
+
+    return ((latestClose / previousClose) - 1) * 100;
+};
+
+export const buildIndexRelativeStrength = (dataSets = [], names = indexes) => {
+    const rows = dataSets.map((data, index) => ({
+        name: names[index] || `Index ${index + 1}`,
+        oneWeek: getPercentChange(data, 5),
+        oneMonth: getPercentChange(data, 20),
+        oneQuarter: getPercentChange(data, 63),
+    }));
+    const rankedRows = rows.filter((row) => row.oneMonth !== null);
+    const leader = rankedRows.reduce((currentLeader, row) => (
+        !currentLeader || row.oneMonth > currentLeader.oneMonth ? row : currentLeader
+    ), null);
+    const laggard = rankedRows.reduce((currentLaggard, row) => (
+        !currentLaggard || row.oneMonth < currentLaggard.oneMonth ? row : currentLaggard
+    ), null);
+
+    return {
+        laggard,
+        leader,
+        rows,
+        spread: leader && laggard ? leader.oneMonth - laggard.oneMonth : null,
+    };
+};
+
 const DashIndices = () => {
 
     const [formattedStockData, setFormattedStockData] = useState([])
@@ -118,6 +156,11 @@ const DashIndices = () => {
             rangeLow,
         };
     }, [formattedStockData, selectedIndex]);
+
+    const relativeStrength = useMemo(
+        () => buildIndexRelativeStrength(formattedStockData),
+        [formattedStockData]
+    );
 
     useEffect(() => {
 
@@ -236,6 +279,52 @@ const DashIndices = () => {
                             <strong>{selectedIndexRegime.rangeLow.toFixed(0)} - {selectedIndexRegime.rangeHigh.toFixed(0)}</strong>
                         </span>
                     </div>
+                </section>
+
+                <section className="index-relative-strength" aria-labelledby="index-relative-strength-title">
+                    <div className="index-relative-strength__header">
+                        <div>
+                            <h2 id="index-relative-strength-title">Index Relative Strength</h2>
+                            <span>Rank the tracked indexes by percent return over the same lookback windows.</span>
+                        </div>
+                        <strong>{relativeStrength.leader ? `${relativeStrength.leader.name} leads` : 'Building history'}</strong>
+                    </div>
+
+                    <div className="index-relative-strength__summary">
+                        <span>
+                            <small>1-Month leader</small>
+                            <strong>{relativeStrength.leader?.name || '-'}</strong>
+                            <em>{formatPercent(relativeStrength.leader?.oneMonth ?? null)}</em>
+                        </span>
+                        <span>
+                            <small>1-Month laggard</small>
+                            <strong>{relativeStrength.laggard?.name || '-'}</strong>
+                            <em>{formatPercent(relativeStrength.laggard?.oneMonth ?? null)}</em>
+                        </span>
+                        <span>
+                            <small>Leader / laggard spread</small>
+                            <strong>{formatPercent(relativeStrength.spread)}</strong>
+                            <em>Difference in 20-trading-day return</em>
+                        </span>
+                    </div>
+
+                    <div className="index-relative-strength__table" role="table" aria-label="Index relative-strength returns">
+                        <div className="index-relative-strength__row index-relative-strength__row--header" role="row">
+                            <span role="columnheader">Index</span>
+                            <span role="columnheader">1 Week</span>
+                            <span role="columnheader">1 Month</span>
+                            <span role="columnheader">1 Quarter</span>
+                        </div>
+                        {relativeStrength.rows.map((row) => (
+                            <div className={row.name === relativeStrength.leader?.name ? 'index-relative-strength__row index-relative-strength__row--leader' : 'index-relative-strength__row'} key={row.name} role="row">
+                                <strong role="cell">{row.name}</strong>
+                                <span role="cell">{formatPercent(row.oneWeek)}</span>
+                                <span role="cell">{formatPercent(row.oneMonth)}</span>
+                                <span role="cell">{formatPercent(row.oneQuarter)}</span>
+                            </div>
+                        ))}
+                    </div>
+                    <small className="index-relative-strength__note">Returns use each index’s reported closes and are comparison aids, not forecasts.</small>
                 </section>
 
                 </>
