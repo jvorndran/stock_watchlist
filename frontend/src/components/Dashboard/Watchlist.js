@@ -66,6 +66,13 @@ const planRewardMultipleOptions = [
     {key: 'fivePlus', label: '5R+', detail: 'Plans with the furthest target relative to risk.'},
     {key: 'needsPlan', label: 'Needs Valid Plan', detail: 'Missing or malformed entry, stop, or target levels.'},
 ];
+const researchBriefLaneOptions = [
+    {key: 'all', label: 'All Briefs', detail: 'Keep every current research brief in view.'},
+    {key: 'draft', label: 'Not Started', detail: 'No thesis, catalyst, or invalidation documented.'},
+    {key: 'forming', label: 'First Pass', detail: 'One of three research-brief fields is documented.'},
+    {key: 'developing', label: 'In Progress', detail: 'Two of three research-brief fields are documented.'},
+    {key: 'ready', label: 'Brief Complete', detail: 'Thesis, catalyst, and invalidation are all documented.'},
+];
 const researchTagKeys = new Set(researchTagOptions.map((tag) => tag.key));
 const validTickerPattern = /^[A-Z0-9.-]{1,12}$/;
 
@@ -433,6 +440,24 @@ export const buildResearchPriority = (symbol, watchlistNotes, tradePlans, riskBu
     };
 };
 
+export const getResearchBriefLane = (brief) => {
+    const completedCount = buildResearchBriefSummary(brief).completedCount;
+
+    if (completedCount === 0) {
+        return 'draft';
+    }
+
+    if (completedCount === 1) {
+        return 'forming';
+    }
+
+    return completedCount === 2 ? 'developing' : 'ready';
+};
+
+export const matchesResearchBriefLane = (symbol, briefs, lane = 'all') => (
+    lane === 'all' || getResearchBriefLane(briefs[symbol]) === lane
+);
+
 export const summarizeResearchBriefCoverage = (symbols, briefs = {}) => {
     const entries = symbols.map((symbol) => ({
         symbol,
@@ -491,10 +516,11 @@ const Watchlist = ({
     const [tagFilter, setTagFilter] = useState('all');
     const [planDirectionFilter, setPlanDirectionFilter] = useState('all');
     const [planRewardMultipleFilter, setPlanRewardMultipleFilter] = useState('all');
+    const [researchBriefLaneFilter, setResearchBriefLaneFilter] = useState('all');
     const [researchExportMessage, setResearchExportMessage] = useState('');
     const [pendingResearchSnapshot, setPendingResearchSnapshot] = useState(null);
     const researchBackupInputRef = useRef(null);
-    const canReorder = sortMode === 'added' && searchText.trim().length === 0 && workflowFilter === 'all' && tagFilter === 'all' && planDirectionFilter === 'all' && planRewardMultipleFilter === 'all';
+    const canReorder = sortMode === 'added' && searchText.trim().length === 0 && workflowFilter === 'all' && tagFilter === 'all' && planDirectionFilter === 'all' && planRewardMultipleFilter === 'all' && researchBriefLaneFilter === 'all';
 
     const workflowSummary = useMemo(() => watchlist.reduce((summary, symbol) => {
         const workflowState = getWorkflowState(symbol, watchlistNotes, tradePlans, riskBudget);
@@ -527,6 +553,11 @@ const Watchlist = ({
         {key: 'unprepared', label: 'Unprepared', count: workflowSummary.unprepared, detail: 'No thesis or trade plan'},
     ];
 
+    const researchBriefs = useMemo(() => watchlist.reduce((savedBriefs, symbol) => {
+        savedBriefs[symbol] = loadResearchBrief(symbol);
+        return savedBriefs;
+    }, {}), [watchlist]);
+
     const visibleWatchlist = useMemo(() => {
         const normalizedSearch = searchText.trim().toUpperCase();
         const filteredSymbols = watchlist.filter((symbol) => {
@@ -542,8 +573,9 @@ const Watchlist = ({
             const matchesTag = tagFilter === 'all' || symbolTags.includes(tagFilter);
             const matchesDirection = matchesTradePlanDirection(symbol, tradePlans, riskBudget, planDirectionFilter);
             const matchesRewardMultiple = matchesTradePlanRewardMultiple(symbol, tradePlans, riskBudget, planRewardMultipleFilter);
+            const matchesResearchBrief = matchesResearchBriefLane(symbol, researchBriefs, researchBriefLaneFilter);
 
-            return matchesSearch && matchesWorkflow && matchesTag && matchesDirection && matchesRewardMultiple;
+            return matchesSearch && matchesWorkflow && matchesTag && matchesDirection && matchesRewardMultiple && matchesResearchBrief;
         });
 
         if (sortMode === 'az') {
@@ -555,7 +587,7 @@ const Watchlist = ({
         }
 
         return filteredSymbols;
-    }, [watchlist, watchlistNotes, tradePlans, watchlistTags, searchText, sortMode, workflowFilter, tagFilter, planDirectionFilter, planRewardMultipleFilter, riskBudget]);
+    }, [watchlist, watchlistNotes, tradePlans, watchlistTags, researchBriefs, searchText, sortMode, workflowFilter, tagFilter, planDirectionFilter, planRewardMultipleFilter, researchBriefLaneFilter, riskBudget]);
 
     const tagCounts = useMemo(() => researchTagOptions.reduce((counts, tag) => {
         counts[tag.key] = watchlist.filter((symbol) => (
@@ -578,6 +610,11 @@ const Watchlist = ({
         return counts;
     }, {}), [watchlist, tradePlans, riskBudget]);
 
+    const researchBriefLaneCounts = useMemo(() => researchBriefLaneOptions.reduce((counts, lane) => {
+        counts[lane.key] = watchlist.filter((symbol) => matchesResearchBriefLane(symbol, researchBriefs, lane.key)).length;
+        return counts;
+    }, {}), [watchlist, researchBriefs]);
+
     const planExposure = useMemo(() => summarizeTradePlanExposure(
         visibleWatchlist,
         tradePlans,
@@ -597,14 +634,10 @@ const Watchlist = ({
         .sort((first, second) => second.score - first.score || first.symbol.localeCompare(second.symbol))
         .slice(0, 3), [visibleWatchlist, watchlistNotes, tradePlans, riskBudget]);
 
-    const researchBriefCoverage = useMemo(() => {
-        const briefs = visibleWatchlist.reduce((savedBriefs, symbol) => {
-            savedBriefs[symbol] = loadResearchBrief(symbol);
-            return savedBriefs;
-        }, {});
-
-        return summarizeResearchBriefCoverage(visibleWatchlist, briefs);
-    }, [visibleWatchlist]);
+    const researchBriefCoverage = useMemo(() => summarizeResearchBriefCoverage(
+        visibleWatchlist,
+        researchBriefs
+    ), [visibleWatchlist, researchBriefs]);
 
     const parsedPortfolioValue = useMemo(() => {
         const value = Number(String(portfolioValue).replace(/[^0-9.]/g, ''));
@@ -1045,6 +1078,30 @@ const Watchlist = ({
                             type="button">
                             <span>{lane.label}</span>
                             <strong>{planRewardMultipleCounts[lane.key] || 0}</strong>
+                            <small>{lane.detail}</small>
+                        </button>
+                    ))}
+                </div>
+            </section>
+
+            <section className="watchlist-brief-lanes" aria-labelledby="watchlist-brief-lanes-title">
+                <div className="watchlist-brief-lanes__header">
+                    <div>
+                        <h3 id="watchlist-brief-lanes-title">Research Brief Lanes</h3>
+                        <span>Focus the entire dashboard by the depth of thesis, catalyst, and invalidation research.</span>
+                    </div>
+                    <strong>{researchBriefLaneCounts[researchBriefLaneFilter] || 0} in view</strong>
+                </div>
+                <div className="watchlist-brief-lanes__grid">
+                    {researchBriefLaneOptions.map((lane) => (
+                        <button
+                            aria-pressed={researchBriefLaneFilter === lane.key}
+                            className={researchBriefLaneFilter === lane.key ? 'watchlist-brief-lanes__card watchlist-brief-lanes__card--active' : 'watchlist-brief-lanes__card'}
+                            key={lane.key}
+                            onClick={() => setResearchBriefLaneFilter(lane.key)}
+                            type="button">
+                            <span>{lane.label}</span>
+                            <strong>{researchBriefLaneCounts[lane.key] || 0}</strong>
                             <small>{lane.detail}</small>
                         </button>
                     ))}

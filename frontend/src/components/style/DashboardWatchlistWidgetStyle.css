@@ -877,6 +877,7 @@ label.watchlist-manager__export {
     font-size: 1.2rem;
 }
 
+.watchlist-brief-lanes,
 .watchlist-reward-filter {
     background: linear-gradient(135deg, #2b2517, #202735);
     border: 1px solid #806a35;
@@ -886,6 +887,7 @@ label.watchlist-manager__export {
     padding: 1rem;
 }
 
+.watchlist-brief-lanes__header,
 .watchlist-reward-filter__header {
     align-items: flex-start;
     display: flex;
@@ -893,18 +895,22 @@ label.watchlist-manager__export {
     justify-content: space-between;
 }
 
+.watchlist-brief-lanes__header h3,
 .watchlist-reward-filter__header h3 {
     font-size: 1.05rem;
     font-weight: 700;
     margin: 0 0 0.2rem;
 }
 
+.watchlist-brief-lanes__header span,
+.watchlist-brief-lanes__card small,
 .watchlist-reward-filter__header span,
 .watchlist-reward-filter__card small {
     color: #d8c9a8;
     font-size: 0.78rem;
 }
 
+.watchlist-brief-lanes__header > strong,
 .watchlist-reward-filter__header > strong {
     background: #584719;
     border: 1px solid #eabf4b;
@@ -915,12 +921,14 @@ label.watchlist-manager__export {
     white-space: nowrap;
 }
 
+.watchlist-brief-lanes__grid,
 .watchlist-reward-filter__grid {
     display: grid;
     gap: 0.65rem;
     grid-template-columns: repeat(auto-fit, minmax(165px, 1fr));
 }
 
+.watchlist-brief-lanes__card,
 .watchlist-reward-filter__card {
     background: rgba(35, 39, 51, 0.82);
     border: 1px solid #665b40;
@@ -933,6 +941,9 @@ label.watchlist-manager__export {
     text-align: left;
 }
 
+.watchlist-brief-lanes__card:hover,
+.watchlist-brief-lanes__card:focus-visible,
+.watchlist-brief-lanes__card--active,
 .watchlist-reward-filter__card:hover,
 .watchlist-reward-filter__card:focus-visible,
 .watchlist-reward-filter__card--active {
@@ -940,6 +951,7 @@ label.watchlist-manager__export {
     box-shadow: 0 0 0 2px rgba(246, 207, 99, 0.16);
 }
 
+.watchlist-brief-lanes__card span,
 .watchlist-reward-filter__card span {
     color: #fde68a;
     font-size: 0.75rem;
@@ -947,6 +959,7 @@ label.watchlist-manager__export {
     text-transform: uppercase;
 }
 
+.watchlist-brief-lanes__card strong,
 .watchlist-reward-filter__card strong {
     font-size: 1.2rem;
 }

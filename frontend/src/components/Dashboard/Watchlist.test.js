@@ -1,4 +1,4 @@
-import {buildPlanCapacitySnapshot, buildResearchPriority, getWorkflowState, matchesTradePlanDirection, matchesTradePlanRewardMultiple, normalizeResearchSnapshot, summarizePlanScenario, summarizeResearchBriefCoverage, summarizeTradePlanByTag, summarizeTradePlanExposure} from './Watchlist';
+import {buildPlanCapacitySnapshot, buildResearchPriority, getResearchBriefLane, getWorkflowState, matchesResearchBriefLane, matchesTradePlanDirection, matchesTradePlanRewardMultiple, normalizeResearchSnapshot, summarizePlanScenario, summarizeResearchBriefCoverage, summarizeTradePlanByTag, summarizeTradePlanExposure} from './Watchlist';
 
 describe('matchesTradePlanDirection', () => {
     const plans = {
@@ -111,6 +111,25 @@ describe('summarizeResearchBriefCoverage', () => {
             expect.objectContaining({symbol: 'EMPTY', completedCount: 0, nextStep: 'Add investment thesis.'}),
             expect.objectContaining({symbol: 'PARTIAL', completedCount: 1, nextStep: 'Add catalyst to watch.'}),
         ]);
+    });
+});
+
+describe('research brief lanes', () => {
+    const briefs = {
+        DRAFT: {},
+        FIRST: {thesis: 'Durable demand'},
+        DEVELOPING: {thesis: 'Durable demand', catalyst: 'New product cycle'},
+        READY: {thesis: 'Durable demand', catalyst: 'New product cycle', invalidation: 'Margin pressure'},
+    };
+
+    it('groups saved briefs by documentation depth for dashboard-wide filtering', () => {
+        expect(getResearchBriefLane(briefs.DRAFT)).toBe('draft');
+        expect(getResearchBriefLane(briefs.FIRST)).toBe('forming');
+        expect(getResearchBriefLane(briefs.DEVELOPING)).toBe('developing');
+        expect(getResearchBriefLane(briefs.READY)).toBe('ready');
+        expect(matchesResearchBriefLane('READY', briefs, 'ready')).toBe(true);
+        expect(matchesResearchBriefLane('FIRST', briefs, 'ready')).toBe(false);
+        expect(matchesResearchBriefLane('DRAFT', briefs, 'all')).toBe(true);
     });
 });
 
