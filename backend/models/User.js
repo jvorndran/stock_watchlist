@@ -43,6 +43,7 @@ const userSchema = new mongoose.Schema({
             entry: { type: Number, required: true, min: 0.01 },
             stop: { type: Number, required: true, min: 0.01 },
             target: { type: Number, required: true, min: 0.01 },
+            riskBudget: { type: Number, min: 0.01 },
             updatedAt: { type: Date, default: Date.now }
         }],
         default: []

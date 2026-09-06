@@ -115,6 +115,20 @@ describe('summarizeResearchBriefCoverage', () => {
 });
 
 describe('summarizeTradePlanExposure', () => {
+    it('uses a saved position risk override instead of the shared dashboard budget', () => {
+        const exposure = summarizeTradePlanExposure(['OVERRIDE', 'DEFAULT'], {
+            OVERRIDE: {entry: 100, stop: 90, target: 120, riskBudget: 50},
+            DEFAULT: {entry: 100, stop: 90, target: 120},
+        }, 100);
+
+        expect(exposure).toMatchObject({
+            totalCapital: 1500,
+            totalRisk: 150,
+            totalReward: 300,
+            validPlans: 2,
+        });
+    });
+
     it('combines long and short plans into portfolio exposure totals', () => {
         const exposure = summarizeTradePlanExposure(['LONG', 'SHORT'], {
             LONG: {entry: 100, stop: 95, target: 110},

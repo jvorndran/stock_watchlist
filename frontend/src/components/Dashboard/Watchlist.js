@@ -40,7 +40,7 @@ const formatMoney = (value) => new Intl.NumberFormat('en-US', {
 
 const escapeCsvValue = (value) => `"${String(value ?? '').replace(/"/g, '""')}"`;
 
-const emptyTradePlan = {entry: '', stop: '', target: ''};
+const emptyTradePlan = {entry: '', stop: '', target: '', riskBudget: ''};
 const researchTagOptions = [
     {key: 'core', label: 'Core'},
     {key: 'swing', label: 'Swing'},
@@ -74,6 +74,10 @@ const parsePositiveNumber = (value) => {
     return Number.isFinite(parsedValue) && parsedValue > 0 ? parsedValue : 0;
 };
 
+const getPlanRiskBudget = (plan, fallbackRiskBudget) => (
+    parsePositiveNumber(plan?.riskBudget) || parsePositiveNumber(fallbackRiskBudget)
+);
+
 const analyzeTradePlan = (plan, riskBudget) => {
     const entry = parsePositiveNumber(plan?.entry);
     const stop = parsePositiveNumber(plan?.stop);
@@ -87,7 +91,8 @@ const analyzeTradePlan = (plan, riskBudget) => {
 
     const riskPerShare = Math.abs(entry - stop);
     const rewardPerShare = Math.abs(target - entry);
-    const shares = Math.floor(parsePositiveNumber(riskBudget) / riskPerShare);
+    const planRiskBudget = getPlanRiskBudget(plan, riskBudget);
+    const shares = Math.floor(planRiskBudget / riskPerShare);
 
     return {
         capital: shares * entry,
@@ -95,6 +100,7 @@ const analyzeTradePlan = (plan, riskBudget) => {
         entry,
         reward: shares * rewardPerShare,
         rewardMultiple: rewardPerShare / riskPerShare,
+        riskBudget: planRiskBudget,
         shares,
         stop,
         target,
@@ -206,6 +212,7 @@ export const normalizeResearchSnapshot = (snapshot) => {
             entry: analysis.entry,
             stop: analysis.stop,
             target: analysis.target,
+            ...(parsePositiveNumber(plan?.riskBudget) ? {riskBudget: parsePositiveNumber(plan.riskBudget)} : {}),
         };
     }
 
@@ -715,6 +722,7 @@ const Watchlist = ({
             entry: analysis.entry,
             stop: analysis.stop,
             target: analysis.target,
+            ...(parsePositiveNumber(planDraft.riskBudget) ? {riskBudget: parsePositiveNumber(planDraft.riskBudget)} : {}),
         };
         const wasSaved = await onSaveTradePlan(symbol, normalizedPlan);
 
@@ -1427,7 +1435,8 @@ const Watchlist = ({
                                         <span>Entry ${analysis.entry.toFixed(2)}</span>
                                         <span>Stop ${analysis.stop.toFixed(2)}</span>
                                         <span>Target ${analysis.target.toFixed(2)}</span>
-                                        <span>{analysis.shares.toLocaleString()} shares / {formatMoney(analysis.capital)} capital</span>
+                                        <span>{formatMoney(analysis.riskBudget)} risk / {analysis.shares.toLocaleString()} shares</span>
+                                        <span>{formatMoney(analysis.capital)} capital</span>
                                         <span>{formatMoney(analysis.reward)} planned reward</span>
                                     </div>
                                 ) : null;
@@ -1460,17 +1469,17 @@ const Watchlist = ({
                                         <span>Long and short setups supported</span>
                                     </div>
                                     <div className="watchlist-plan-editor__fields">
-                                        {['entry', 'stop', 'target'].map((field) => (
+                                        {['entry', 'stop', 'target', 'riskBudget'].map((field) => (
                                             <label key={field}>
-                                                <span>{field}</span>
+                                                <span>{field === 'riskBudget' ? 'risk budget (optional)' : field}</span>
                                                 <input
                                                     inputMode="decimal"
                                                     min="0.01"
                                                     onChange={(event) => handlePlanDraftChange(field, event.target.value)}
-                                                    placeholder="0.00"
+                                                    placeholder={field === 'riskBudget' ? `Dashboard default: $${riskBudget}` : '0.00'}
                                                     step="0.01"
                                                     type="number"
-                                                    value={planDraft[field]}
+                                                    value={planDraft[field] || ''}
                                                 />
                                             </label>
                                         ))}

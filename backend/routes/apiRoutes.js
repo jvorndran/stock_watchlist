@@ -25,7 +25,10 @@ const serializeWatchlistTradePlans = (tradePlans = []) => tradePlans.reduce((ser
         serializedPlans[item.ticker] = {
             entry: item.entry,
             stop: item.stop,
-            target: item.target
+            target: item.target,
+            ...(Number.isFinite(Number(item.riskBudget)) && Number(item.riskBudget) > 0
+                ? {riskBudget: Number(item.riskBudget)}
+                : {})
         };
     }
 
@@ -97,15 +100,27 @@ const normalizeResearchSnapshot = (snapshot = {}) => {
         const entry = Number(plan?.entry);
         const stop = Number(plan?.stop);
         const target = Number(plan?.target);
+        const riskBudget = plan?.riskBudget === undefined || plan?.riskBudget === null || plan?.riskBudget === ''
+            ? null
+            : Number(plan.riskBudget);
         const isLongPlan = stop < entry && entry < target;
         const isShortPlan = target < entry && entry < stop;
 
         if (!tickerSet.has(normalizedTicker) || !Number.isFinite(entry) || !Number.isFinite(stop) || !Number.isFinite(target) ||
-            entry <= 0 || stop <= 0 || target <= 0 || (!isLongPlan && !isShortPlan)) {
+            entry <= 0 || stop <= 0 || target <= 0 ||
+            (riskBudget !== null && (!Number.isFinite(riskBudget) || riskBudget <= 0)) ||
+            (!isLongPlan && !isShortPlan)) {
             return null;
         }
 
-        normalizedPlans.push({ticker: normalizedTicker, entry, stop, target, updatedAt: new Date()});
+        normalizedPlans.push({
+            ticker: normalizedTicker,
+            entry,
+            stop,
+            target,
+            ...(riskBudget === null ? {} : {riskBudget}),
+            updatedAt: new Date()
+        });
     }
 
     return {watchlist: tickers, notes: normalizedNotes, tags: normalizedTags, tradePlans: normalizedPlans};
@@ -509,6 +524,10 @@ router.put('/watchlist/:stockTicker/trade-plan', (req, res) => {
         const entry = Number(requestedPlan?.entry);
         const stop = Number(requestedPlan?.stop);
         const target = Number(requestedPlan?.target);
+        const requestedRiskBudget = requestedPlan?.riskBudget;
+        const riskBudget = requestedRiskBudget === undefined || requestedRiskBudget === null || requestedRiskBudget === ''
+            ? null
+            : Number(requestedRiskBudget);
         const isLongPlan = stop < entry && entry < target;
         const isShortPlan = target < entry && entry < stop;
 
@@ -527,6 +546,7 @@ router.put('/watchlist/:stockTicker/trade-plan', (req, res) => {
             entry <= 0 ||
             stop <= 0 ||
             target <= 0 ||
+            (riskBudget !== null && (!Number.isFinite(riskBudget) || riskBudget <= 0)) ||
             (!isLongPlan && !isShortPlan)
         )) {
             return res.status(400).json({
@@ -559,6 +579,7 @@ router.put('/watchlist/:stockTicker/trade-plan', (req, res) => {
                     existingPlan.entry = entry;
                     existingPlan.stop = stop;
                     existingPlan.target = target;
+                    existingPlan.riskBudget = riskBudget || undefined;
                     existingPlan.updatedAt = new Date();
                 } else if (!shouldClearPlan) {
                     user.watchlistTradePlans.push({
@@ -566,6 +587,7 @@ router.put('/watchlist/:stockTicker/trade-plan', (req, res) => {
                         entry,
                         stop,
                         target,
+                        ...(riskBudget === null ? {} : {riskBudget}),
                         updatedAt: new Date()
                     });
                 }
