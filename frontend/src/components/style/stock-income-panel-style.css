@@ -161,6 +161,87 @@
     margin: 0;
 }
 
+.stock-income-reinvestment {
+    background: linear-gradient(135deg, #1b2531, #1d2932);
+    border: 1px solid #3d6672;
+    border-radius: 7px;
+    display: grid;
+    gap: 0.9rem;
+    padding: 0.9rem;
+}
+
+.stock-income-reinvestment__header {
+    align-items: flex-start;
+    display: flex;
+    gap: 1rem;
+    justify-content: space-between;
+}
+
+.stock-income-reinvestment__header h3 {
+    font-size: 1rem;
+    margin: 0 0 0.25rem;
+}
+
+.stock-income-reinvestment__header span,
+.stock-income-reinvestment__header > strong,
+.stock-income-reinvestment__results span,
+.stock-income-reinvestment__results small,
+.stock-income-reinvestment__disclaimer {
+    color: #b9d5d8;
+    font-size: 0.8rem;
+}
+
+.stock-income-reinvestment__header > strong {
+    max-width: 19rem;
+    text-align: right;
+}
+
+.stock-income-reinvestment__controls,
+.stock-income-reinvestment__results {
+    display: grid;
+    gap: 0.75rem;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+}
+
+.stock-income-reinvestment__controls label,
+.stock-income-reinvestment__results article {
+    display: grid;
+    gap: 0.4rem;
+}
+
+.stock-income-reinvestment__controls label > span,
+.stock-income-reinvestment__results span {
+    font-size: 0.74rem;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.stock-income-reinvestment__controls input {
+    background: #172029;
+    border: 1px solid #4c7180;
+    border-radius: 6px;
+    color: #ffffff;
+    min-width: 0;
+    padding: 0.65rem 0.75rem;
+    width: 100%;
+}
+
+.stock-income-reinvestment__results article {
+    background: rgba(15, 28, 36, 0.72);
+    border: 1px solid rgba(107, 171, 185, 0.32);
+    border-radius: 6px;
+    padding: 0.75rem;
+}
+
+.stock-income-reinvestment__results strong {
+    color: #8ee3e0;
+    font-size: 1.2rem;
+}
+
+.stock-income-reinvestment__disclaimer {
+    line-height: 1.35;
+}
+
 @media (max-width: 700px) {
     .stock-income-panel {
         margin-left: 1rem;
@@ -174,5 +255,14 @@
 
     .stock-income-planner__header {
         flex-direction: column;
+    }
+
+    .stock-income-reinvestment__header {
+        flex-direction: column;
+    }
+
+    .stock-income-reinvestment__header > strong {
+        max-width: none;
+        text-align: left;
     }
 }
