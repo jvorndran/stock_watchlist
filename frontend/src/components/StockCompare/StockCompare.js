@@ -51,6 +51,8 @@ const formatMarketCap = (value) => {
     }).format(parsed);
 };
 
+const escapeCsvValue = (value) => `"${String(value ?? '').replace(/"/g, '""')}"`;
+
 const fetchComparisonData = async (symbols) => {
     const results = await Promise.allSettled(symbols.map(async (symbol) => {
         const response = await fetch(`${comparisonEndpoint}/${encodeURIComponent(symbol)}`);
@@ -90,6 +92,19 @@ const metricRows = [
     {label: '52-Week Low', field: '52WeekLow', format: formatCurrency},
     {label: '52-Week High', field: '52WeekHigh', format: formatCurrency},
 ];
+
+export const buildComparisonCsv = (summaries) => {
+    const headers = ['Ticker', 'Company', ...metricRows.map((metric) => metric.label)];
+    const rows = summaries.map((summary) => [
+        summary.Symbol,
+        summary.Name,
+        ...metricRows.map((metric) => summary[metric.field]),
+    ]);
+
+    return [headers, ...rows]
+        .map((row) => row.map(escapeCsvValue).join(','))
+        .join('\n');
+};
 
 const comparisonLenses = [
     {
@@ -209,6 +224,7 @@ const StockCompare = () => {
     const [loading, setLoading] = useState(false);
     const [comparisonError, setComparisonError] = useState('');
     const [comparisonLens, setComparisonLens] = useState('balanced');
+    const [exportMessage, setExportMessage] = useState('');
 
     const runComparison = useCallback(async (symbols) => {
         if (symbols.length < 2) {
@@ -277,6 +293,26 @@ const StockCompare = () => {
 
         setSymbolsInput(symbols.join(', '));
         runComparison(symbols);
+    };
+
+    const downloadComparisonCsv = () => {
+        if (summaries.length === 0) {
+            setExportMessage('Load at least one company before exporting the comparison.');
+            return;
+        }
+
+        const blob = new Blob([buildComparisonCsv(summaries)], {type: 'text/csv;charset=utf-8'});
+        const downloadUrl = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        const symbols = summaries.map((summary) => summary.Symbol).join('-').toLowerCase();
+
+        link.href = downloadUrl;
+        link.download = `stock-comparison-${symbols}.csv`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(downloadUrl);
+        setExportMessage(`${summaries.length} company${summaries.length === 1 ? '' : 'ies'} exported as CSV.`);
     };
 
     return (
@@ -352,6 +388,15 @@ const StockCompare = () => {
                                 </article>
                             ))}
                         </div>
+                    </section>
+
+                    <section className="stock-compare__export" aria-label="Comparison export">
+                        <div>
+                            <strong>Take the comparison with you</strong>
+                            <span>Export every displayed metric for the currently loaded companies.</span>
+                        </div>
+                        <button onClick={downloadComparisonCsv} type="button">Export Comparison CSV</button>
+                        {exportMessage && <small aria-live="polite">{exportMessage}</small>}
                     </section>
 
                     <section className="stock-compare__table-wrap">

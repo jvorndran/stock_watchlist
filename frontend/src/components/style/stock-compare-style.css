@@ -249,6 +249,47 @@
     height: 100%;
 }
 
+.stock-compare__export {
+    align-items: center;
+    background: #172033;
+    border: 1px solid #30547a;
+    border-radius: 10px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.8rem 1rem;
+    justify-content: space-between;
+    padding: 0.9rem 1rem;
+}
+
+.stock-compare__export > div {
+    display: grid;
+    gap: 0.2rem;
+}
+
+.stock-compare__export strong {
+    color: #f8fafc;
+}
+
+.stock-compare__export span,
+.stock-compare__export small {
+    color: #cbd5e1;
+    font-size: 0.85rem;
+}
+
+.stock-compare__export button {
+    background: #0e7490;
+    border: 1px solid #22d3ee;
+    border-radius: 7px;
+    color: #ffffff;
+    cursor: pointer;
+    font-weight: 700;
+    padding: 0.65rem 0.9rem;
+}
+
+.stock-compare__export small {
+    flex-basis: 100%;
+}
+
 .stock-compare__table-wrap {
     overflow-x: auto;
 }

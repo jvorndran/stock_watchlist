@@ -1,7 +1,7 @@
 import {render, screen, waitFor} from '@testing-library/react';
 import '@testing-library/jest-dom';
 import {MemoryRouter} from 'react-router-dom';
-import StockCompare, {buildComparisonScorecard, parseSymbolEntry} from './StockCompare';
+import StockCompare, {buildComparisonCsv, buildComparisonScorecard, parseSymbolEntry} from './StockCompare';
 
 describe('StockCompare', () => {
     afterEach(() => {
@@ -40,6 +40,20 @@ describe('StockCompare', () => {
             summary: {Symbol: 'GROWTH'},
         });
         expect(scorecard[1].summary.Symbol).toBe('VALUE');
+    });
+
+    it('exports each displayed metric as portable CSV rows', () => {
+        const csv = buildComparisonCsv([{
+            Symbol: 'ACME',
+            Name: 'Acme, Inc.',
+            ForwardPE: '19.5',
+            DividendYield: '0.02',
+        }]);
+
+        expect(csv).toContain('"Ticker","Company","Market Cap"');
+        expect(csv).toContain('"ACME","Acme, Inc."');
+        expect(csv).toContain('"19.5"');
+        expect(csv).toContain('"0.02"');
     });
 
     it('loads shared symbols into the comparison table', async () => {
