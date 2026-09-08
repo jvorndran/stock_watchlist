@@ -144,6 +144,111 @@
     color: #d7deea;
 }
 
+.stock-compare__scorecard {
+    background: #22232d;
+    border: 1px solid #343947;
+    border-radius: 10px;
+    padding: 1rem;
+}
+
+.stock-compare__scorecard-header {
+    align-items: end;
+    display: flex;
+    gap: 1rem;
+    justify-content: space-between;
+    margin-bottom: 0.9rem;
+}
+
+.stock-compare__scorecard-header > div > span,
+.stock-compare__scorecard-header label > span,
+.stock-compare__scorecard article > div span {
+    color: #94a3b8;
+    display: block;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.stock-compare__scorecard h2 {
+    font-size: 1.25rem;
+    margin: 0.2rem 0;
+}
+
+.stock-compare__scorecard p {
+    color: #cbd5e1;
+    margin: 0;
+}
+
+.stock-compare__scorecard-header label {
+    display: grid;
+    gap: 0.35rem;
+    min-width: 130px;
+}
+
+.stock-compare__scorecard select {
+    background: #171923;
+    border: 1px solid #475066;
+    border-radius: 7px;
+    color: #ffffff;
+    padding: 0.6rem;
+}
+
+.stock-compare__scorecard-grid {
+    display: grid;
+    gap: 0.7rem;
+    grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+}
+
+.stock-compare__scorecard article {
+    background: #171923;
+    border: 1px solid #343947;
+    border-radius: 8px;
+    display: grid;
+    gap: 0.4rem;
+    padding: 0.85rem;
+}
+
+.stock-compare__scorecard article.is-leading {
+    border-color: #22d3ee;
+}
+
+.stock-compare__scorecard article > div:first-child {
+    align-items: center;
+    display: flex;
+    gap: 0.5rem;
+    justify-content: space-between;
+}
+
+.stock-compare__scorecard article a {
+    color: #67e8f9;
+    font-weight: 800;
+    text-decoration: none;
+}
+
+.stock-compare__scorecard article strong {
+    color: #f8fafc;
+    font-size: 1.8rem;
+    line-height: 1;
+}
+
+.stock-compare__scorecard article small {
+    color: #94a3b8;
+}
+
+.stock-compare__scorecard-bar {
+    background: #343947;
+    border-radius: 999px;
+    height: 0.45rem;
+    overflow: hidden;
+}
+
+.stock-compare__scorecard-bar span {
+    background: linear-gradient(90deg, #0e7490, #67e8f9);
+    display: block;
+    height: 100%;
+}
+
 .stock-compare__table-wrap {
     overflow-x: auto;
 }
@@ -200,6 +305,11 @@
 
 @media (max-width: 700px) {
     .stock-compare__hero {
+        flex-direction: column;
+    }
+
+    .stock-compare__scorecard-header {
+        align-items: stretch;
         flex-direction: column;
     }
 

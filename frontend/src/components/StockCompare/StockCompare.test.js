@@ -1,7 +1,7 @@
 import {render, screen, waitFor} from '@testing-library/react';
 import '@testing-library/jest-dom';
 import {MemoryRouter} from 'react-router-dom';
-import StockCompare, {parseSymbolEntry} from './StockCompare';
+import StockCompare, {buildComparisonScorecard, parseSymbolEntry} from './StockCompare';
 
 describe('StockCompare', () => {
     afterEach(() => {
@@ -12,6 +12,34 @@ describe('StockCompare', () => {
     it('normalizes, deduplicates, and limits ticker entries', () => {
         expect(parseSymbolEntry(' aapl, msft;AAPL googl nvda tsla '))
             .toEqual(['AAPL', 'MSFT', 'GOOGL', 'NVDA']);
+    });
+
+    it('ranks loaded companies with the selected research lens', () => {
+        const scorecard = buildComparisonScorecard([
+            {
+                Symbol: 'VALUE',
+                ForwardPE: '14',
+                PERatio: '16',
+                ProfitMargin: '0.12',
+                QuarterlyEarningsGrowthYOY: '0.05',
+                QuarterlyRevenueGrowthYOY: '0.04',
+            },
+            {
+                Symbol: 'GROWTH',
+                ForwardPE: '35',
+                PERatio: '45',
+                ProfitMargin: '0.3',
+                QuarterlyEarningsGrowthYOY: '0.35',
+                QuarterlyRevenueGrowthYOY: '0.4',
+            },
+        ], 'growth');
+
+        expect(scorecard[0]).toMatchObject({
+            availableMetrics: 3,
+            score: 100,
+            summary: {Symbol: 'GROWTH'},
+        });
+        expect(scorecard[1].summary.Symbol).toBe('VALUE');
     });
 
     it('loads shared symbols into the comparison table', async () => {

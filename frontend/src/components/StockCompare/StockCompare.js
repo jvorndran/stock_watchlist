@@ -91,6 +91,96 @@ const metricRows = [
     {label: '52-Week High', field: '52WeekHigh', format: formatCurrency},
 ];
 
+const comparisonLenses = [
+    {
+        key: 'balanced',
+        label: 'Balanced',
+        detail: 'Blend growth, profitability, and valuation.',
+        metrics: [
+            {field: 'QuarterlyRevenueGrowthYOY', direction: 'high', weight: 0.3},
+            {field: 'QuarterlyEarningsGrowthYOY', direction: 'high', weight: 0.3},
+            {field: 'ProfitMargin', direction: 'high', weight: 0.2},
+            {field: 'ForwardPE', direction: 'low', weight: 0.2},
+        ],
+    },
+    {
+        key: 'growth',
+        label: 'Growth',
+        detail: 'Prioritize expanding revenue and earnings.',
+        metrics: [
+            {field: 'QuarterlyRevenueGrowthYOY', direction: 'high', weight: 0.45},
+            {field: 'QuarterlyEarningsGrowthYOY', direction: 'high', weight: 0.45},
+            {field: 'ProfitMargin', direction: 'high', weight: 0.1},
+        ],
+    },
+    {
+        key: 'value',
+        label: 'Value',
+        detail: 'Favor lower earnings multiples and stronger margins.',
+        metrics: [
+            {field: 'ForwardPE', direction: 'low', weight: 0.45},
+            {field: 'PERatio', direction: 'low', weight: 0.3},
+            {field: 'ProfitMargin', direction: 'high', weight: 0.25},
+        ],
+    },
+    {
+        key: 'income',
+        label: 'Income',
+        detail: 'Favor yield, profitability, and lower beta.',
+        metrics: [
+            {field: 'DividendYield', direction: 'high', weight: 0.6},
+            {field: 'ProfitMargin', direction: 'high', weight: 0.25},
+            {field: 'Beta', direction: 'low', weight: 0.15},
+        ],
+    },
+];
+
+const clampScore = (value) => Math.max(0, Math.min(100, value));
+
+export const buildComparisonScorecard = (summaries, lensKey = 'balanced') => {
+    const lens = comparisonLenses.find((candidate) => candidate.key === lensKey) || comparisonLenses[0];
+
+    return summaries
+        .map((summary) => {
+            let weightedScore = 0;
+            let availableWeight = 0;
+            let availableMetrics = 0;
+
+            lens.metrics.forEach((metric) => {
+                const value = parseMetric(summary[metric.field]);
+                const candidates = summaries
+                    .map((candidate) => parseMetric(candidate[metric.field]))
+                    .filter((candidate) => candidate !== null);
+
+                if (value === null || candidates.length === 0) {
+                    return;
+                }
+
+                const low = Math.min(...candidates);
+                const high = Math.max(...candidates);
+                const normalized = high === low
+                    ? 100
+                    : metric.direction === 'low'
+                        ? ((high - value) / (high - low)) * 100
+                        : ((value - low) / (high - low)) * 100;
+
+                weightedScore += clampScore(normalized) * metric.weight;
+                availableWeight += metric.weight;
+                availableMetrics += 1;
+            });
+
+            return {
+                availableMetrics,
+                score: availableWeight > 0 ? Math.round(weightedScore / availableWeight) : null,
+                summary,
+            };
+        })
+        .sort((first, second) => (
+            (second.score ?? -1) - (first.score ?? -1) ||
+            first.summary.Symbol.localeCompare(second.summary.Symbol)
+        ));
+};
+
 const getLeader = (summaries, field, direction = 'high') => {
     const candidates = summaries
         .map((summary) => ({summary, value: parseMetric(summary[field])}))
@@ -118,6 +208,7 @@ const StockCompare = () => {
     const [summaries, setSummaries] = useState([]);
     const [loading, setLoading] = useState(false);
     const [comparisonError, setComparisonError] = useState('');
+    const [comparisonLens, setComparisonLens] = useState('balanced');
 
     const runComparison = useCallback(async (symbols) => {
         if (symbols.length < 2) {
@@ -174,6 +265,11 @@ const StockCompare = () => {
             format: formatPercent,
         },
     ]), [summaries]);
+    const activeLens = comparisonLenses.find((lens) => lens.key === comparisonLens) || comparisonLenses[0];
+    const scorecard = useMemo(
+        () => buildComparisonScorecard(summaries, comparisonLens),
+        [comparisonLens, summaries]
+    );
 
     const handleSubmit = (event) => {
         event.preventDefault();
@@ -223,6 +319,39 @@ const StockCompare = () => {
                                 <small>{highlight.leader ? highlight.format(highlight.leader.value) : 'No reported data'}</small>
                             </article>
                         ))}
+                    </section>
+
+                    <section className="stock-compare__scorecard" aria-labelledby="stock-compare-scorecard-title">
+                        <div className="stock-compare__scorecard-header">
+                            <div>
+                                <span>Research Lens</span>
+                                <h2 id="stock-compare-scorecard-title">Comparison Scorecard</h2>
+                                <p>{activeLens.detail} Scores are relative to the companies currently loaded.</p>
+                            </div>
+                            <label>
+                                <span>Lens</span>
+                                <select onChange={(event) => setComparisonLens(event.target.value)} value={comparisonLens}>
+                                    {comparisonLenses.map((lens) => (
+                                        <option key={lens.key} value={lens.key}>{lens.label}</option>
+                                    ))}
+                                </select>
+                            </label>
+                        </div>
+                        <div className="stock-compare__scorecard-grid">
+                            {scorecard.map((item, index) => (
+                                <article className={index === 0 && item.score !== null ? 'is-leading' : ''} key={item.summary.Symbol}>
+                                    <div>
+                                        <Link to={`/dash/${item.summary.Symbol}`}>{item.summary.Symbol}</Link>
+                                        <span>{index === 0 && item.score !== null ? 'Current leader' : `Rank ${index + 1}`}</span>
+                                    </div>
+                                    <strong>{item.score === null ? '—' : item.score}</strong>
+                                    <small>{item.availableMetrics} of {activeLens.metrics.length} lens metrics reported</small>
+                                    <div aria-label={`${item.summary.Symbol} score ${item.score ?? 0} out of 100`} className="stock-compare__scorecard-bar" role="img">
+                                        <span style={{width: `${item.score ?? 0}%`}}></span>
+                                    </div>
+                                </article>
+                            ))}
+                        </div>
                     </section>
 
                     <section className="stock-compare__table-wrap">
