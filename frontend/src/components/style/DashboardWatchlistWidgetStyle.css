@@ -1445,6 +1445,144 @@ label.watchlist-manager__export {
     color: #f8fafc;
 }
 
+.watchlist-risk-concentration {
+    background: linear-gradient(135deg, #202234, #202c3a);
+    border: 1px solid #496c8d;
+    border-radius: 6px;
+    display: grid;
+    gap: 0.85rem;
+    padding: 1rem;
+}
+
+.watchlist-risk-concentration__header,
+.watchlist-risk-concentration__header > label,
+.watchlist-risk-concentration__item,
+.watchlist-risk-concentration__metrics {
+    align-items: center;
+    display: flex;
+    gap: 0.75rem;
+    justify-content: space-between;
+}
+
+.watchlist-risk-concentration__header h3 {
+    font-size: 1.05rem;
+    font-weight: 700;
+    margin: 0 0 0.25rem;
+}
+
+.watchlist-risk-concentration__header span,
+.watchlist-risk-concentration__summary span,
+.watchlist-risk-concentration__summary small,
+.watchlist-risk-concentration__item span,
+.watchlist-risk-concentration__note,
+.watchlist-risk-concentration__header > label > span {
+    color: #b5c7d8;
+    font-size: 0.8rem;
+}
+
+.watchlist-risk-concentration__header > label > span {
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.watchlist-risk-concentration__header select {
+    background: #17222e;
+    border: 1px solid #587a98;
+    border-radius: 4px;
+    color: #f8fafc;
+    padding: 0.5rem 0.6rem;
+}
+
+.watchlist-risk-concentration__summary {
+    display: grid;
+    gap: 0.6rem;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.watchlist-risk-concentration__summary article {
+    background: rgba(12, 23, 34, 0.7);
+    border: 1px solid rgba(115, 158, 194, 0.3);
+    border-radius: 5px;
+    display: grid;
+    gap: 0.3rem;
+    padding: 0.7rem;
+}
+
+.watchlist-risk-concentration__summary strong {
+    color: #d6efff;
+    font-size: 1.25rem;
+}
+
+.watchlist-risk-concentration__summary .is-warning strong {
+    color: #fbbf24;
+}
+
+.watchlist-risk-concentration__summary .is-balanced strong {
+    color: #86efac;
+}
+
+.watchlist-risk-concentration__list {
+    display: grid;
+    gap: 0.5rem;
+}
+
+.watchlist-risk-concentration__item {
+    background: rgba(15, 28, 41, 0.72);
+    border: 1px solid rgba(115, 158, 194, 0.28);
+    border-radius: 5px;
+    color: inherit;
+    display: grid;
+    gap: 0.65rem;
+    grid-template-columns: minmax(100px, 0.65fr) minmax(100px, 2fr) minmax(125px, 0.8fr);
+    padding: 0.65rem 0.75rem;
+    text-decoration: none;
+}
+
+.watchlist-risk-concentration__item:hover {
+    border-color: #84b9de;
+}
+
+.watchlist-risk-concentration__item.is-flagged {
+    border-color: #d6a14b;
+    box-shadow: inset 3px 0 #d6a14b;
+}
+
+.watchlist-risk-concentration__item > div:first-child,
+.watchlist-risk-concentration__metrics {
+    display: grid;
+    gap: 0.15rem;
+}
+
+.watchlist-risk-concentration__item strong {
+    color: #f1f8ff;
+}
+
+.watchlist-risk-concentration__bar {
+    background: #13202d;
+    border-radius: 999px;
+    height: 0.6rem;
+    overflow: hidden;
+}
+
+.watchlist-risk-concentration__bar span {
+    background: linear-gradient(90deg, #5aabd5, #8ec5e8);
+    display: block;
+    height: 100%;
+}
+
+.watchlist-risk-concentration__item.is-flagged .watchlist-risk-concentration__bar span {
+    background: linear-gradient(90deg, #d38635, #f3c56b);
+}
+
+.watchlist-risk-concentration__metrics {
+    justify-items: end;
+    text-align: right;
+}
+
+.watchlist-risk-concentration__note {
+    line-height: 1.35;
+}
+
 @media (max-width: 640px) {
     .watchlist-manager__header {
         align-items: stretch;
@@ -1516,6 +1654,25 @@ label.watchlist-manager__export {
     .watchlist-plan-scenario__header {
         align-items: stretch;
         flex-direction: column;
+    }
+
+    .watchlist-risk-concentration__header,
+    .watchlist-risk-concentration__header > label {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .watchlist-risk-concentration__summary {
+        grid-template-columns: 1fr;
+    }
+
+    .watchlist-risk-concentration__item {
+        grid-template-columns: 1fr;
+    }
+
+    .watchlist-risk-concentration__metrics {
+        justify-items: start;
+        text-align: left;
     }
 
     .watchlist-plan-editor__fields {

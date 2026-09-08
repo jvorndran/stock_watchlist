@@ -1,4 +1,4 @@
-import {buildPlanCapacitySnapshot, buildResearchPriority, getResearchBriefLane, getWorkflowState, matchesResearchBriefLane, matchesTradePlanDirection, matchesTradePlanRewardMultiple, normalizeResearchSnapshot, summarizePlanScenario, summarizeResearchBriefCoverage, summarizeTradePlanByTag, summarizeTradePlanExposure} from './Watchlist';
+import {buildPlanCapacitySnapshot, buildPlanRiskConcentration, buildResearchPriority, getResearchBriefLane, getWorkflowState, matchesResearchBriefLane, matchesTradePlanDirection, matchesTradePlanRewardMultiple, normalizeResearchSnapshot, summarizePlanScenario, summarizeResearchBriefCoverage, summarizeTradePlanByTag, summarizeTradePlanExposure} from './Watchlist';
 
 describe('matchesTradePlanDirection', () => {
     const plans = {
@@ -194,6 +194,38 @@ describe('summarizeTradePlanExposure', () => {
             validPlans: 0,
             weightedRewardMultiple: 0,
         });
+    });
+});
+
+describe('buildPlanRiskConcentration', () => {
+    it('ranks valid plans by modeled risk and flags positions above the selected guardrail', () => {
+        const concentration = buildPlanRiskConcentration(['LARGE', 'SMALL', 'BROKEN'], {
+            LARGE: {entry: 100, stop: 90, target: 130, riskBudget: 200},
+            SMALL: {entry: 50, stop: 45, target: 65, riskBudget: 100},
+            BROKEN: {entry: 50, stop: 50, target: 65},
+        }, 100, 0.6);
+
+        expect(concentration).toMatchObject({
+            threshold: 0.6,
+            totalRisk: 300,
+            topThreeRiskShare: 1,
+        });
+        expect(concentration.largestPosition).toMatchObject({symbol: 'LARGE', plannedRisk: 200, riskShare: 2 / 3});
+        expect(concentration.overThresholdPositions).toEqual([
+            expect.objectContaining({symbol: 'LARGE'}),
+        ]);
+        expect(concentration.positions).toHaveLength(2);
+    });
+
+    it('bounds invalid concentration thresholds while retaining every valid plan', () => {
+        const concentration = buildPlanRiskConcentration(['A', 'B'], {
+            A: {entry: 100, stop: 90, target: 120},
+            B: {entry: 100, stop: 90, target: 120},
+        }, 100, 2);
+
+        expect(concentration.threshold).toBe(1);
+        expect(concentration.overThresholdPositions).toEqual([]);
+        expect(concentration.positions.map((position) => position.riskShare)).toEqual([0.5, 0.5]);
     });
 });
 

@@ -288,6 +288,43 @@ export const summarizeTradePlanExposure = (symbols, tradePlans, riskBudget) => {
     };
 };
 
+export const buildPlanRiskConcentration = (symbols, tradePlans, riskBudget, warningThreshold = 0.35) => {
+    const threshold = Math.min(1, Math.max(0.1, Number(warningThreshold) || 0.35));
+    const positions = symbols.reduce((rows, symbol) => {
+        const analysis = analyzeTradePlan(tradePlans[symbol], riskBudget);
+
+        if (!analysis) {
+            return rows;
+        }
+
+        rows.push({
+            capital: analysis.capital,
+            direction: analysis.direction,
+            plannedRisk: analysis.shares * Math.abs(analysis.entry - analysis.stop),
+            rewardMultiple: analysis.rewardMultiple,
+            symbol,
+        });
+        return rows;
+    }, []);
+    const totalRisk = positions.reduce((total, position) => total + position.plannedRisk, 0);
+    const rankedPositions = positions
+        .map((position) => ({
+            ...position,
+            riskShare: totalRisk > 0 ? position.plannedRisk / totalRisk : 0,
+        }))
+        .sort((first, second) => second.plannedRisk - first.plannedRisk || first.symbol.localeCompare(second.symbol));
+    const overThresholdPositions = rankedPositions.filter((position) => position.riskShare >= threshold);
+
+    return {
+        largestPosition: rankedPositions[0] || null,
+        overThresholdPositions,
+        positions: rankedPositions,
+        threshold,
+        topThreeRiskShare: rankedPositions.slice(0, 3).reduce((total, position) => total + position.riskShare, 0),
+        totalRisk,
+    };
+};
+
 export const summarizeTradePlanByTag = (symbols, tradePlans, watchlistTags, riskBudget) => researchTagOptions
     .map((tag) => symbols.reduce((summary, symbol) => {
         const symbolTags = Array.isArray(watchlistTags[symbol]) ? watchlistTags[symbol] : [];
@@ -512,6 +549,7 @@ const Watchlist = ({
     const [planMessage, setPlanMessage] = useState('');
     const [riskBudget, setRiskBudget] = useState('250');
     const [planScenario, setPlanScenario] = useState('stop');
+    const [riskConcentrationThreshold, setRiskConcentrationThreshold] = useState('35');
     const [workflowFilter, setWorkflowFilter] = useState('all');
     const [tagFilter, setTagFilter] = useState('all');
     const [planDirectionFilter, setPlanDirectionFilter] = useState('all');
@@ -627,6 +665,13 @@ const Watchlist = ({
         watchlistTags,
         riskBudget
     ), [visibleWatchlist, tradePlans, watchlistTags, riskBudget]);
+
+    const planRiskConcentration = useMemo(() => buildPlanRiskConcentration(
+        visibleWatchlist,
+        tradePlans,
+        riskBudget,
+        Number(riskConcentrationThreshold) / 100
+    ), [visibleWatchlist, tradePlans, riskBudget, riskConcentrationThreshold]);
 
     const researchPriorities = useMemo(() => visibleWatchlist
         .map((symbol) => buildResearchPriority(symbol, watchlistNotes, tradePlans, riskBudget))
@@ -1277,6 +1322,66 @@ const Watchlist = ({
                     </p>
                 )}
             </section>
+
+            {planRiskConcentration.positions.length > 1 && (
+                <section className="watchlist-risk-concentration" aria-labelledby="watchlist-risk-concentration-title">
+                    <div className="watchlist-risk-concentration__header">
+                        <div>
+                            <h3 id="watchlist-risk-concentration-title">Position Risk Concentration</h3>
+                            <span>Rank the current plan’s modeled loss by symbol so the largest risk allocations stay visible.</span>
+                        </div>
+                        <label>
+                            <span>Flag above</span>
+                            <select onChange={(event) => setRiskConcentrationThreshold(event.target.value)} value={riskConcentrationThreshold}>
+                                <option value="25">25% of plan risk</option>
+                                <option value="35">35% of plan risk</option>
+                                <option value="50">50% of plan risk</option>
+                            </select>
+                        </label>
+                    </div>
+
+                    <div className="watchlist-risk-concentration__summary">
+                        <article>
+                            <span>Largest risk</span>
+                            <strong>{planRiskConcentration.largestPosition?.symbol || '-'}</strong>
+                            <small>{planRiskConcentration.largestPosition ? `${(planRiskConcentration.largestPosition.riskShare * 100).toFixed(1)}% of modeled plan risk` : 'No valid plan'}</small>
+                        </article>
+                        <article>
+                            <span>Top three concentration</span>
+                            <strong>{(planRiskConcentration.topThreeRiskShare * 100).toFixed(1)}%</strong>
+                            <small>Of {formatMoney(planRiskConcentration.totalRisk)} modeled risk</small>
+                        </article>
+                        <article className={planRiskConcentration.overThresholdPositions.length > 0 ? 'is-warning' : 'is-balanced'}>
+                            <span>Guardrail flags</span>
+                            <strong>{planRiskConcentration.overThresholdPositions.length}</strong>
+                            <small>At or above {(planRiskConcentration.threshold * 100).toFixed(0)}% of plan risk</small>
+                        </article>
+                    </div>
+
+                    <div className="watchlist-risk-concentration__list">
+                        {planRiskConcentration.positions.slice(0, 5).map((position) => {
+                            const isFlagged = position.riskShare >= planRiskConcentration.threshold;
+
+                            return (
+                                <Link className={isFlagged ? 'watchlist-risk-concentration__item is-flagged' : 'watchlist-risk-concentration__item'} key={position.symbol} to={`/dash/${position.symbol}`}>
+                                    <div>
+                                        <strong>{position.symbol}</strong>
+                                        <span>{position.direction} · {position.rewardMultiple.toFixed(2)}R plan</span>
+                                    </div>
+                                    <div className="watchlist-risk-concentration__bar" role="img" aria-label={`${position.symbol} carries ${(position.riskShare * 100).toFixed(1)} percent of modeled plan risk`}>
+                                        <span style={{width: `${position.riskShare * 100}%`}} />
+                                    </div>
+                                    <div className="watchlist-risk-concentration__metrics">
+                                        <strong>{formatMoney(position.plannedRisk)}</strong>
+                                        <span>{(position.riskShare * 100).toFixed(1)}% risk share</span>
+                                    </div>
+                                </Link>
+                            );
+                        })}
+                    </div>
+                    <small className="watchlist-risk-concentration__note">Risk shares use the saved entry, stop, and position size in the current filtered view; they are planning guardrails, not a forecast of realized loss.</small>
+                </section>
+            )}
 
             {planTagExposures.length > 0 && (
                 <section className="watchlist-tag-exposure" aria-labelledby="watchlist-tag-exposure-title">
