@@ -1,4 +1,4 @@
-import {buildPlanCapacitySnapshot, buildPlanRiskConcentration, buildResearchPriority, getResearchBriefLane, getWorkflowState, matchesResearchBriefLane, matchesTradePlanDirection, matchesTradePlanRewardMultiple, normalizeResearchSnapshot, normalizeSavedWatchlistView, normalizeSavedWatchlistViews, summarizePlanScenario, summarizeResearchBriefCoverage, summarizeTradePlanByTag, summarizeTradePlanExposure} from './Watchlist';
+import {buildPlanAllocationDrift, buildPlanCapacitySnapshot, buildPlanRiskConcentration, buildResearchPriority, getResearchBriefLane, getWorkflowState, matchesResearchBriefLane, matchesTradePlanDirection, matchesTradePlanRewardMultiple, normalizeResearchSnapshot, normalizeSavedWatchlistView, normalizeSavedWatchlistViews, summarizePlanScenario, summarizeResearchBriefCoverage, summarizeTradePlanByTag, summarizeTradePlanExposure} from './Watchlist';
 
 describe('matchesTradePlanDirection', () => {
     const plans = {
@@ -275,6 +275,28 @@ describe('buildPlanCapacitySnapshot', () => {
             hasPortfolioValue: false,
             status: 'unavailable',
         });
+    });
+});
+
+describe('buildPlanAllocationDrift', () => {
+    it('compares each valid saved plan with the current equal-weight portfolio share', () => {
+        const drift = buildPlanAllocationDrift(['OVER', 'BALANCED', 'UNDER', 'EMPTY'], {
+            OVER: {entry: 100, stop: 90, target: 120, riskBudget: 400},
+            BALANCED: {entry: 100, stop: 90, target: 120, riskBudget: 250},
+            UNDER: {entry: 100, stop: 90, target: 120, riskBudget: 100},
+        }, 100, 10000);
+
+        expect(drift).toMatchObject({
+            equalWeightCapital: 2500,
+            overweightCount: 1,
+            balancedCount: 1,
+            underweightCount: 1,
+        });
+        expect(drift.positions).toEqual(expect.arrayContaining([
+            expect.objectContaining({symbol: 'OVER', plannedCapital: 4000, capitalDelta: 1500, status: 'overweight'}),
+            expect.objectContaining({symbol: 'BALANCED', plannedCapital: 2500, status: 'balanced'}),
+            expect.objectContaining({symbol: 'UNDER', plannedCapital: 1000, capitalDelta: -1500, status: 'underweight'}),
+        ]));
     });
 });
 

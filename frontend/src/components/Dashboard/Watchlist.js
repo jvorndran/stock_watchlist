@@ -38,6 +38,8 @@ const formatMoney = (value) => new Intl.NumberFormat('en-US', {
     maximumFractionDigits: 0,
 }).format(value);
 
+const formatSignedMoney = (value) => `${value < 0 ? '-' : '+'}${formatMoney(Math.abs(value))}`;
+
 const escapeCsvValue = (value) => `"${String(value ?? '').replace(/"/g, '""')}"`;
 
 const emptyTradePlan = {entry: '', stop: '', target: '', riskBudget: ''};
@@ -477,6 +479,42 @@ export const buildPlanCapacitySnapshot = (exposure, portfolioValue) => {
     };
 };
 
+export const buildPlanAllocationDrift = (symbols, tradePlans, riskBudget, portfolioValue) => {
+    const capacity = parsePositiveNumber(portfolioValue);
+    const equalWeightCapital = capacity > 0 && symbols.length > 0 ? capacity / symbols.length : 0;
+    const positions = symbols.reduce((rows, symbol) => {
+        const analysis = analyzeTradePlan(tradePlans[symbol], riskBudget);
+
+        if (!analysis || !equalWeightCapital) {
+            return rows;
+        }
+
+        const capitalDelta = analysis.capital - equalWeightCapital;
+        const capitalRatio = analysis.capital / equalWeightCapital;
+        rows.push({
+            capitalDelta,
+            capitalRatio,
+            direction: analysis.direction,
+            plannedCapital: analysis.capital,
+            status: capitalRatio > 1.2 ? 'overweight' : capitalRatio < 0.8 ? 'underweight' : 'balanced',
+            symbol,
+        });
+        return rows;
+    }, []);
+
+    const rankedPositions = positions.sort((first, second) => (
+        Math.abs(second.capitalDelta) - Math.abs(first.capitalDelta) || first.symbol.localeCompare(second.symbol)
+    ));
+
+    return {
+        balancedCount: rankedPositions.filter((position) => position.status === 'balanced').length,
+        equalWeightCapital,
+        overweightCount: rankedPositions.filter((position) => position.status === 'overweight').length,
+        positions: rankedPositions,
+        underweightCount: rankedPositions.filter((position) => position.status === 'underweight').length,
+    };
+};
+
 export const summarizePlanScenario = (symbols, tradePlans, riskBudget, scenario = 'target') => {
     const scenarioMultiplier = scenario === 'stop' ? -1 : scenario === 'midpoint' ? 0.5 : 1;
     const summary = symbols.reduce((result, symbol) => {
@@ -774,6 +812,13 @@ const Watchlist = ({
     }, [portfolioValue]);
 
     const planCapacity = useMemo(() => buildPlanCapacitySnapshot(planExposure, parsedPortfolioValue), [planExposure, parsedPortfolioValue]);
+
+    const planAllocationDrift = useMemo(() => buildPlanAllocationDrift(
+        visibleWatchlist,
+        tradePlans,
+        riskBudget,
+        parsedPortfolioValue
+    ), [visibleWatchlist, tradePlans, riskBudget, parsedPortfolioValue]);
 
     const scenarioSummary = useMemo(() => summarizePlanScenario(
         visibleWatchlist,
@@ -1636,6 +1681,38 @@ const Watchlist = ({
                     ) : (
                         <p className="watchlist-manager__empty">Enter a portfolio value in the Equal Weight Plan to run this capacity check.</p>
                     )}
+                </section>
+            )}
+
+            {planAllocationDrift.positions.length > 0 && (
+                <section className="watchlist-plan-drift" aria-labelledby="watchlist-plan-drift-title">
+                    <div className="watchlist-plan-drift__header">
+                        <div>
+                            <h3 id="watchlist-plan-drift-title">Plan Weight Drift</h3>
+                            <span>Compare each modeled plan size with an equal-weight share of the active portfolio value.</span>
+                        </div>
+                        <strong>{formatMoney(planAllocationDrift.equalWeightCapital)} equal weight</strong>
+                    </div>
+                    <div className="watchlist-plan-drift__summary">
+                        <span><strong>{planAllocationDrift.overweightCount}</strong> over 120%</span>
+                        <span><strong>{planAllocationDrift.balancedCount}</strong> within 80–120%</span>
+                        <span><strong>{planAllocationDrift.underweightCount}</strong> under 80%</span>
+                    </div>
+                    <div className="watchlist-plan-drift__grid">
+                        {planAllocationDrift.positions.slice(0, 6).map((position) => (
+                            <Link className={`watchlist-plan-drift__item is-${position.status}`} key={position.symbol} to={`/dash/${position.symbol}`}>
+                                <div>
+                                    <strong>{position.symbol}</strong>
+                                    <span>{position.direction} plan · {(position.capitalRatio * 100).toFixed(0)}% of equal weight</span>
+                                </div>
+                                <div>
+                                    <strong>{formatMoney(position.plannedCapital)}</strong>
+                                    <small>{formatSignedMoney(position.capitalDelta)} vs equal weight</small>
+                                </div>
+                            </Link>
+                        ))}
+                    </div>
+                    <small className="watchlist-plan-drift__note">Saved plan capital is derived from the entry-to-stop risk size. This compares planned notional sizing only; it does not model short margin or live prices.</small>
                 </section>
             )}
 
