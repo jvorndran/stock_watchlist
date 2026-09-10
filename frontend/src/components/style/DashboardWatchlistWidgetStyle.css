@@ -153,6 +153,99 @@ label.watchlist-manager__export {
     text-transform: uppercase;
 }
 
+.watchlist-saved-views {
+    background: #172338;
+    border: 1px solid #315374;
+    border-radius: 6px;
+    display: grid;
+    gap: 0.75rem;
+    padding: 0.9rem;
+}
+
+.watchlist-saved-views__header,
+.watchlist-saved-views__form,
+.watchlist-saved-views__list article {
+    align-items: center;
+    display: flex;
+    gap: 0.7rem;
+    justify-content: space-between;
+}
+
+.watchlist-saved-views__header h3 {
+    font-size: 1.02rem;
+    margin: 0 0 0.2rem;
+}
+
+.watchlist-saved-views__header span,
+.watchlist-saved-views__list small,
+.watchlist-saved-views__message {
+    color: #b5c7d9;
+    font-size: 0.8rem;
+}
+
+.watchlist-saved-views__header > strong {
+    color: #93c5fd;
+    font-size: 0.82rem;
+    white-space: nowrap;
+}
+
+.watchlist-saved-views__form label {
+    display: grid;
+    gap: 0.3rem;
+    max-width: 330px;
+    width: 100%;
+}
+
+.watchlist-saved-views__form label span {
+    color: #b5c7d9;
+    font-size: 0.68rem;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.watchlist-saved-views__form button,
+.watchlist-saved-views__list button {
+    background: #1b4268;
+    border: 1px solid #5794c9;
+    border-radius: 4px;
+    color: #e2f1ff;
+    cursor: pointer;
+    font-weight: 700;
+    padding: 0.45rem 0.6rem;
+}
+
+.watchlist-saved-views__form button:hover,
+.watchlist-saved-views__list button:hover {
+    background: #2563a1;
+}
+
+.watchlist-saved-views__message {
+    margin: 0;
+}
+
+.watchlist-saved-views__list {
+    display: grid;
+    gap: 0.45rem;
+}
+
+.watchlist-saved-views__list article {
+    background: rgba(14, 28, 46, 0.75);
+    border: 1px solid rgba(115, 158, 194, 0.32);
+    border-radius: 5px;
+    padding: 0.45rem;
+}
+
+.watchlist-saved-views__list article button:first-child {
+    text-align: left;
+}
+
+.watchlist-saved-views__list article button:last-child {
+    background: transparent;
+    border-color: transparent;
+    color: #bfdbfe;
+    padding: 0.35rem;
+}
+
 .watchlist-workflow {
     background: #1b1f2a;
     border: 1px solid #303646;
@@ -1602,6 +1695,17 @@ label.watchlist-manager__export {
     .watchlist-manager__add-form,
     .watchlist-manager__controls {
         grid-template-columns: 1fr;
+    }
+
+    .watchlist-saved-views__header,
+    .watchlist-saved-views__form,
+    .watchlist-saved-views__list article {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .watchlist-saved-views__list article button:last-child {
+        align-self: flex-start;
     }
 
     .watchlist-allocation__header {

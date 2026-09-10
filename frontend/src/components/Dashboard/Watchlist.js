@@ -75,6 +75,13 @@ const researchBriefLaneOptions = [
 ];
 const researchTagKeys = new Set(researchTagOptions.map((tag) => tag.key));
 const validTickerPattern = /^[A-Z0-9.-]{1,12}$/;
+const watchlistViewStorageKey = 'stock-watchlist-saved-views';
+const maxSavedWatchlistViews = 8;
+const validWorkflowViewKeys = new Set(['all', 'ready', 'needs-note', 'needs-plan', 'needs-quality', 'unprepared']);
+const validSortModes = new Set(['added', 'az', 'za']);
+const validDirectionViewKeys = new Set(planDirectionOptions.map((option) => option.key));
+const validRewardViewKeys = new Set(planRewardMultipleOptions.map((option) => option.key));
+const validBriefViewKeys = new Set(researchBriefLaneOptions.map((option) => option.key));
 
 const parsePositiveNumber = (value) => {
     const parsedValue = Number(value);
@@ -156,6 +163,80 @@ export const matchesTradePlanRewardMultiple = (symbol, tradePlans, riskBudget, l
     }
 
     return lane === 'fivePlus' && analysis.rewardMultiple >= 5;
+};
+
+export const normalizeSavedWatchlistView = (view) => {
+    if (!view || typeof view !== 'object') {
+        return null;
+    }
+
+    const name = String(view.name || '').trim().replace(/\s+/g, ' ').slice(0, 40);
+    const searchText = String(view.searchText || '').trim().toUpperCase().slice(0, 60);
+    const workflowFilter = String(view.workflowFilter || 'all');
+    const tagFilter = String(view.tagFilter || 'all');
+    const sortMode = String(view.sortMode || 'added');
+    const planDirectionFilter = String(view.planDirectionFilter || 'all');
+    const planRewardMultipleFilter = String(view.planRewardMultipleFilter || 'all');
+    const researchBriefLaneFilter = String(view.researchBriefLaneFilter || 'all');
+
+    if (!name ||
+        !validWorkflowViewKeys.has(workflowFilter) ||
+        (tagFilter !== 'all' && !researchTagKeys.has(tagFilter)) ||
+        !validSortModes.has(sortMode) ||
+        !validDirectionViewKeys.has(planDirectionFilter) ||
+        !validRewardViewKeys.has(planRewardMultipleFilter) ||
+        !validBriefViewKeys.has(researchBriefLaneFilter)) {
+        return null;
+    }
+
+    return {
+        name,
+        searchText,
+        workflowFilter,
+        tagFilter,
+        sortMode,
+        planDirectionFilter,
+        planRewardMultipleFilter,
+        researchBriefLaneFilter,
+    };
+};
+
+export const normalizeSavedWatchlistViews = (views) => {
+    if (!Array.isArray(views)) {
+        return [];
+    }
+
+    const seenNames = new Set();
+    return views.reduce((normalizedViews, view) => {
+        const normalizedView = normalizeSavedWatchlistView(view);
+        const normalizedName = normalizedView?.name.toLowerCase();
+
+        if (!normalizedView || seenNames.has(normalizedName) || normalizedViews.length >= maxSavedWatchlistViews) {
+            return normalizedViews;
+        }
+
+        seenNames.add(normalizedName);
+        normalizedViews.push(normalizedView);
+        return normalizedViews;
+    }, []);
+};
+
+const loadSavedWatchlistViews = () => {
+    if (typeof window === 'undefined') {
+        return [];
+    }
+
+    try {
+        return normalizeSavedWatchlistViews(JSON.parse(window.localStorage.getItem(watchlistViewStorageKey) || '[]'));
+    } catch {
+        return [];
+    }
+};
+
+const persistSavedWatchlistViews = (views) => {
+    if (typeof window !== 'undefined') {
+        window.localStorage.setItem(watchlistViewStorageKey, JSON.stringify(views));
+    }
 };
 
 export const normalizeResearchSnapshot = (snapshot) => {
@@ -555,6 +636,9 @@ const Watchlist = ({
     const [planDirectionFilter, setPlanDirectionFilter] = useState('all');
     const [planRewardMultipleFilter, setPlanRewardMultipleFilter] = useState('all');
     const [researchBriefLaneFilter, setResearchBriefLaneFilter] = useState('all');
+    const [savedWatchlistViews, setSavedWatchlistViews] = useState(loadSavedWatchlistViews);
+    const [savedWatchlistViewName, setSavedWatchlistViewName] = useState('');
+    const [savedWatchlistViewMessage, setSavedWatchlistViewMessage] = useState('');
     const [researchExportMessage, setResearchExportMessage] = useState('');
     const [pendingResearchSnapshot, setPendingResearchSnapshot] = useState(null);
     const researchBackupInputRef = useRef(null);
@@ -952,6 +1036,55 @@ const Watchlist = ({
         }
     };
 
+    const getCurrentWatchlistView = (name) => normalizeSavedWatchlistView({
+        name,
+        searchText,
+        workflowFilter,
+        tagFilter,
+        sortMode,
+        planDirectionFilter,
+        planRewardMultipleFilter,
+        researchBriefLaneFilter,
+    });
+
+    const saveWatchlistView = (event) => {
+        event.preventDefault();
+        const view = getCurrentWatchlistView(savedWatchlistViewName);
+
+        if (!view) {
+            setSavedWatchlistViewMessage('Enter a name to save this research view.');
+            return;
+        }
+
+        const hasExistingView = savedWatchlistViews.some((savedView) => savedView.name.toLowerCase() === view.name.toLowerCase());
+        const nextViews = hasExistingView
+            ? savedWatchlistViews.map((savedView) => savedView.name.toLowerCase() === view.name.toLowerCase() ? view : savedView)
+            : [...savedWatchlistViews, view].slice(-maxSavedWatchlistViews);
+
+        setSavedWatchlistViews(nextViews);
+        persistSavedWatchlistViews(nextViews);
+        setSavedWatchlistViewName('');
+        setSavedWatchlistViewMessage(`${view.name} ${hasExistingView ? 'updated' : 'saved'} with the current filters.`);
+    };
+
+    const applyWatchlistView = (view) => {
+        setSearchText(view.searchText);
+        setWorkflowFilter(view.workflowFilter);
+        setTagFilter(view.tagFilter);
+        setSortMode(view.sortMode);
+        setPlanDirectionFilter(view.planDirectionFilter);
+        setPlanRewardMultipleFilter(view.planRewardMultipleFilter);
+        setResearchBriefLaneFilter(view.researchBriefLaneFilter);
+        setSavedWatchlistViewMessage(`${view.name} applied to the watchlist.`);
+    };
+
+    const deleteWatchlistView = (view) => {
+        const nextViews = savedWatchlistViews.filter((savedView) => savedView.name !== view.name);
+        setSavedWatchlistViews(nextViews);
+        persistSavedWatchlistViews(nextViews);
+        setSavedWatchlistViewMessage(`${view.name} removed from saved research views.`);
+    };
+
     return (
         <section className="watchlist-manager">
             <div className="watchlist-manager__header">
@@ -1056,6 +1189,40 @@ const Watchlist = ({
                     </select>
                 </label>
             </div>
+
+            <section className="watchlist-saved-views" aria-labelledby="watchlist-saved-views-title">
+                <div className="watchlist-saved-views__header">
+                    <div>
+                        <h3 id="watchlist-saved-views-title">Saved Research Views</h3>
+                        <span>Save a focused combination of filters and restore it whenever you return.</span>
+                    </div>
+                    <strong>{savedWatchlistViews.length}/{maxSavedWatchlistViews} saved</strong>
+                </div>
+                <form className="watchlist-saved-views__form" onSubmit={saveWatchlistView}>
+                    <label>
+                        <span>View name</span>
+                        <input
+                            maxLength="40"
+                            onChange={(event) => setSavedWatchlistViewName(event.target.value)}
+                            placeholder="High-conviction longs"
+                            value={savedWatchlistViewName}
+                        />
+                    </label>
+                    <button type="submit">Save current view</button>
+                </form>
+                {savedWatchlistViewMessage && <p aria-live="polite" className="watchlist-saved-views__message">{savedWatchlistViewMessage}</p>}
+                {savedWatchlistViews.length > 0 && (
+                    <div className="watchlist-saved-views__list">
+                        {savedWatchlistViews.map((view) => (
+                            <article key={view.name}>
+                                <button onClick={() => applyWatchlistView(view)} type="button">{view.name}</button>
+                                <small>{view.workflowFilter.replace('-', ' ')} · {view.planDirectionFilter} · {view.researchBriefLaneFilter.replace('-', ' ')}</small>
+                                <button aria-label={`Delete ${view.name} saved view`} onClick={() => deleteWatchlistView(view)} type="button"><FaTimes /></button>
+                            </article>
+                        ))}
+                    </div>
+                )}
+            </section>
 
             <section className="watchlist-workflow" aria-labelledby="watchlist-workflow-title">
                 <div className="watchlist-workflow__header">

@@ -1,4 +1,4 @@
-import {buildPlanCapacitySnapshot, buildPlanRiskConcentration, buildResearchPriority, getResearchBriefLane, getWorkflowState, matchesResearchBriefLane, matchesTradePlanDirection, matchesTradePlanRewardMultiple, normalizeResearchSnapshot, summarizePlanScenario, summarizeResearchBriefCoverage, summarizeTradePlanByTag, summarizeTradePlanExposure} from './Watchlist';
+import {buildPlanCapacitySnapshot, buildPlanRiskConcentration, buildResearchPriority, getResearchBriefLane, getWorkflowState, matchesResearchBriefLane, matchesTradePlanDirection, matchesTradePlanRewardMultiple, normalizeResearchSnapshot, normalizeSavedWatchlistView, normalizeSavedWatchlistViews, summarizePlanScenario, summarizeResearchBriefCoverage, summarizeTradePlanByTag, summarizeTradePlanExposure} from './Watchlist';
 
 describe('matchesTradePlanDirection', () => {
     const plans = {
@@ -338,5 +338,37 @@ describe('normalizeResearchSnapshot', () => {
             watchlist: ['AAPL'],
             tradePlans: {AAPL: {entry: 100, stop: 100, target: 110}},
         })).toBeNull();
+    });
+});
+
+describe('saved watchlist views', () => {
+    it('normalizes an allowed research view while preserving its filter choices', () => {
+        expect(normalizeSavedWatchlistView({
+            name: '  Long earnings ideas  ',
+            searchText: ' nvda ',
+            workflowFilter: 'ready',
+            tagFilter: 'earnings',
+            sortMode: 'az',
+            planDirectionFilter: 'long',
+            planRewardMultipleFilter: 'threeToFive',
+            researchBriefLaneFilter: 'developing',
+        })).toEqual({
+            name: 'Long earnings ideas',
+            searchText: 'NVDA',
+            workflowFilter: 'ready',
+            tagFilter: 'earnings',
+            sortMode: 'az',
+            planDirectionFilter: 'long',
+            planRewardMultipleFilter: 'threeToFive',
+            researchBriefLaneFilter: 'developing',
+        });
+    });
+
+    it('drops malformed and duplicate saved views before they reach browser storage', () => {
+        expect(normalizeSavedWatchlistViews([
+            {name: 'Longs', planDirectionFilter: 'long'},
+            {name: 'longs', planDirectionFilter: 'short'},
+            {name: 'Broken', workflowFilter: 'not-a-lane'},
+        ])).toEqual([expect.objectContaining({name: 'Longs', planDirectionFilter: 'long'})]);
     });
 });
