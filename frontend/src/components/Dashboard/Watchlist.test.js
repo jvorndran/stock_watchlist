@@ -344,6 +344,24 @@ describe('normalizeResearchSnapshot', () => {
             notes: {AAPL: 'Compounder thesis'},
             tags: {MSFT: ['core', 'income']},
             tradePlans: {AAPL: {entry: 200, stop: 190, target: 225}},
+            researchBriefs: {},
+            hasResearchBriefs: false,
+        });
+    });
+
+    it('keeps valid research briefs with their matching symbols while ignoring empty briefs', () => {
+        expect(normalizeResearchSnapshot({
+            watchlist: ['AAPL', 'MSFT'],
+            researchBriefs: {
+                aapl: {thesis: 'Services growth', catalyst: 'New product cycle', invalidation: 'Margin pressure'},
+                MSFT: {thesis: '   '},
+            },
+        })).toMatchObject({
+            watchlist: ['AAPL', 'MSFT'],
+            hasResearchBriefs: true,
+            researchBriefs: {
+                AAPL: {thesis: 'Services growth', catalyst: 'New product cycle', invalidation: 'Margin pressure'},
+            },
         });
     });
 

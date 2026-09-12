@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { FaArrowDown, FaArrowUp, FaPlus, FaTimes } from 'react-icons/fa';
-import {buildResearchBriefSummary, loadResearchBrief} from '../StockPage/StockResearchBrief';
+import {buildResearchBriefSummary, getResearchBriefStorageKey, loadResearchBrief, normalizeResearchBrief} from '../StockPage/StockResearchBrief';
 import '../style/DashboardWatchlistWidgetStyle.css';
 
 const parseTickerEntry = (entry) => [...new Set(entry
@@ -258,9 +258,14 @@ export const normalizeResearchSnapshot = (snapshot) => {
     const rawTradePlans = snapshot.tradePlans && typeof snapshot.tradePlans === 'object' && !Array.isArray(snapshot.tradePlans)
         ? snapshot.tradePlans
         : {};
+    const hasResearchBriefs = Boolean(
+        snapshot.researchBriefs && typeof snapshot.researchBriefs === 'object' && !Array.isArray(snapshot.researchBriefs)
+    );
+    const rawResearchBriefs = hasResearchBriefs ? snapshot.researchBriefs : {};
     const notes = {};
     const tags = {};
     const tradePlans = {};
+    const researchBriefs = {};
 
     for (const [ticker, note] of Object.entries(rawNotes)) {
         const normalizedTicker = ticker.trim().toUpperCase();
@@ -306,7 +311,21 @@ export const normalizeResearchSnapshot = (snapshot) => {
         };
     }
 
-    return {watchlist, notes, tags, tradePlans};
+    for (const [ticker, brief] of Object.entries(rawResearchBriefs)) {
+        const normalizedTicker = ticker.trim().toUpperCase();
+
+        if (!tickerSet.has(normalizedTicker) || !brief || typeof brief !== 'object' || Array.isArray(brief)) {
+            return null;
+        }
+
+        const normalizedBrief = normalizeResearchBrief(brief);
+
+        if (Object.values(normalizedBrief).some(Boolean)) {
+            researchBriefs[normalizedTicker] = normalizedBrief;
+        }
+    }
+
+    return {watchlist, notes, tags, tradePlans, researchBriefs, hasResearchBriefs};
 };
 
 export const summarizeTradePlanExposure = (symbols, tradePlans, riskBudget) => {
@@ -679,6 +698,7 @@ const Watchlist = ({
     const [savedWatchlistViewMessage, setSavedWatchlistViewMessage] = useState('');
     const [researchExportMessage, setResearchExportMessage] = useState('');
     const [pendingResearchSnapshot, setPendingResearchSnapshot] = useState(null);
+    const [researchBriefRevision, setResearchBriefRevision] = useState(0);
     const researchBackupInputRef = useRef(null);
     const canReorder = sortMode === 'added' && searchText.trim().length === 0 && workflowFilter === 'all' && tagFilter === 'all' && planDirectionFilter === 'all' && planRewardMultipleFilter === 'all' && researchBriefLaneFilter === 'all';
 
@@ -716,7 +736,7 @@ const Watchlist = ({
     const researchBriefs = useMemo(() => watchlist.reduce((savedBriefs, symbol) => {
         savedBriefs[symbol] = loadResearchBrief(symbol);
         return savedBriefs;
-    }, {}), [watchlist]);
+    }, {}), [watchlist, researchBriefRevision]);
 
     const visibleWatchlist = useMemo(() => {
         const normalizedSearch = searchText.trim().toUpperCase();
@@ -970,6 +990,10 @@ const Watchlist = ({
             'Ticker',
             'Research Tags',
             'Thesis Note',
+            'Research Brief Progress',
+            'Research Brief Thesis',
+            'Research Brief Catalyst',
+            'Research Brief Invalidation',
             'Plan Direction',
             'Entry',
             'Stop',
@@ -983,6 +1007,8 @@ const Watchlist = ({
         const rows = visibleWatchlist.map((symbol) => {
             const plan = tradePlans[symbol];
             const analysis = analyzeTradePlan(plan, riskBudget);
+            const brief = researchBriefs[symbol] || normalizeResearchBrief(null);
+            const briefSummary = buildResearchBriefSummary(brief);
             const tags = (Array.isArray(watchlistTags[symbol]) ? watchlistTags[symbol] : [])
                 .map((tagKey) => researchTagOptions.find((option) => option.key === tagKey)?.label || tagKey)
                 .join('; ');
@@ -991,6 +1017,10 @@ const Watchlist = ({
                 symbol,
                 tags,
                 watchlistNotes[symbol] || '',
+                `${briefSummary.completedCount}/${briefSummary.totalCount}`,
+                brief.thesis,
+                brief.catalyst,
+                brief.invalidation,
                 analysis?.direction || '',
                 plan?.entry || '',
                 plan?.stop || '',
@@ -1019,13 +1049,23 @@ const Watchlist = ({
     };
 
     const downloadResearchBackup = () => {
+        const savedResearchBriefs = Object.entries(researchBriefs).reduce((briefs, [symbol, brief]) => {
+            const normalizedBrief = normalizeResearchBrief(brief);
+
+            if (Object.values(normalizedBrief).some(Boolean)) {
+                briefs[symbol] = normalizedBrief;
+            }
+
+            return briefs;
+        }, {});
         const backup = JSON.stringify({
-            version: 1,
+            version: 2,
             exportedAt: new Date().toISOString(),
             watchlist,
             notes: watchlistNotes,
             tags: watchlistTags,
             tradePlans,
+            researchBriefs: savedResearchBriefs,
         }, null, 2);
         const blob = new Blob([backup], {type: 'application/json'});
         const downloadUrl = URL.createObjectURL(blob);
@@ -1037,7 +1077,8 @@ const Watchlist = ({
         link.click();
         document.body.removeChild(link);
         URL.revokeObjectURL(downloadUrl);
-        setResearchExportMessage(`${watchlist.length} tracked symbol${watchlist.length === 1 ? '' : 's'} saved to a research backup.`);
+        const briefCount = Object.keys(savedResearchBriefs).length;
+        setResearchExportMessage(`${watchlist.length} tracked symbol${watchlist.length === 1 ? '' : 's'} and ${briefCount} research brief${briefCount === 1 ? '' : 's'} saved to a research backup.`);
     };
 
     const selectResearchBackup = async (event) => {
@@ -1061,7 +1102,10 @@ const Watchlist = ({
             }
 
             setPendingResearchSnapshot(snapshot);
-            setResearchExportMessage(`${snapshot.watchlist.length} symbols are ready to restore. Confirming replaces the current watchlist research.`);
+            const briefDetail = snapshot.hasResearchBriefs
+                ? ` and ${Object.keys(snapshot.researchBriefs).length} research brief${Object.keys(snapshot.researchBriefs).length === 1 ? '' : 's'}`
+                : '';
+            setResearchExportMessage(`${snapshot.watchlist.length} symbols${briefDetail} are ready to restore. Confirming replaces the current watchlist research.`);
         } catch (error) {
             setPendingResearchSnapshot(null);
             setResearchExportMessage('That file is not a valid watchlist research backup.');
@@ -1076,8 +1120,30 @@ const Watchlist = ({
         const wasRestored = await onRestoreResearchSnapshot(pendingResearchSnapshot);
 
         if (wasRestored) {
+            let briefRestoreSucceeded = true;
+
+            if (pendingResearchSnapshot.hasResearchBriefs) {
+                try {
+                    pendingResearchSnapshot.watchlist.forEach((symbol) => {
+                        const key = getResearchBriefStorageKey(symbol);
+                        const brief = pendingResearchSnapshot.researchBriefs[symbol];
+
+                        if (brief) {
+                            window.localStorage.setItem(key, JSON.stringify(brief));
+                        } else {
+                            window.localStorage.removeItem(key);
+                        }
+                    });
+                    setResearchBriefRevision((revision) => revision + 1);
+                } catch (error) {
+                    briefRestoreSucceeded = false;
+                }
+            }
+
             setPendingResearchSnapshot(null);
-            setResearchExportMessage(`${pendingResearchSnapshot.watchlist.length} symbols and their research were restored.`);
+            setResearchExportMessage(briefRestoreSucceeded
+                ? `${pendingResearchSnapshot.watchlist.length} symbols and their research were restored.`
+                : `${pendingResearchSnapshot.watchlist.length} symbols were restored, but this browser could not restore research briefs.`);
         }
     };
 
